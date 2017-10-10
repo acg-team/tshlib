@@ -1,1 +1,3 @@
-# My project's README
+# TSHLIB's README
+
+1. From root folder execute cmake, make

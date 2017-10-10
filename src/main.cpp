@@ -1,32 +1,70 @@
-//===================================================================================================================
-//===================================================================================================================
+/*******************************************************************************
+ * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
+ *
+ *
+ * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
+ *******************************************************************************
+ *
+ * This file is part of tshlib
+ *
+ * tshlib is a free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * tshlib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with likpip. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+/**
+ * @file main.cpp
+ * @author Lorenzo Gatti & Massimo Maiolo
+ * @date 11 10 2017
+ * @version 1.0
+ * @maintainer Lorenzo Gatti
+ * @maintainer Massimo Maiolo
+ * @email lg@lorenzogatti.me
+ * @email massimo.maiolo@zhaw.ch
+ * @status Development
+ *
+ * @brief
+ * @details
+ * @pre
+ * @bug
+ * @warning
+ *
+ * @see For more information visit:
+ */
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <limits>
-#include "PhyTree.h"
-#include "newick.h"
-#include "main.h"
+#include "PhyTree.hpp"
+#include "newick.hpp"
+
 //===================================================================================================================
 //===================================================================================================================
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
 
-	std::string tree_file="/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
-	PhyTree* tree = NULL;
+    std::string tree_file = "/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
+    PhyTree *tree = nullptr;
 
-	std::ifstream tree_str(tree_file.c_str());
-	tree = newick_parser::parse_newick(&tree_str);
+    std::ifstream tree_str(tree_file.c_str());
+    tree = newick_parser::parse_newick(&tree_str);
 
-	tree->set_missing_node_name("V");
+    tree->set_missing_node_name("V");
 
-	std::cout<<tree->formatNewick()<<"\n\n";
+    std::cout << tree->formatNewick() << "\n\n";
 
-	tree->print();
-	std::cout<<"\n";
+    tree->print();
+    std::cout << "\n";
 
-	//----------------------------------------------------------
+    //----------------------------------------------------------
 //	PhyTree *t1;
 //
 //	t1=tree->get_right_child()->copy();
@@ -46,20 +84,20 @@ int main(int argc, char** argv)
 //	std::cout<<"\n";
 //
 //	std::cout<<tree->formatNewick()<<"\n\n";
-	//----------------------------------------------------------
-	PhyTree *t1;
-	PhyTree *t2;
+    //----------------------------------------------------------
+    PhyTree *t1;
+    PhyTree *t2;
 
-	t1=tree->get_right_child();
-	t2=tree->get_left_child()->get_right_child();
+    t1 = tree->get_right_child();
+    t2 = tree->get_left_child()->get_right_child();
 
 //	tree->swap(tree,1,tree->get_left_child(),1);
-	tree->swap2(t1,t2);
+    tree->swap2(t1, t2);
 
-	std::cout<<tree->formatNewick()<<"\n\n";
-	//----------------------------------------------------------
+    std::cout << tree->formatNewick() << "\n\n";
+    //----------------------------------------------------------
 
-	return 0;
+    return 0;
 }
 
 
