@@ -23,8 +23,7 @@
 
 /**
  * @file main.cpp
- * @author Lorenzo Gatti & Massimo Maiolo
- * @date 11 10 2017
+ *  * @date 11 10 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
  * @maintainer Massimo Maiolo
