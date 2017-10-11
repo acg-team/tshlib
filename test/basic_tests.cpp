@@ -105,7 +105,7 @@ namespace {
     }
 
     TEST_F(TSHLIB_MiddleLevel, test_neq) {
-        EXPECT_NE(1, 0);
+        EXPECT_NE(1, 1);
 
     }
 
