@@ -27,6 +27,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-Wall -Wshadow -Weffc++")
 
 
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WINDOWS TRUE)
     message(STATUS "Compilation will be performed under Windows")
@@ -70,7 +71,9 @@ endif (EIGEN3_FOUND)
 
 if (UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
-endif ()
+endif (UNIX)
+
+add_definitions(-DVERBOSE=0)
 
 ################################################################################
 #                                       ___     _                       _       
@@ -81,16 +84,19 @@ endif ()
 #                                                            |___/              
 ################################################################################
 
-INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
+include_directories(${EIGEN3_INCLUDE_DIR})
 #INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 SET(SOURCES
-        main.cpp
         newick.cpp
-        PhyTree.cpp)
+        newick.hpp
+        PhyTree.cpp
+        PhyTree.hpp)
 
-ADD_EXECUTABLE(tshlib ${SOURCES})
+add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
+
+#ADD_EXECUTABLE(tshlib ${SOURCES})
 
 ################################################################################
 #                                                              

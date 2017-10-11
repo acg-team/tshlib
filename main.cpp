@@ -44,14 +44,15 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include "PhyTree.hpp"
-#include "newick.hpp"
+#include "src/PhyTree.hpp"
+#include "src/newick.hpp"
 
 //===================================================================================================================
 //===================================================================================================================
 int main(int argc, char **argv) {
 
-    std::string tree_file = "/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
+    //std::string tree_file = "/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
+    std::string tree_file = argv[1];
     PhyTree *tree = nullptr;
 
     std::ifstream tree_str(tree_file.c_str());

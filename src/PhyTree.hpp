@@ -50,7 +50,7 @@
 #include <assert.h>
 #include <sstream>
 #include <cmath>
-#include "main.hpp"
+#include "../main.hpp"
 //=====================
 //DP-PIP
 #include <Eigen/Core>
