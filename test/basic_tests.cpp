@@ -1,8 +1,9 @@
 //
 // Created by Lorenzo Gatti on 08.10.17.
 //
-
+#include <TreeSearchEngine.hpp>
 #include "gtest/gtest.h"
+
 
 namespace {
 // The fixture for testing class TSHLIB_LowLevel.
@@ -98,16 +99,12 @@ namespace {
     }
     */
 
-    TEST_F(TSHLIB_MiddleLevel, test_eq) {
 
-        EXPECT_EQ(1, 1);
-
+    TEST_F(TSHLIB_MiddleLevel, test_stringnotnull) {
+        TreeSearchEngine ts((std::string) "Test1");
+        EXPECT_TRUE(ts.getLength() > 0);
     }
 
-    TEST_F(TSHLIB_MiddleLevel, test_neq) {
-        EXPECT_NE(1, 1);
-
-    }
 
 }  // namespace
 

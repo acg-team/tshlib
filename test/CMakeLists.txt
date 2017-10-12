@@ -15,7 +15,11 @@ download_project(
 
 add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
 
+# Include TSHLIB
+include_directories(../src)
+
 #set(test_SRCS ADD ALL TEST SOURCE FILES HERE)
-add_executable(runUnitTests basic_tests.cpp ${test_SRCS} basic_tests.cpp)
+add_executable(runUnitTests basic_tests.cpp ${test_SRCS})
 target_link_libraries(runUnitTests gtest gmock)
+target_link_libraries(runUnitTests tshlib)
 #add_test(runUnitTests runUnitTests) #included in all tutorials but I don't know what it actually does.

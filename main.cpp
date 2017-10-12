@@ -46,6 +46,7 @@
 #include <iostream>
 #include "PhyTree.hpp"
 #include "newick.hpp"
+#include "TreeSearchEngine.hpp"
 
 //===================================================================================================================
 //===================================================================================================================
@@ -64,6 +65,11 @@ int main(int argc, char **argv) {
 
     tree->print();
     std::cout << "\n";
+
+    TreeSearchEngine ts((std::string) "Test1");
+    std::cout << ts.getLength() << "\n";
+    ts.setString((std::string) "TestString");
+    std::cout << ts.getLength() << "\n";
 
     //----------------------------------------------------------
 //	PhyTree *t1;
