@@ -61,59 +61,6 @@ std::string create_col_MSA(std::vector<std::pair<std::string,std::string>> &MSA,
 }
 //=======================================================================================================
 //DP-PIP
-//template <class ALPHABET>
-//double compute_lk_down(PhyTree &tree,std::string &s,Eigen::Matrix<score_t,ALPHABET::DIM+1,1> &pi,int ugglyflag){
-//
-//	double pr;
-//	int idx;
-//	Eigen::VectorXd fvL;
-//	Eigen::VectorXd fvR;
-//	Eigen::VectorXd fv;
-//	double fv0;
-//
-//	if(tree.isLeaf()){
-//
-//		idx=0;
-//		fv=go_down<ALPHABET>(tree,s,idx,ugglyflag);
-//		fv0=fv.dot(pi);
-//		pr=tree.get_iota()*tree.get_beta()*fv0;
-//
-//		return pr;
-//
-//	}else{
-//
-//		idx=0;
-//		fv=go_down<ALPHABET>(tree,s,idx,ugglyflag);
-//		fv0=fv.dot(pi);
-//		pr=tree.get_iota()*tree.get_beta()*fv0;
-//
-//		bool flagL=true;
-//		bool flagR=true;
-//		idx=0;
-//		allgaps<ALPHABET>(tree[0],s,idx,flagL);
-//		int ixx=idx;
-//		allgaps<ALPHABET>(tree[1],s,idx,flagR);
-//
-//		int len;
-//		if(flagR){
-//			std::string sL;//=stringFromSequence(s);
-//			len=ixx;
-//			sL=s.substr(0,len);
-//			return pr + compute_lk_down<ALPHABET>(tree[0],sL,pi,ugglyflag);
-//		}
-//
-//		if(flagL){
-//			std::string sR;//=stringFromSequence(s);
-//			sR=s.substr(ixx);
-//			return pr + compute_lk_down<ALPHABET>(tree[1],sR,pi,ugglyflag);
-//		}
-//
-//	}
-//
-//	return pr;
-//}
-//=======================================================================================================
-//DP-PIP
 Eigen::VectorXd go_down(PhyTree &tree,int is_DNA_AA_Codon,int dim_alphabet){
     Eigen::VectorXd fv;
     Eigen::VectorXd fvL;
@@ -247,7 +194,6 @@ double compute_col_lk_prova(PhyTree &tree,
 
     int dim_alphabet;
     double lk;
-//	Eigen::VectorXd fv;
 
     if(is_DNA_AA_Codon==1){
         dim_alphabet=4;
@@ -269,13 +215,15 @@ double recompute_lk(PhyTree *tree,double k){
     return k;
 }
 //===================================================================================================================
-void nodes_within_radius(PhyTree *node,int radius,bool save,std::vector<PhyTree *> &list_nodes){
+void nodes_within_radius(PhyTree *start_node,PhyTree *node,int radius,bool save,std::vector<move_info> &list_nodes){
 
     if(!save){
         save=true;
     }else{
-        list_nodes.push_back(node);
-//		std::cout<<"nodes_within_radius: saving node = "<<node->getName()<<" ; radius "<<radius<<"\n";
+        move_info m;
+        m.node1=start_node;
+        m.node2=node;
+        list_nodes.push_back(m);
     }
 
     if(radius<=0){
@@ -284,18 +232,21 @@ void nodes_within_radius(PhyTree *node,int radius,bool save,std::vector<PhyTree 
 
     if(!node->isLeaf()){
         radius --;
-        nodes_within_radius(node->get_left_child(),radius,save,list_nodes);
-        nodes_within_radius(node->get_right_child(),radius,save,list_nodes);
+        nodes_within_radius(start_node,node->get_left_child(),radius,save,list_nodes);
+        nodes_within_radius(start_node,node->get_right_child(),radius,save,list_nodes);
     }
 
 }
 //===================================================================================================================
-void nodes_within_radius_up(PhyTree *node,int radius,int direction,std::vector<PhyTree *> &list_nodes){
+void nodes_within_radius_up(PhyTree *start_node,PhyTree *node,int radius,int direction,std::vector<move_info> &list_nodes){
     index_t idx;
 
     //TODO: check binary tree condition!
 
-    list_nodes.push_back(node);
+    move_info m;
+    m.node1=start_node;
+    m.node2=node;
+    list_nodes.push_back(m);
 
     if(radius<=0){
         return;
@@ -305,28 +256,28 @@ void nodes_within_radius_up(PhyTree *node,int radius,int direction,std::vector<P
     if(direction==0){
         if(node->getParent()!=NULL){
             idx=node->indexOf();
-            nodes_within_radius_up(node->getParent(),radius,idx,list_nodes);
+            nodes_within_radius_up(start_node,node->getParent(),radius,idx,list_nodes);
         }
-        nodes_within_radius(node->get_right_child(),radius,true,list_nodes);
+        nodes_within_radius(start_node,node->get_right_child(),radius,true,list_nodes);
     }else if(direction==1){
         if(node->getParent()!=NULL){
             idx=node->indexOf();
-            nodes_within_radius_up(node->getParent(),radius,idx,list_nodes);
+            nodes_within_radius_up(start_node,node->getParent(),radius,idx,list_nodes);
         }
-        nodes_within_radius(node->get_left_child(),radius,true,list_nodes);
+        nodes_within_radius(start_node,node->get_left_child(),radius,true,list_nodes);
     }
 
 }
 //===================================================================================================================
-void get_list_nodes_within_radius(PhyTree *node,int radius,std::vector<PhyTree *> &list_nodes){
+void get_list_nodes_within_radius(PhyTree *node,int radius,std::vector<move_info> &list_nodes){
     bool save;
 
     save=false;
 
-    nodes_within_radius(node,radius,save,list_nodes);
+    nodes_within_radius(node,node,radius,save,list_nodes);
 
     if(node->getParent()!=NULL){
-        nodes_within_radius_up(node->getParent(),radius,node->indexOf(),list_nodes);
+        nodes_within_radius_up(node,node->getParent(),radius,node->indexOf(),list_nodes);
     }
 
 }
@@ -416,54 +367,40 @@ int main(int argc, char** argv)
     mu=0.1;
     lambda=0.2;
 
+    //----------------------------------------------------------
+    // INIT TREE
+
+    // tree filename
     std::ifstream tree_str(tree_file.c_str());
 
+    // read newick file
     tree = newick_parser::parse_newick(&tree_str);
 
+    // set name of internal nodes
     tree->set_missing_node_name("V");
 
+    // compute total tree length
     tau=tree->computeLength();
 
+    // compute the normalizing Poisson intensity
     nu=compute_nu(tau,lambda,mu);
 
-    tree->set_tau(tau);
+    //tree->set_tau(tau);
 
-    tree->set_nu(nu);
+    //tree->set_nu(nu);
 
+    // set insertion probability to each node
     tree->set_iota(tau,mu);
 
+    // set survival probability to each node
     tree->set_beta(tau,mu);
 
-//	std::cout<<tree->formatNewick()<<"\n\n";
-//	tree->print();
-//	std::cout<<"\n";
+	std::cout<<tree->formatNewick()<<"\n\n";
+	tree->print();
+	std::cout<<"\n";
     //----------------------------------------------------------
-//	for(int i=0;i<10;i++){
-//		Eigen::VectorXd fv;
-//		fv=Eigen::VectorXd::Zero(5);
-//		fv[0]=i+1;
-//		tree->append_MSA_fv(fv);
-//	}
-//
-//	for(int i=0;i<10;i++){
-//		Eigen::VectorXd fv=tree->get_MSA_fv(i);
-//		std::cout<<"fv:\n"<<fv<<"\n";
-//	}
-    //----------------------------------------------------------
-//	std::vector<PhyTree *> p;
-//
-////	t1=tree->get_right_child();
-////	t2=tree->get_left_child()->get_left_child()->get_left_child();
-//	t1=tree->get_left_child()->get_left_child()->get_left_child()->get_right_child();
-//	t2=tree->get_left_child()->get_left_child()->get_left_child()->get_left_child();
-//
-//	p=get_path_from_nodes(t1,t2);
-//
-//	for(unsigned int i=0;i<p.size();i++){
-//		std::cout<<"p["<<i<<"]="<<(p.at(i))->getName()<<"\n";
-//	}
-//	update_fv_values(p); //TODO fill all the MSA_fv vectors
-    //----------------------------------------------------------
+    // LOAD MSA
+
     std::vector< std::pair<std::string,std::string> > MSA;
 
     std::string seq1_label="A";
@@ -482,9 +419,11 @@ int main(int argc, char** argv)
     MSA.push_back(std::make_pair(seq3_label,seq3_DNA));
     MSA.push_back(std::make_pair(seq4_label,seq4_DNA));
     MSA.push_back(std::make_pair(seq5_label,seq5_DNA));
+    //----------------------------------------------------------
+    // INITIAL LIKELIHOOD COMPUTATION
+    int alphabet_size=5; // DNA alphabet
 
-    int alphabet_size=5;
-
+    // set "pseudo" probability matrix
     tree->tmp_initPr(alphabet_size);
 
     int MSA_len;
@@ -494,6 +433,7 @@ int main(int argc, char** argv)
 
     is_DNA_AA_Codon=1; // 1:DNA, 2:AA, 3:Codon
 
+    // set Pi, steady state frequencies
     pi=Eigen::VectorXd::Zero(alphabet_size);
     pi[0]=0.25;
     pi[1]=0.25;
@@ -501,66 +441,77 @@ int main(int argc, char** argv)
     pi[3]=0.25;
     pi[4]=0.0;
 
+    // get MSA length
     MSA_len=MSA.at(0).second.size();
 
     std::cout<<"MSA_len="<<MSA_len<<"\n";
 
+    double LK=0;
+
+    // compute lk
     for(int i=0;i<MSA_len;i++){
 
+        // extract MSA column
         std::string s=create_col_MSA(MSA,i);
 
+        // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         set_ancestral_flag(tree,s);
 
+        // assign char at the leaves
         set_leaf_state(tree,s);
 
         std::cout<<"col["<<i<<"]="<<s<<"\n";
 
 //		lk=compute_col_lk(*tree,s,pi,is_DNA_AA_Codon);
 
+        // compute column likelihood
         lk=compute_col_lk_prova(*tree,s,pi,is_DNA_AA_Codon);
 
         std::cout<<"col_lk="<<lk<<"\n";
+
+        LK+=lk;
     }
 
-
-    exit(EXIT_SUCCESS);
+    // TODO: add likelihood empty column
     //----------------------------------------------------------
+    // GET ALL NODES WITHIN RADIUS
+
     int radius;
     PhyTree* node;
-    std::vector<PhyTree *> list_nodes;
+    std::vector<move_info> nni_spr_stack;
 
     node=tree->get_left_child();
     radius=3;
-    get_list_nodes_within_radius(node,radius,list_nodes);
 
+    get_list_nodes_within_radius(node,radius,nni_spr_stack);
 
-    std::cout<<"size list:"<<list_nodes.size()<<"\n";
+    std::cout<<"size list:"<<nni_spr_stack.size()<<"\n";
 
-    for(unsigned int i=0;i<list_nodes.size();i++){
-        std::cout<<"list["<<i<<"]="<<(list_nodes.at(i))->getName()<<"\n";
+    for(unsigned int i=0;i<nni_spr_stack.size();i++){
+        std::cout<<"list["<<i<<"]=("<<(nni_spr_stack.at(i)).node1->getName()<<";"<<(nni_spr_stack.at(i)).node2->getName()<<")\n";
     }
     //----------------------------------------------------------
+    // PERFORM SPR MOVES and RECOMPUTE LK
+
     move_info m;
     move_info n;
-    std::vector<move_info> nni_spr_stack; // STL Stack object
-
-    t1=tree->get_right_child();
-    t2=tree->get_left_child()->get_left_child()->get_left_child();
-    m.ID=1;
-    m.node1=t1;
-    m.node2=t2;
-    nni_spr_stack.push_back(m);
-
-    t1=tree->get_left_child();
-    t2=tree->get_left_child()->get_left_child();
-    m.ID=2;
-    m.node1=t1;
-    m.node2=t2;
-    nni_spr_stack.push_back(m);
-
-
     int max_idx;
     double max_val;
+    std::vector<PhyTree *> p;
+
+//    std::vector<move_info> nni_spr_stack; // STL Stack object
+//    t1=tree->get_right_child();
+//    t2=tree->get_left_child()->get_left_child()->get_left_child();
+//    m.ID=1;
+//    m.node1=t1;
+//    m.node2=t2;
+//    nni_spr_stack.push_back(m);
+//    t1=tree->get_left_child();
+//    t2=tree->get_left_child()->get_left_child();
+//    m.ID=2;
+//    m.node1=t1;
+//    m.node2=t2;
+//    nni_spr_stack.push_back(m);
 
     max_val=-INFINITY;
     for(unsigned int i=0;i<nni_spr_stack.size();i++){
@@ -568,20 +519,30 @@ int main(int argc, char** argv)
         // perform SPR move
         std::cout<<"Perform SPR move\n";
         n= nni_spr_stack.at(i);
-        std::cout<<"ID: "<<n.ID<<"\n";
+
+        //std::cout<<"ID: "<<n.ID<<"\n";
         std::cout<<"n.t1="<<n.node1->getName()<<" : n.t2="<<n.node2->getName()<<"\n";
         tree->swap2(n.node1,n.node2);
 
-        std::cout<<tree->get_right_child()->getName()<<" : ";
-        std::cout<<tree->get_right_child()->getParent()->getName()<<" \n";
+        //std::cout<<tree->get_right_child()->getName()<<" : ";
+        //std::cout<<tree->get_right_child()->getParent()->getName()<<" \n";
 
         // print newick
         std::cout<<"after SPR move\n";
         std::cout<<tree->formatNewick()<<"\n";
 
         // compute new lk
-        n.lk=recompute_lk(tree,i*10);
-        // store index max
+        //n.lk=recompute_lk(tree,i*10);
+
+        // get all nodes in the SPR path
+        p=get_path_from_nodes(n.node1,n.node2);
+
+        // update all fv values
+        update_fv_values(p,alphabet_size);
+
+        //TODO recompute the sum
+
+        // store index of max
         if(n.lk>max_val){
             max_val=n.lk;
             max_idx=i;
@@ -594,13 +555,45 @@ int main(int argc, char** argv)
         // print newick
         std::cout<<"after rollback\n";
         std::cout<<tree->formatNewick()<<"\n";
+
+        p.clear();
     }
 
     std::cout<<"max_val:"<<max_val<<" at index: "<<max_idx<<"\n";
 
     //	nni_spr_stack.pop_back();
     nni_spr_stack.empty();
-    //----------------------------------------------------------
+
+    return 0;
+}
+
+//----------------------------------------------------------
+//	for(int i=0;i<10;i++){
+//		Eigen::VectorXd fv;
+//		fv=Eigen::VectorXd::Zero(5);
+//		fv[0]=i+1;
+//		tree->append_MSA_fv(fv);
+//	}
+//
+//	for(int i=0;i<10;i++){
+//		Eigen::VectorXd fv=tree->get_MSA_fv(i);
+//		std::cout<<"fv:\n"<<fv<<"\n";
+//	}
+//----------------------------------------------------------
+//	std::vector<PhyTree *> p;
+//
+////	t1=tree->get_right_child();
+////	t2=tree->get_left_child()->get_left_child()->get_left_child();
+//	t1=tree->get_left_child()->get_left_child()->get_left_child()->get_right_child();
+//	t2=tree->get_left_child()->get_left_child()->get_left_child()->get_left_child();
+//
+//	p=get_path_from_nodes(t1,t2);
+//
+//	for(unsigned int i=0;i<p.size();i++){
+//		std::cout<<"p["<<i<<"]="<<(p.at(i))->getName()<<"\n";
+//	}
+//	update_fv_values(p); //TODO fill all the MSA_fv vectors
+//----------------------------------------------------------
 //	PhyTree *t1;
 //
 //	t1=tree->get_right_child()->copy();
@@ -620,7 +613,7 @@ int main(int argc, char** argv)
 //	std::cout<<"\n";
 //
 //	std::cout<<tree->formatNewick()<<"\n\n";
-    //----------------------------------------------------------
+//----------------------------------------------------------
 //	PhyTree *t1;
 //	PhyTree *t2;
 //
@@ -631,7 +624,7 @@ int main(int argc, char** argv)
 //	tree->swap2(t1,t2);
 //
 //	std::cout<<tree->formatNewick()<<"\n\n";
-    //----------------------------------------------------------
+//----------------------------------------------------------
 //	std::stack<move_info> nni_spr_stack; // STL Stack object
 //
 //	for(int i=0;i<10;i++){
@@ -645,69 +638,7 @@ int main(int argc, char** argv)
 //		std::cout<<"ID: "<<mm.ID<<"\n";
 //		nni_spr_stack.pop();
 //	}
-    //----------------------------------------------------------
-
-    return 0;
-}
-
-
-
-
-
-/*
-//===================================================================================================================
-//===================================================================================================================
-int main(int argc, char **argv) {
-
-    //std::string tree_file = "/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
-    std::string tree_file = argv[1];
-    PhyTree *tree = nullptr;
-
-    std::ifstream tree_str(tree_file.c_str());
-    tree = newick_parser::parse_newick(&tree_str);
-
-    tree->set_missing_node_name("V");
-
-    std::cout << tree->formatNewick() << "\n\n";
-
-    tree->print();
-    std::cout << "\n";
-
-    //----------------------------------------------------------
-//	PhyTree *t1;
-//
-//	t1=tree->get_right_child()->copy();
-//	t1->null_parent();
-//	double bl=t1->getBranchLength();
-//
-//	std::cout<<t1->getName()<<"\n";
-//	std::cout<<tree->n_children()<<"\n";
-//
-//	tree->deleteChild(1);
-//
-//	std::cout<<tree->n_children()<<"\n";
-//
-//	tree->addChild(t1,bl,0);
-//
-//	tree->print();
-//	std::cout<<"\n";
-//
-//	std::cout<<tree->formatNewick()<<"\n\n";
-    //----------------------------------------------------------
-    PhyTree *t1;
-    PhyTree *t2;
-
-    t1 = tree->get_right_child();
-    t2 = tree->get_left_child()->get_right_child();
-
-//	tree->swap(tree,1,tree->get_left_child(),1);
-    tree->swap2(t1, t2);
-
-    std::cout << tree->formatNewick() << "\n\n";
-    //----------------------------------------------------------
-
-    return 0;
-}*/
+//----------------------------------------------------------
 
 
 

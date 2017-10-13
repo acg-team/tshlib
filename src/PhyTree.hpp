@@ -839,33 +839,35 @@ public:
         return this->MSA_fv.size();
     }
     //=======================================================================================================
-    void update_MSA_fv(){
+    void update_MSA_fv(int dim_alphabet){
         unsigned int l1,l2;
         PhyTree *n1;
         PhyTree *n2;
         Eigen::VectorXd fv0,fv1,fv2;
 
 
-        fv0=Eigen::VectorXd::Zero(5); //TODO : alphabet
+        fv0=Eigen::VectorXd::Zero(dim_alphabet);
 
         n1=this->children[0];
         n2=this->children[1];
 
-        //TODO: wrong here
         l1=n1->get_MSA_fv_size();
         l2=n2->get_MSA_fv_size();
 
         if(l1!=l2){
             perror("diff size\n");
+            exit(EXIT_FAILURE);
         }
+
+        this->MSA_fv.clear();
 
         for(unsigned int k=0;k<l1;k++){
             fv1=n1->get_MSA_fv(k);
             fv2=n2->get_MSA_fv(k);
-            for(int i=0;i<5;i++){
+            for(int i=0;i<dim_alphabet;i++){
                 fv0[i]=fv1[i]*fv2[i];
             }
-            this->set_MSA_fv(fv0,k);
+            this->MSA_fv.push_back(fv0);
         }
 
     }
@@ -917,7 +919,7 @@ PhyTree* midpointRoot(PhyTree *root);
 std::vector<std::string> get_tree_order_ancestral(const PhyTree *tree);
 std::vector<std::string> get_tree_order(const PhyTree *tree);
 
-void update_fv_values(std::vector<PhyTree *> &p);
+void update_fv_values(std::vector<PhyTree *> &p,int alphabet_size);
 bool set_ancestral_flag(PhyTree *node,std::string &MSA_col,int &idx);
 void set_ancestral_flag(PhyTree *node,std::string &MSA_col);
 void set_leaf_state(PhyTree *node,std::string &MSA_col,int &idx);

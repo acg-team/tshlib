@@ -224,12 +224,12 @@ std::vector<std::string> get_tree_order(const PhyTree *tree) {
     return order;
 }
 //=======================================================================================================
-void update_fv_values(std::vector<PhyTree *> &p){
+void update_fv_values(std::vector<PhyTree *> &p,int alphabet_size){
     PhyTree *n;
 
     for(unsigned int k=0;k<p.size();k++){
         n=p.at(k);
-        n->update_MSA_fv();
+        n->update_MSA_fv(alphabet_size);
     }
 
 }
