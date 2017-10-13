@@ -5,15 +5,19 @@ include(CTest)
 enable_testing()
 
 #set(gtest_disable_pthreads on) #needed in MinGW
-include(../lib/DP/DownloadProject.cmake)
-download_project(
-        PROJ googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG master
-        UPDATE_DISCONNECTED 1
-)
+#include(../lib/DP/DownloadProject.cmake)
+#download_project(
+#        PROJ googletest
+#        GIT_REPOSITORY https://github.com/google/googletest.git
+#        GIT_TAG master
+#        UPDATE_DISCONNECTED 1
+#)
 
-add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+#add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+#add_subdirectory(../lib/googletest-master)
+#include_directories(../lib/googletest-master/googlemock)
+#include_directories(../lib/googletest-master/googletest)
 
 # Include TSHLIB
 include_directories(../src)

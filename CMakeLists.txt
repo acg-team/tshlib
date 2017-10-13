@@ -29,6 +29,7 @@ if (EIGEN3_FOUND)
 endif (EIGEN3_FOUND)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+#add_subdirectory("lib/googletest-master")
 
 add_subdirectory("src")
 add_subdirectory("test")
