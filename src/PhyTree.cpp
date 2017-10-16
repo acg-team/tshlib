@@ -234,34 +234,62 @@ void update_fv_values(std::vector<PhyTree *> &p,int alphabet_size){
 
 }
 //=======================================================================================================
-bool set_ancestral_flag(PhyTree *node,std::string &MSA_col,int &idx){
-    bool b0,b1,b2;
-
-    if(node->getParent()==NULL){
-        node->set_setA(true);
-        return true;
-    }else if(node->isLeaf()){
-        b0= (MSA_col[idx]=='-');
-        idx++;
-        node->set_setA(b0);
-        std::cout<<"I am leaf :"<<node->getName()<<" MSA-col["<<idx<<"]="<<MSA_col[idx]<<" is gap? ="<<b0<<" setA="<<node->get_setA()<<"\n";
-        return b0;
+void set_ancestral_flag(PhyTree *node,std::string &MSA_col,int num_gaps){
+    int descCount;
+   if(node->isLeaf()){
+       descCount=node->get_descCount();
+       node->set_setA(descCount==num_gaps);
     }else{
-        b1=set_ancestral_flag(node->get_left_child(),MSA_col,idx);
-        b2=set_ancestral_flag(node->get_right_child(),MSA_col,idx);
-        b0= (b1&&b2);
-        node->set_setA(b0);
-        std::cout<<"I am node :"<<node->getName()<<" child all gap?="<<b0<<" setA="<<node->get_setA()<<"\n";
-        return b0;
+       set_ancestral_flag(node->get_left_child(),MSA_col,num_gaps);
+       set_ancestral_flag(node->get_right_child(),MSA_col,num_gaps);
+       descCount=node->get_descCount();
+       node->set_setA(descCount==num_gaps);
+   }
+
+}
+//=======================================================================================================
+void print_ancestral_flag(PhyTree *node){
+
+    if(node->isLeaf()){
+        std::cout<<node->getName()<<": "<<node->get_setA()<<"\n";
+    }else{
+        print_ancestral_flag(node->get_left_child());
+        print_ancestral_flag(node->get_right_child());
+        std::cout<<node->getName()<<": "<<node->get_setA()<<"\n";
+    }
+
+}
+//=======================================================================================================
+void set_descCount(PhyTree *node){
+    int s;
+
+    if(node->isLeaf()){
+        s=node->get_leaf_character()=='-'?0:1;
+        node->set_descCount(s);
+        //std::cout<<"set_descCount:"<<node->getName()<<": "<<node->get_descCount()<<"\n";
+    }else{
+        set_descCount(node->get_left_child());
+        set_descCount(node->get_right_child());
+        s=node->get_left_child()->get_descCount()+node->get_right_child()->get_descCount();
+        node->set_descCount(s);
+        //std::cout<<"set_descCount:"<<node->getName()<<": "<<node->get_descCount()<<"\n";
     }
 
 }
 //=======================================================================================================
 void set_ancestral_flag(PhyTree *node,std::string &MSA_col){
-    int idx;
+    int num_gaps;
 
-    idx=0;
-    set_ancestral_flag(node,MSA_col,idx);
+    num_gaps=0;
+    for(int i=0;i<MSA_col.size();i++){
+        num_gaps+= (MSA_col[i] != '-');
+    }
+
+    //std::cout<<"num non gaps="<<num_gaps<<"\n";
+
+    set_descCount(node);
+
+    set_ancestral_flag(node,MSA_col,num_gaps);
 
 }
 //=======================================================================================================
@@ -273,6 +301,29 @@ void set_leaf_state(PhyTree *node,std::string &MSA_col,int &idx){
     }else{
         set_leaf_state(node->get_left_child(),MSA_col,idx);
         set_leaf_state(node->get_right_child(),MSA_col,idx);
+    }
+
+}
+//=======================================================================================================
+void print_leaf_state(PhyTree *node){
+
+    if(node->isLeaf()){
+        std::cout<<node->getName()<<": "<<node->get_leaf_character()<<"\n";
+    }else{
+        print_leaf_state(node->get_left_child());
+        print_leaf_state(node->get_right_child());
+    }
+
+}
+//=======================================================================================================
+void print_descCount(PhyTree *node){
+
+    if(node->isLeaf()){
+        std::cout<<node->getName()<<": "<<node->get_descCount()<<"\n";
+    }else{
+        print_descCount(node->get_left_child());
+        print_descCount(node->get_right_child());
+        std::cout<<node->getName()<<": "<<node->get_descCount()<<"\n";
     }
 
 }

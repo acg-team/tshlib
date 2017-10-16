@@ -76,6 +76,7 @@ private:
     double nu;
     std::vector<Eigen::VectorXd> MSA_fv;
     bool setA;
+    int descCount;
     char character;
     //================================================================
 
@@ -442,13 +443,13 @@ public:
     void set_iota(double tau,double mu){
 
         if(fabs(mu)<1e-8){
-//			error("ERROR in set_iota: mu too small");
+			perror("ERROR in set_iota: mu too small");
         }
 
         double T=tau+1/mu;
 
         if(fabs(T)<1e-8){
-//			error("ERROR in set_iota: T too small");
+			perror("ERROR in set_iota: T too small");
         }
 
         if(this->parent==NULL){
@@ -880,6 +881,14 @@ public:
         return this->setA;
     }
     //=======================================================================================================
+    void set_descCount(int b){
+        this->descCount=b;
+    }
+    //=======================================================================================================
+    int get_descCount(){
+        return this->descCount;
+    }
+    //=======================================================================================================
     void set_leaf_character(char ch){
         this->character=ch;
     }
@@ -920,10 +929,12 @@ std::vector<std::string> get_tree_order_ancestral(const PhyTree *tree);
 std::vector<std::string> get_tree_order(const PhyTree *tree);
 
 void update_fv_values(std::vector<PhyTree *> &p,int alphabet_size);
-bool set_ancestral_flag(PhyTree *node,std::string &MSA_col,int &idx);
+void set_ancestral_flag(PhyTree *node,std::string &MSA_col,int num_gaps);
 void set_ancestral_flag(PhyTree *node,std::string &MSA_col);
 void set_leaf_state(PhyTree *node,std::string &MSA_col,int &idx);
 void set_leaf_state(PhyTree *node,std::string &MSA_col);
-
+void print_ancestral_flag(PhyTree *node);
+void print_leaf_state(PhyTree *node);
+void print_descCount(PhyTree *tree);
 
 #endif /* TSHLIB_PHYTREE_HPP */

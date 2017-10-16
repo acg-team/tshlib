@@ -97,6 +97,7 @@ Eigen::VectorXd go_down(PhyTree &tree,int is_DNA_AA_Codon,int dim_alphabet){
 }
 //=======================================================================================================
 //DP-PIP
+/*
 double compute_col_lk(PhyTree &tree,
                       std::string &MSA_col,
                       Eigen::VectorXd &pi,
@@ -134,16 +135,18 @@ double compute_col_lk(PhyTree &tree,
 
     return pr;
 }
+*/
 //=======================================================================================================
 //DP-PIP
-Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &pi,int is_DNA_AA_Codon,int dim_alphabet){
+Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &pi,int is_DNA_AA_Codon,int dim_extended_alphabet){
     Eigen::VectorXd fv;
     Eigen::VectorXd fvL;
     Eigen::VectorXd fvR;
-    std::cout<<"node="<<node.getName()<<" fv:"<<fv<<"\n";
+
+    //std::cout<<"node="<<node.getName()<<" fv:"<<fv<<"\n";
 
     if(node.isLeaf()){
-        fv=Eigen::VectorXd::Zero(dim_alphabet+1);
+        fv=Eigen::VectorXd::Zero(dim_extended_alphabet);
 
         fv[0]=1.0;
 
@@ -151,20 +154,20 @@ Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &p
             lk+=node.get_iota()*node.get_beta()*(fv.dot(pi));
         }
 
-        std::cout<<"NODE:"<<node.getName()<<"\n";
+/*        std::cout<<"NODE:"<<node.getName()<<"\n";
         std::cout<<"setA="<<node.get_setA()<<"\n";
         std::cout<<"iota="<<node.get_iota()<<"\n";
         std::cout<<"beta="<<node.get_beta()<<"\n";
         std::cout<<"fv:\n";
         std::cout<<fv<<"\n";
         std::cout<<"lk:\n";
-        std::cout<<lk<<"\n\n";
+        std::cout<<lk<<"\n\n";*/
 
         return fv;
     }else{
 
-        fvL=compute_lk_recursive(node[0],lk,pi,is_DNA_AA_Codon,dim_alphabet);
-        fvR=compute_lk_recursive(node[1],lk,pi,is_DNA_AA_Codon,dim_alphabet);
+        fvL=compute_lk_recursive(node[0],lk,pi,is_DNA_AA_Codon,dim_extended_alphabet);
+        fvR=compute_lk_recursive(node[1],lk,pi,is_DNA_AA_Codon,dim_extended_alphabet);
 
         fv=(node.get_left_child()->get_Pr()*fvL).cwiseProduct(node.get_right_child()->get_Pr()*fvR);
 
@@ -172,7 +175,7 @@ Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &p
             lk+=node.get_iota()*node.get_beta()*(fv.dot(pi));
         }
 
-        std::cout<<"NODE:"<<node.getName()<<"\n";
+/*        std::cout<<"NODE:"<<node.getName()<<"\n";
         std::cout<<"setA="<<node.get_setA()<<"\n";
         std::cout<<"iota="<<node.get_iota()<<"\n";
         std::cout<<"beta="<<node.get_beta()<<"\n";
@@ -180,40 +183,29 @@ Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &p
         std::cout<<fv<<"\n";
         std::cout<<"lk:\n";
         std::cout<<lk<<"\n\n";
+*/
         return fv;
     }
 
 }
 //=======================================================================================================
 //DP-PIP
-double compute_col_lk_prova(PhyTree &tree,
+double compute_col_lk(PhyTree &tree,
                             std::string &MSA_col,
                             Eigen::VectorXd &pi,
-                            int is_DNA_AA_Codon){
+                            int is_DNA_AA_Codon,
+                            int alphabet_size){
 
-
-    int dim_alphabet;
     double lk;
 
-    if(is_DNA_AA_Codon==1){
-        dim_alphabet=4;
-    }else if(is_DNA_AA_Codon==2){
-        dim_alphabet=20;
-    }else if(is_DNA_AA_Codon==3){
-        dim_alphabet=61;
-    }else{
-        perror("ERROR: alphabet not recognized\n");
-        exit(EXIT_FAILURE);
-    }
-
-    compute_lk_recursive(tree,lk,pi,is_DNA_AA_Codon,dim_alphabet);
+    compute_lk_recursive(tree,lk,pi,is_DNA_AA_Codon,alphabet_size);
 
     return lk;
 }
 //===================================================================================================================
-double recompute_lk(PhyTree *tree,double k){
-    return k;
-}
+//double recompute_lk(PhyTree *tree,double k){
+//    return k;
+//}
 //===================================================================================================================
 void nodes_within_radius(PhyTree *start_node,PhyTree *node,int radius,bool save,std::vector<move_info> &list_nodes){
 
@@ -382,12 +374,10 @@ int main(int argc, char** argv)
     // compute total tree length
     tau=tree->computeLength();
 
+//    std::cout<<tau<<"\n";
+
     // compute the normalizing Poisson intensity
     nu=compute_nu(tau,lambda,mu);
-
-    //tree->set_tau(tau);
-
-    //tree->set_nu(nu);
 
     // set insertion probability to each node
     tree->set_iota(tau,mu);
@@ -403,7 +393,7 @@ int main(int argc, char** argv)
 
     std::vector< std::pair<std::string,std::string> > MSA;
 
-    std::string seq1_label="A";
+/*    std::string seq1_label="A";
     std::string seq1_DNA="ACGT";
     std::string seq2_label="B";
     std::string seq2_DNA="TAGC";
@@ -413,6 +403,19 @@ int main(int argc, char** argv)
     std::string seq4_DNA="CGTA";
     std::string seq5_label="E";
     std::string seq5_DNA="GTCA";
+*/
+
+    std::string seq1_label="A";
+    std::string seq2_label="B";
+    std::string seq3_label="C";
+    std::string seq4_label="D";
+    std::string seq5_label="E";
+
+    std::string seq1_DNA="-";
+    std::string seq2_DNA="-";
+    std::string seq3_DNA="A";
+    std::string seq4_DNA="-";
+    std::string seq5_DNA="A";
 
     MSA.push_back(std::make_pair(seq1_label,seq1_DNA));
     MSA.push_back(std::make_pair(seq2_label,seq2_DNA));
@@ -421,7 +424,11 @@ int main(int argc, char** argv)
     MSA.push_back(std::make_pair(seq5_label,seq5_DNA));
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
-    int alphabet_size=5; // DNA alphabet
+    int is_DNA_AA_Codon;
+    int alphabet_size;
+
+    is_DNA_AA_Codon=1; // 1:DNA, 2:AA, 3:Codon
+    alphabet_size=5; // DNA alphabet
 
     // set "pseudo" probability matrix
     tree->tmp_initPr(alphabet_size);
@@ -429,9 +436,6 @@ int main(int argc, char** argv)
     int MSA_len;
     double lk;
     Eigen::VectorXd pi;
-    int is_DNA_AA_Codon;
-
-    is_DNA_AA_Codon=1; // 1:DNA, 2:AA, 3:Codon
 
     // set Pi, steady state frequencies
     pi=Eigen::VectorXd::Zero(alphabet_size);
@@ -444,7 +448,7 @@ int main(int argc, char** argv)
     // get MSA length
     MSA_len=MSA.at(0).second.size();
 
-    std::cout<<"MSA_len="<<MSA_len<<"\n";
+    //std::cout<<"MSA_len="<<MSA_len<<"\n";
 
     double LK=0;
 
@@ -453,24 +457,26 @@ int main(int argc, char** argv)
 
         // extract MSA column
         std::string s=create_col_MSA(MSA,i);
-
-        // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
-        set_ancestral_flag(tree,s);
+        //std::cout<<"col["<<i<<"]="<<s<<"\n";
 
         // assign char at the leaves
         set_leaf_state(tree,s);
+        //print_leaf_state(tree);
 
-        std::cout<<"col["<<i<<"]="<<s<<"\n";
-
-//		lk=compute_col_lk(*tree,s,pi,is_DNA_AA_Codon);
+        // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
+        set_ancestral_flag(tree,s);
+        //print_descCount(tree);
+        //print_ancestral_flag(tree);
 
         // compute column likelihood
-        lk=compute_col_lk_prova(*tree,s,pi,is_DNA_AA_Codon);
+        lk=compute_col_lk(*tree,s,pi,is_DNA_AA_Codon,alphabet_size);
 
         std::cout<<"col_lk="<<lk<<"\n";
 
         LK+=lk;
     }
+
+    exit(1);
 
     // TODO: add likelihood empty column
     //----------------------------------------------------------

@@ -91,7 +91,7 @@ SET(SOURCES
         newick.cpp
         newick.hpp
         PhyTree.cpp
-        PhyTree.hpp TreeSearchEngine.cpp TreeSearchEngine.hpp)
+        PhyTree.hpp TreeSearchEngine.cpp TreeSearchEngine.hpp nni_spr.hpp)
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
