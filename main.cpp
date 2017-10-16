@@ -345,7 +345,7 @@ std::vector<PhyTree *> get_path_from_nodes(PhyTree *n1,PhyTree *n2){
     // add nodes from n1 to root
     list_nodes_n1=fill_with_nodes(n1);
 
-    // add nodes from n2 to root
+    // add nodes from n2 to root& Massimo Maiolov
     list_nodes_n2=fill_with_nodes(n2);
 
     list_nodes_n0=get_unique(list_nodes_n1,list_nodes_n2);
@@ -357,7 +357,7 @@ int main(int argc, char** argv)
 {
     PhyTree *t1;
     PhyTree *t2;
-    std::string tree_file="/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
+    std::string tree_file=argv[1];
     PhyTree* tree = NULL;
     double mu;
     double lambda;
