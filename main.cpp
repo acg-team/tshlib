@@ -47,6 +47,7 @@
 #include "PhyTree.hpp"
 #include "newick.hpp"
 #include "nni_spr.h"
+#include "main.hpp"
 
 //=======================================================================================================
 //DP-PIP

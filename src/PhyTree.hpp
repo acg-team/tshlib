@@ -50,7 +50,6 @@
 #include <assert.h>
 #include <sstream>
 #include <cmath>
-#include "../main.hpp"
 //=====================
 //DP-PIP
 #include <Eigen/Core>
@@ -180,11 +179,11 @@ public:
         child->branch_support = branch_support;
     }
 
-    index_t indexOf() {
+    unsigned int indexOf() {
         PhyTree *parent = this->parent;
         assert(parent != NULL);
 
-        for(index_t i=0; i < parent->children.size(); ++i) {
+        for(unsigned int i=0; i < parent->children.size(); ++i) {
             if(parent->children[i] == this) {
                 return i;
             }
@@ -197,7 +196,7 @@ public:
     void pluck() {
         assert(this->parent != NULL);
 
-        index_t index = this->indexOf();
+        unsigned int index = this->indexOf();
         std::vector<PhyTree*>::iterator iter = this->parent->children.begin()+index;
 
         this->parent->children.erase(iter);
@@ -207,7 +206,7 @@ public:
         this->branch_support = 1;
     }
 
-    PhyTree* pluckChild(index_t index) {
+    PhyTree* pluckChild(unsigned int index) {
         std::vector<PhyTree*>::iterator iter = this->children.begin()+index;
         PhyTree *child = *iter;
 
@@ -219,7 +218,7 @@ public:
         return child;
     }
 
-    void deleteChild(index_t index) {
+    void deleteChild(unsigned int index) {
         PhyTree *child = this->pluckChild(index);
         delete child;
     }
@@ -230,11 +229,11 @@ public:
 //		}
 //	}
 
-    index_t countLeaves() {
+    unsigned int countLeaves() {
         if(this->isLeaf()) {
             return 1;
         } else {
-            index_t leaves = 0;
+            unsigned int leaves = 0;
             for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
                 leaves += (*i)->countLeaves();
             }
@@ -298,7 +297,7 @@ public:
         return this->children.end();
     }
 
-    index_t n_children() const {
+    unsigned int n_children() const {
         return this->children.size();
     }
 
@@ -792,7 +791,7 @@ public:
         this->parent=NULL;
     }
     //=======================================================================================================
-    void swap(PhyTree *t1,index_t index1,PhyTree *t2,index_t index2){
+    void swap(PhyTree *t1,unsigned int index1,PhyTree *t2,unsigned int index2){
         PhyTree *t0;
 
         t0=t1->children[index1];
@@ -807,8 +806,8 @@ public:
     void swap2(PhyTree *t1,PhyTree *t2){
         PhyTree *pt1; 		// parent of t1
         PhyTree *pt2; 		// parent of t2
-        index_t index1; 	// left/right child index for t1
-        index_t index2; 	// left/right child index for t2
+        unsigned int index1; 	// left/right child index for t1
+        unsigned int index2; 	// left/right child index for t2
 
         index1=t1->indexOf();
         pt1=t1->parent;
