@@ -46,7 +46,7 @@
 #include <iostream>
 #include "PhyTree.hpp"
 #include "newick.hpp"
-#include "nni_spr.h"
+#include "nni_spr.hpp"
 
 //=======================================================================================================
 //DP-PIP
@@ -138,6 +138,54 @@ double compute_col_lk(PhyTree &tree,
 */
 //=======================================================================================================
 //DP-PIP
+Eigen::VectorXd compute_lk_empty_col(PhyTree &node,double &lk,Eigen::VectorXd &pi,int is_DNA_AA_Codon,int dim_extended_alphabet){
+    Eigen::VectorXd fv;
+    Eigen::VectorXd fvL;
+    Eigen::VectorXd fvR;
+
+    //std::cout<<"node="<<node.getName()<<" fv:"<<fv<<"\n";
+
+    if(node.isLeaf()){
+        fv=Eigen::VectorXd::Zero(dim_extended_alphabet);
+
+        fv[dim_extended_alphabet-1]=1.0;
+
+        lk+=node.get_iota()*(1-node.get_beta()+node.get_beta()*(fv.dot(pi)));
+
+/*        std::cout<<"NODE:"<<node.getName()<<"\n";
+        std::cout<<"setA="<<node.get_setA()<<"\n";
+        std::cout<<"iota="<<node.get_iota()<<"\n";
+        std::cout<<"beta="<<node.get_beta()<<"\n";
+        std::cout<<"fv:\n";
+        std::cout<<fv<<"\n";
+        std::cout<<"lk:\n";
+        std::cout<<lk<<"\n\n";*/
+
+        return fv;
+    }else{
+
+        fvL=compute_lk_empty_col(node[0],lk,pi,is_DNA_AA_Codon,dim_extended_alphabet);
+        fvR=compute_lk_empty_col(node[1],lk,pi,is_DNA_AA_Codon,dim_extended_alphabet);
+
+        fv=(node.get_left_child()->get_Pr()*fvL).cwiseProduct(node.get_right_child()->get_Pr()*fvR);
+
+        lk+=node.get_iota()*(1-node.get_beta()+node.get_beta()*(fv.dot(pi)));
+
+/*        std::cout<<"NODE:"<<node.getName()<<"\n";
+        std::cout<<"setA="<<node.get_setA()<<"\n";
+        std::cout<<"iota="<<node.get_iota()<<"\n";
+        std::cout<<"beta="<<node.get_beta()<<"\n";
+        std::cout<<"fv:\n";
+        std::cout<<fv<<"\n";
+        std::cout<<"lk:\n";
+        std::cout<<lk<<"\n\n";
+*/
+        return fv;
+    }
+
+}
+//=======================================================================================================
+//DP-PIP
 Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &pi,int is_DNA_AA_Codon,int dim_extended_alphabet){
     Eigen::VectorXd fv;
     Eigen::VectorXd fvL;
@@ -148,7 +196,20 @@ Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &p
     if(node.isLeaf()){
         fv=Eigen::VectorXd::Zero(dim_extended_alphabet);
 
-        fv[0]=1.0;
+        //fv[0]=1.0;
+        int idx;
+
+        if(is_DNA_AA_Codon==1){
+            idx=mytable[(int)node.get_leaf_character()];
+        }else if(is_DNA_AA_Codon==2){
+            idx=mytableAA[(int)node.get_leaf_character()];
+        }else{
+            perror("not implemented for codon model yet\n");
+            exit(EXIT_FAILURE);
+        }
+
+        idx=idx<0?dim_extended_alphabet-1:idx;
+        fv[idx]=1.0;
 
         if(node.get_setA()){
             lk+=node.get_iota()*node.get_beta()*(fv.dot(pi));
@@ -162,6 +223,8 @@ Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &p
         std::cout<<fv<<"\n";
         std::cout<<"lk:\n";
         std::cout<<lk<<"\n\n";*/
+
+        node.set_MSA_fv(fv);
 
         return fv;
     }else{
@@ -184,23 +247,25 @@ Eigen::VectorXd compute_lk_recursive(PhyTree &node,double &lk,Eigen::VectorXd &p
         std::cout<<"lk:\n";
         std::cout<<lk<<"\n\n";
 */
+
+        node.set_MSA_fv(fv);
+
         return fv;
     }
 
 }
 //=======================================================================================================
 //DP-PIP
-double compute_col_lk(PhyTree &tree,
-                            std::string &MSA_col,
-                            Eigen::VectorXd &pi,
-                            int is_DNA_AA_Codon,
-                            int alphabet_size){
+double compute_col_lk(  PhyTree &tree,
+                        Eigen::VectorXd &pi,
+                        int is_DNA_AA_Codon,
+                        int alphabet_size){
 
     double lk;
 
     compute_lk_recursive(tree,lk,pi,is_DNA_AA_Codon,alphabet_size);
 
-    return lk;
+    return log(lk);
 }
 //===================================================================================================================
 //double recompute_lk(PhyTree *tree,double k){
@@ -345,6 +410,20 @@ std::vector<PhyTree *> get_path_from_nodes(PhyTree *n1,PhyTree *n2){
     return list_nodes_n0;
 }
 //===================================================================================================================
+double phi(int m,double nu,double p0){
+    double p;
+    double log_factorial_m;
+
+    log_factorial_m=0;
+    for(int i=1;i<=m;i++){
+        log_factorial_m+=log(i);
+    }
+
+    p=-log_factorial_m+m*log(nu)+(nu*(p0-1));
+
+    return p;
+}
+//===================================================================================================================
 int main(int argc, char** argv)
 {
     PhyTree *t1;
@@ -411,11 +490,11 @@ int main(int argc, char** argv)
     std::string seq4_label="D";
     std::string seq5_label="E";
 
-    std::string seq1_DNA="-";
+    std::string seq1_DNA="A";
     std::string seq2_DNA="-";
-    std::string seq3_DNA="A";
+    std::string seq3_DNA="-";
     std::string seq4_DNA="-";
-    std::string seq5_DNA="A";
+    std::string seq5_DNA="-";
 
     MSA.push_back(std::make_pair(seq1_label,seq1_DNA));
     MSA.push_back(std::make_pair(seq2_label,seq2_DNA));
@@ -425,20 +504,20 @@ int main(int argc, char** argv)
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
     int is_DNA_AA_Codon;
-    int alphabet_size;
+    int extended_alphabet_size;
 
     is_DNA_AA_Codon=1; // 1:DNA, 2:AA, 3:Codon
-    alphabet_size=5; // DNA alphabet
+    extended_alphabet_size=5; // DNA alphabet
 
     // set "pseudo" probability matrix
-    tree->tmp_initPr(alphabet_size);
+    tree->tmp_initPr(extended_alphabet_size);
 
     int MSA_len;
     double lk;
     Eigen::VectorXd pi;
 
     // set Pi, steady state frequencies
-    pi=Eigen::VectorXd::Zero(alphabet_size);
+    pi=Eigen::VectorXd::Zero(extended_alphabet_size);
     pi[0]=0.25;
     pi[1]=0.25;
     pi[2]=0.25;
@@ -468,17 +547,23 @@ int main(int argc, char** argv)
         //print_descCount(tree);
         //print_ancestral_flag(tree);
 
+        tree->clear_fv();
+
         // compute column likelihood
-        lk=compute_col_lk(*tree,s,pi,is_DNA_AA_Codon,alphabet_size);
+        lk=compute_col_lk(*tree,pi,is_DNA_AA_Codon,extended_alphabet_size);
 
         std::cout<<"col_lk="<<lk<<"\n";
 
         LK+=lk;
     }
 
-    exit(1);
+    double p0;
+    compute_lk_empty_col(*tree,p0,pi,is_DNA_AA_Codon,extended_alphabet_size);
+    p0=log(p0);
 
-    // TODO: add likelihood empty column
+    std::cout<<"p0="<<p0<<"\n";
+
+    LK+=phi(MSA_len,nu,p0);
     //----------------------------------------------------------
     // GET ALL NODES WITHIN RADIUS
 
@@ -505,20 +590,6 @@ int main(int argc, char** argv)
     double max_val;
     std::vector<PhyTree *> p;
 
-//    std::vector<move_info> nni_spr_stack; // STL Stack object
-//    t1=tree->get_right_child();
-//    t2=tree->get_left_child()->get_left_child()->get_left_child();
-//    m.ID=1;
-//    m.node1=t1;
-//    m.node2=t2;
-//    nni_spr_stack.push_back(m);
-//    t1=tree->get_left_child();
-//    t2=tree->get_left_child()->get_left_child();
-//    m.ID=2;
-//    m.node1=t1;
-//    m.node2=t2;
-//    nni_spr_stack.push_back(m);
-
     max_val=-INFINITY;
     for(unsigned int i=0;i<nni_spr_stack.size();i++){
 
@@ -528,7 +599,7 @@ int main(int argc, char** argv)
 
         //std::cout<<"ID: "<<n.ID<<"\n";
         std::cout<<"n.t1="<<n.node1->getName()<<" : n.t2="<<n.node2->getName()<<"\n";
-        tree->swap2(n.node1,n.node2);
+        tree->swap(n.node1,n.node2);
 
         //std::cout<<tree->get_right_child()->getName()<<" : ";
         //std::cout<<tree->get_right_child()->getParent()->getName()<<" \n";
@@ -544,7 +615,7 @@ int main(int argc, char** argv)
         p=get_path_from_nodes(n.node1,n.node2);
 
         // update all fv values
-        update_fv_values(p,alphabet_size);
+        update_fv_values(p,extended_alphabet_size);
 
         //TODO recompute the sum
 
@@ -556,7 +627,7 @@ int main(int argc, char** argv)
 
         // rollback SPR move
         std::cout<<"Perform SPR move rollback\n";
-        tree->swap2(n.node1,n.node2);
+        tree->swap(n.node1,n.node2);
 
         // print newick
         std::cout<<"after rollback\n";

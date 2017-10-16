@@ -793,6 +793,7 @@ public:
         this->parent=NULL;
     }
     //=======================================================================================================
+    /*
     void swap(PhyTree *t1,index_t index1,PhyTree *t2,index_t index2){
         PhyTree *t0;
 
@@ -804,8 +805,9 @@ public:
         t2->children[index2]->parent=t2;
 
     }
+     */
     //=======================================================================================================
-    void swap2(PhyTree *t1,PhyTree *t2){
+    void swap(PhyTree *t1,PhyTree *t2){
         PhyTree *pt1; 		// parent of t1
         PhyTree *pt2; 		// parent of t2
         index_t index1; 	// left/right child index for t1
@@ -832,8 +834,8 @@ public:
         return this->MSA_fv.at(idx);
     }
     //=======================================================================================================
-    void set_MSA_fv(Eigen::VectorXd &fv,int idx){
-        this->MSA_fv.at(idx)=fv;
+    void set_MSA_fv(Eigen::VectorXd &fv){
+        this->MSA_fv.push_back(fv);
     }
     //=======================================================================================================
     unsigned int get_MSA_fv_size(){
@@ -897,6 +899,15 @@ public:
         return this->character;
     }
     //=======================================================================================================
+    void clear_fv(){
+
+        this->MSA_fv.clear();
+
+        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->clear_fv();
+        }
+    }
+    //=======================================================================================================
     void tmp_initPr(int dim){
 
         if(this->Pr.rows()*this->Pr.cols()!=0){
@@ -907,7 +918,7 @@ public:
             this->Pr.resize(dim,dim);
             for(int i=0;i<dim;i++){
                 for(int j=0;j<dim;j++){
-                    this->Pr(i,j)=0.1;
+                    this->Pr(i,j)=0.1*this->getBranchLength();
                 }
             }
 //			std::cout<<"NODE="<<this->getName()<<"\n";
