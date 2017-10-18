@@ -128,11 +128,11 @@ int main(int argc, char **argv) {
     std::string seq4_DNA = "-";
     std::string seq5_DNA = "-";
 
-    MSA.push_back(std::make_pair(seq1_label, seq1_DNA));
-    MSA.push_back(std::make_pair(seq2_label, seq2_DNA));
-    MSA.push_back(std::make_pair(seq3_label, seq3_DNA));
-    MSA.push_back(std::make_pair(seq4_label, seq4_DNA));
-    MSA.push_back(std::make_pair(seq5_label, seq5_DNA));
+    MSA.emplace_back(seq1_label, seq1_DNA);
+    MSA.emplace_back(seq2_label, seq2_DNA);
+    MSA.emplace_back(seq3_label, seq3_DNA);
+    MSA.emplace_back(seq4_label, seq4_DNA);
+    MSA.emplace_back(seq5_label, seq5_DNA);
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
     int is_DNA_AA_Codon;
