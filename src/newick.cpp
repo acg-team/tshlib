@@ -114,8 +114,7 @@ namespace newick_parser {
         return out;
     }
 
-    static PhyTree *parse_tree(TokenBuffer &buffer) throw(ParserException,
-    LexerException) {
+    static PhyTree *parse_tree(TokenBuffer &buffer) throw(ParserException, LexerException) {
         PhyTree *t = new PhyTree();
 
         string tok = buffer.next();
@@ -161,8 +160,7 @@ namespace newick_parser {
         return t;
     }
 
-    PhyTree *parse_newick(istream *in) throw(ParserException, LexerException) {
-        TokenBuffer buffer(in);
+    PhyTree *parse_newick(istream *in) throw(ParserException, LexerException) { TokenBuffer buffer(in);
         PhyTree *t = parse_tree(buffer);
 
         string tok = buffer.next();
