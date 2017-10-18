@@ -795,8 +795,8 @@ public:
     bool swap2(PhyTree *t1,PhyTree *t2){
         PhyTree *pt1; 		// parent of t1
         PhyTree *pt2; 		// parent of t2
-        index_t index1;
-        index_t index2;
+        unsigned int index1;
+        unsigned int index2;
 
         if(t1->isLeaf() && t2->isLeaf()){
             return false;
@@ -816,7 +816,7 @@ public:
         pt2=t2->parent;
 
         PhyTree *child_t1;
-        index_t index_child_t1;
+        unsigned int index_child_t1;
         index_child_t1=0;
         child_t1=t1->children[index_child_t1];
         if(child_t1==pt2){

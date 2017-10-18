@@ -64,15 +64,15 @@ static void maxDistPairR(const PhyTree *root, std::vector<double> &distances, st
         assert(distances.size() == leaves.size());
         assert(distances2.size() == leaves2.size());
 
-        for(index_t i=0; i<distances.size(); ++i) {
+        for(unsigned int i=0; i<distances.size(); ++i) {
             distances[i] += (*root)[0].getBranchLength();
         }
-        for(index_t j=0; j<distances2.size(); ++j) {
+        for(unsigned int j=0; j<distances2.size(); ++j) {
             distances2[j] += (*root)[1].getBranchLength();
         }
 
-        for(index_t i=0; i<distances.size(); ++i) {
-            for(index_t j=0; j<distances2.size(); ++j) {
+        for(unsigned int i=0; i<distances.size(); ++i) {
+            for(unsigned int j=0; j<distances2.size(); ++j) {
                 if(distances[i]+distances2[j] > max_dist) {
                     max_dist = distances[i]+distances2[j];
                     if(distances[i] > distances2[j]) max = leaves[i];
@@ -191,7 +191,7 @@ std::vector<std::string> get_tree_order_ancestral(const PhyTree *tree) {
             std::vector<std::string> subtree_order;
             subtree_order = get_tree_order_ancestral(*i);
 
-            index_t pos = order.size();
+            unsigned int pos = order.size();
             order.insert(order.begin()+pos,subtree_order.begin(),subtree_order.end());
 
             if(i != tree->firstChild()) {
