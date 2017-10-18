@@ -429,7 +429,8 @@ int main(int argc, char** argv)
 {
     PhyTree *t1;
     PhyTree *t2;
-    std::string tree_file="/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
+    //std::string tree_file="/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
+    std::string tree_file=argv[1];
     PhyTree* tree = NULL;
     double mu;
     double lambda;
