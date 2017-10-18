@@ -22,7 +22,7 @@
  *******************************************************************************/
 
 /**
- * @file TreeSearchEngine.hpp
+ * @file TreeSearchEngine.cpp
  * @author Lorenzo Gatti
  * @date 11 10 2017
  * @version 1.0
@@ -38,33 +38,34 @@
  *
  * @see For more information visit: http://www.lorenzogatti.me
  */
-#ifndef TSHEXE_TREESEARCHENGINE_HPP
-#define TSHEXE_TREESEARCHENGINE_HPP
 
 #include <string>
+#include "TreeSearch.hpp"
 
-using namespace std;
 
+// constructor of TreeSearchHL,
+TreeSearch::TreeSearch(std::string name) {
+    this->test_field = name;
+}
 
-class TreeSearchEngine {
+//copy constructor for making a new copy of a TreeSearchHL
+TreeSearch::TreeSearch(const TreeSearch &copy_from) {
 
-private:
-    string test_field;
+}
 
-public:
+//copy assignment for assigning a value from one TreeSearchHL to another
+TreeSearch &TreeSearch::operator=(const TreeSearch &copy_from) {
+}
 
-    TreeSearchEngine(string name);
+// destructor, just an example
+TreeSearch::~TreeSearch() {
+    //delete[] this->test_field ;
+}
 
-    TreeSearchEngine(const TreeSearchEngine &copy_from);
+void TreeSearch::setString(std::string input = "") {
+    this->test_field = input;
+}
 
-    TreeSearchEngine &operator=(const TreeSearchEngine &copy_from);
-
-    ~TreeSearchEngine();
-
-    void setString(string input);
-
-    int getLength();
-
-};
-
-#endif //TSHEXE_TREESEARCHENGINE_HPP
+int TreeSearch::getLength() {
+    return (int) this->test_field.length();
+}

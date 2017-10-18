@@ -1,18 +1,18 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
+ * Licensed Materials - Property of Lorenzo Gatti
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2017 by Lorenzo Gatti
  *******************************************************************************
  *
- * This file is part of tshlib
+ * This file is part of tshexe
  *
- * tshlib is a free software: you can redistribute it and/or modify it
+ * tshexe is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshlib is distributed in the hope that it will be useful,
+ * tshexe is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
@@ -22,15 +22,12 @@
  *******************************************************************************/
 
 /**
- * @file main.hpp
+ * @file TreeSearchEngine.hpp
  * @author Lorenzo Gatti
- * @author Massimo Maiolo
  * @date 11 10 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
- * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
- * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -39,15 +36,35 @@
  * @bug
  * @warning
  *
- * @see For more information visit:
+ * @see For more information visit: http://www.lorenzogatti.me
  */
-
-#ifndef TSHLIB_MAIN_HPP
-#define TSHLIB_MAIN_HPP
+#ifndef TSHLIB_TREESEARCH_HPP
+#define TSHLIB_TREESEARCH_HPP
 
 #include <string>
 
-typedef double score_t;
-typedef float dp_score_t;
-typedef unsigned int index_t;
-typedef double distance_t;
+using namespace std;
+
+
+class TreeSearch {
+
+private:
+    string test_field;
+
+public:
+
+    TreeSearch(string name);
+
+    TreeSearch(const TreeSearch &copy_from);
+
+    TreeSearch &operator=(const TreeSearch &copy_from);
+
+    ~TreeSearch();
+
+    void setString(string input);
+
+    int getLength();
+
+};
+
+#endif //TSHLIB_TREESEARCH_HPP

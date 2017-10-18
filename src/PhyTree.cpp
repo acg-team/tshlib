@@ -23,7 +23,8 @@
 
 /**
  * @file PhyTree.cpp
- * @author Lorenzo Gatti & Massimo Maiolo
+ * @author Lorenzo Gatti
+ * @author Massimo Maiolo
  * @date 11 10 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti

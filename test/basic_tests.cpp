@@ -1,7 +1,7 @@
 //
 // Created by Lorenzo Gatti on 08.10.17.
 //
-#include <TreeSearchEngine.hpp>
+#include <TreeSearch.hpp>
 #include <gtest/gtest.h>
 
 
@@ -103,7 +103,7 @@ namespace {
     TEST_F(TSHLIB_MiddleLevel, test_stringnotnull) {
 
 
-        TreeSearchEngine ts((std::string) "Test1");
+    TreeSearchHL ts((std::string) "Test1");
         EXPECT_TRUE(ts.getLength() > 0);
 
     }

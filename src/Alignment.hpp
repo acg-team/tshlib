@@ -5,7 +5,7 @@
  * Copyright (C) 2015-2017 by Lorenzo Gatti
  *******************************************************************************
  *
- * This file is part of tshexe
+ * This file is part of tshlib
  *
  * tshexe is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -22,12 +22,15 @@
  *******************************************************************************/
 
 /**
- * @file TreeSearchEngine.cpp
+ * @file Alignment.hpp
  * @author Lorenzo Gatti
- * @date 11 10 2017
+ * @author Massimo Maiolo
+ * @date 18 10 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
+ * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
+ * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -38,34 +41,17 @@
  *
  * @see For more information visit: http://www.lorenzogatti.me
  */
+#ifndef TSHEXE_ALIGNMENT_HPP
+#define TSHEXE_ALIGNMENT_HPP
 
 #include <string>
-#include "TreeSearchEngine.hpp"
+#include <vector>
 
 
-// constructor of TreeSearchEngine,
-TreeSearchEngine::TreeSearchEngine(std::string name) {
-    this->test_field = name;
-}
+class Alignment {
 
-//copy constructor for making a new copy of a TreeSearchEngine
-TreeSearchEngine::TreeSearchEngine(const TreeSearchEngine &copy_from) {
+};
 
-}
+std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index);
 
-//copy assignment for assigning a value from one TreeSearchEngine to another
-TreeSearchEngine &TreeSearchEngine::operator=(const TreeSearchEngine &copy_from) {
-}
-
-// destructor, just an example
-TreeSearchEngine::~TreeSearchEngine() {
-    //delete[] this->test_field ;
-}
-
-void TreeSearchEngine::setString(std::string input = "") {
-    this->test_field = input;
-}
-
-int TreeSearchEngine::getLength() {
-    return (int) this->test_field.length();
-}
+#endif //TSHEXE_ALIGNMENT_HPP
