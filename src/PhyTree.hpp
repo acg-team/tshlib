@@ -793,19 +793,45 @@ public:
         this->parent=NULL;
     }
     //=======================================================================================================
-    /*
-    void swap(PhyTree *t1,index_t index1,PhyTree *t2,index_t index2){
-        PhyTree *t0;
+    bool swap2(PhyTree *t1,PhyTree *t2){
+        PhyTree *pt1; 		// parent of t1
+        PhyTree *pt2; 		// parent of t2
+        index_t index1;
+        index_t index2;
 
-        t0=t1->children[index1];
-        t1->children[index1]=t2->children[index2];
-        t2->children[index2]=t0;
+        if(t1->isLeaf() && t2->isLeaf()){
+            return false;
+        }
 
-        t1->children[index1]->parent=t1;
-        t2->children[index2]->parent=t2;
+        if(t1->isLeaf()){
+            PhyTree *tmp_ptr;
+            tmp_ptr=t1;
+            t1=t2;
+            t2=tmp_ptr;
+        }
 
+        index1=t1->indexOf();
+        pt1=t1->parent;
+
+        index2=t2->indexOf();
+        pt2=t2->parent;
+
+        PhyTree *child_t1;
+        index_t index_child_t1;
+        index_child_t1=0;
+        child_t1=t1->children[index_child_t1];
+        if(child_t1==pt2){
+            index_child_t1=1;
+            child_t1=t1->children[index_child_t1];
+        }
+        pt2->children[index2]=child_t1;
+        child_t1->parent=pt2;
+
+        t1->children[index_child_t1]=t2;
+        t2->parent=t1;
+
+        return true;
     }
-     */
     //=======================================================================================================
     void swap(PhyTree *t1,PhyTree *t2){
         PhyTree *pt1; 		// parent of t1
@@ -819,11 +845,44 @@ public:
         index2=t2->indexOf();
         pt2=t2->parent;
 
-        pt1->children[index1]=t2;
-        pt2->children[index2]=t1;
+        if(t1==pt2){
+            std::cout<<"CASO1\n";
+            pt1->children[index1] = t2;
+            t2->parent = pt1;
+            t1->children[index2] = t2->children[index2];
+            t2->children[index2] = t1;
+            t1->parent = t2;
+            t1->children[index2]->parent=t1;
+        }else if(t2==pt1){
+            std::cout<<"CASO2\n";
+            pt2->children[index2] = t1;
+            t1->parent = pt2;
+            t2->children[index1] = t1->children[index1];
+            t1->children[index1] = t2;
+            t2->parent = t1;
+            t2->children[index1]->parent=t2;
+        }else{
+            std::cout<<"CASO3\n";
+            /*
+            pt1->children[index1] = t2;
+            pt2->children[index2] = t1;
+            t1->parent = pt2;
+            t2->parent = pt1;
+            */
+            //PhyTree *ct1;
+            PhyTree *ct2;
+            //ct1=t1->children[index1];
+            ct2=t2->children[index2];
 
-        t1->parent=pt2;
-        t2->parent=pt1;
+            pt1->children[index1] = t2;
+            t2->parent = pt1;
+
+            t1->parent = t2;
+            t2->children[index2] = t1;
+
+            pt2->children[index2]=ct2;
+            ct2->parent=pt2;
+        }
     }
     //=======================================================================================================
     void append_MSA_fv(Eigen::VectorXd fv){

@@ -589,51 +589,48 @@ int main(int argc, char** argv)
     int max_idx;
     double max_val;
     std::vector<PhyTree *> p;
+    bool valid_move;
 
     max_val=-INFINITY;
     for(unsigned int i=0;i<nni_spr_stack.size();i++){
 
         // perform SPR move
-        std::cout<<"Perform SPR move\n";
+        std::cout<<"\n\nPerform SPR move\n";
         n= nni_spr_stack.at(i);
 
         //std::cout<<"ID: "<<n.ID<<"\n";
         std::cout<<"n.t1="<<n.node1->getName()<<" : n.t2="<<n.node2->getName()<<"\n";
-        tree->swap(n.node1,n.node2);
+        valid_move=tree->swap2(n.node1,n.node2);
 
-        //std::cout<<tree->get_right_child()->getName()<<" : ";
-        //std::cout<<tree->get_right_child()->getParent()->getName()<<" \n";
+        if(valid_move){
+            // print newick
+            std::cout << "after SPR move\n";
+            std::cout << tree->formatNewick() << "\n";
 
-        // print newick
-        std::cout<<"after SPR move\n";
-        std::cout<<tree->formatNewick()<<"\n";
+            /*
+            // get all nodes in the SPR path
+            p = get_path_from_nodes(n.node1, n.node2);
 
-        // compute new lk
-        //n.lk=recompute_lk(tree,i*10);
+            // update all fv values
+            update_fv_values(p, extended_alphabet_size); //TODO recompute the sum
 
-        // get all nodes in the SPR path
-        p=get_path_from_nodes(n.node1,n.node2);
+            // store index of max
+            if (n.lk > max_val) {
+                max_val = n.lk;
+                max_idx = i;
+            }
+             */
 
-        // update all fv values
-        update_fv_values(p,extended_alphabet_size);
+            // rollback SPR move
+            std::cout << "Perform SPR move rollback\n";
+            tree->swap2(n.node1, n.node2);
 
-        //TODO recompute the sum
+            // print newick
+            std::cout << "after rollback\n";
+            std::cout << tree->formatNewick() << "\n";
 
-        // store index of max
-        if(n.lk>max_val){
-            max_val=n.lk;
-            max_idx=i;
+            p.clear();
         }
-
-        // rollback SPR move
-        std::cout<<"Perform SPR move rollback\n";
-        tree->swap(n.node1,n.node2);
-
-        // print newick
-        std::cout<<"after rollback\n";
-        std::cout<<tree->formatNewick()<<"\n";
-
-        p.clear();
     }
 
     std::cout<<"max_val:"<<max_val<<" at index: "<<max_idx<<"\n";
