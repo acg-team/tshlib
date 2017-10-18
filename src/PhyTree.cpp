@@ -233,77 +233,22 @@ void update_fv_values(std::vector<PhyTree *> &p,int alphabet_size){
     }
 
 }
-//=======================================================================================================
-void set_ancestral_flag(PhyTree *node,std::string &MSA_col,int num_gaps){
-    int descCount;
-   if(node->isLeaf()){
-       descCount=node->get_descCount();
-       node->set_setA(descCount==num_gaps);
-    }else{
-       set_ancestral_flag(node->get_left_child(),MSA_col,num_gaps);
-       set_ancestral_flag(node->get_right_child(),MSA_col,num_gaps);
-       descCount=node->get_descCount();
-       node->set_setA(descCount==num_gaps);
-   }
 
-}
 //=======================================================================================================
 void print_ancestral_flag(PhyTree *node){
 
     if(node->isLeaf()){
-        std::cout<<node->getName()<<": "<<node->get_setA()<<"\n";
+        std::cout << node->getName() << ": " << node->get_InsertionHistories() << "\n";
     }else{
         print_ancestral_flag(node->get_left_child());
         print_ancestral_flag(node->get_right_child());
-        std::cout<<node->getName()<<": "<<node->get_setA()<<"\n";
+        std::cout << node->getName() << ": " << node->get_InsertionHistories() << "\n";
     }
 
 }
 //=======================================================================================================
-void set_descCount(PhyTree *node){
-    int s;
 
-    if(node->isLeaf()){
-        s=node->get_leaf_character()=='-'?0:1;
-        node->set_descCount(s);
-        //std::cout<<"set_descCount:"<<node->getName()<<": "<<node->get_descCount()<<"\n";
-    }else{
-        set_descCount(node->get_left_child());
-        set_descCount(node->get_right_child());
-        s=node->get_left_child()->get_descCount()+node->get_right_child()->get_descCount();
-        node->set_descCount(s);
-        //std::cout<<"set_descCount:"<<node->getName()<<": "<<node->get_descCount()<<"\n";
-    }
 
-}
-//=======================================================================================================
-void set_ancestral_flag(PhyTree *node,std::string &MSA_col){
-    int num_gaps;
-
-    num_gaps=0;
-    for(int i=0;i<MSA_col.size();i++){
-        num_gaps+= (MSA_col[i] != '-');
-    }
-
-    //std::cout<<"num non gaps="<<num_gaps<<"\n";
-
-    set_descCount(node);
-
-    set_ancestral_flag(node,MSA_col,num_gaps);
-
-}
-//=======================================================================================================
-void set_leaf_state(PhyTree *node,std::string &MSA_col,int &idx){
-
-    if(node->isLeaf()){
-        node->set_leaf_character(MSA_col[idx]);
-        idx++;
-    }else{
-        set_leaf_state(node->get_left_child(),MSA_col,idx);
-        set_leaf_state(node->get_right_child(),MSA_col,idx);
-    }
-
-}
 //=======================================================================================================
 void print_leaf_state(PhyTree *node){
 
@@ -327,16 +272,6 @@ void print_descCount(PhyTree *node){
     }
 
 }
-//=======================================================================================================
-void set_leaf_state(PhyTree *node,std::string &MSA_col){
-    int idx;
-
-    idx=0;
-    set_leaf_state(node,MSA_col,idx);
-
-}
-//=======================================================================================================
-
 
 
 

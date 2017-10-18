@@ -65,7 +65,7 @@ private:
     double branch_length;
     double branch_support;
     PhyTree *parent;
-    std::vector<PhyTree*> children;
+    std::vector<PhyTree *> children;
     //================================================================
     //DP-PIP
     double iota;
@@ -85,11 +85,12 @@ private:
 
         //====================================================================================
         //DP-PIP
-        std::cout << prefix << "(" << this->branch_length << ") " << this->name << " " <<" iota: " << this->iota <<" beta: "<<this->beta<<std::endl;
+        std::cout << prefix << "(" << this->branch_length << ") " << this->name << " " << " iota: " << this->iota
+                  << " beta: " << this->beta << std::endl;
         //====================================================================================
 
-        for(std::vector<PhyTree*>::const_iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->print_prefix(prefix+"  ");
+        for (std::vector<PhyTree *>::const_iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->print_prefix(prefix + "  ");
         }
     }
 
@@ -107,14 +108,14 @@ private:
 //	}
 
     std::string formatNewickR() const {
-        if(this->isLeaf()) {
+        if (this->isLeaf()) {
             return this->getName();
         } else {
             std::stringstream newick;
             newick << "(";
-            std::vector<PhyTree*>::const_iterator i=this->children.begin();
+            std::vector<PhyTree *>::const_iterator i = this->children.begin();
             newick << (*i)->formatNewickR() << ":" << (*i)->getBranchLength();
-            for(++i; i < this->children.end(); ++i) {
+            for (++i; i < this->children.end(); ++i) {
                 newick << "," << (*i)->formatNewickR() << ":" << (*i)->getBranchLength();
             }
             newick << ")";
@@ -130,7 +131,7 @@ public:
     //double **fv_array;
     //================================================================
 
-    PhyTree(std::string name="") {
+    PhyTree(std::string name = "") {
         this->parent = NULL;
         this->branch_length = 0;
         this->branch_support = 1;
@@ -140,16 +141,16 @@ public:
         //DP-PIP
         this->iota = 0;
         this->beta = 0;
-        this->Pr.resize(0,0);
-        this->tau=0;
-        this->nu=0;
+        this->Pr.resize(0, 0);
+        this->tau = 0;
+        this->nu = 0;
         //==============================
 
     }
 
     ~PhyTree() {
         assert(this->parent == NULL);
-        for(std::vector<PhyTree*>::reverse_iterator i=this->children.rbegin(); i < this->children.rend(); ++i) {
+        for (std::vector<PhyTree *>::reverse_iterator i = this->children.rbegin(); i < this->children.rend(); ++i) {
             PhyTree *child = *i;
             child->parent = NULL;
             child->branch_length = 0;
@@ -158,14 +159,14 @@ public:
         }
     }
 
-    PhyTree* copy() {
-        PhyTree* out = new PhyTree();
+    PhyTree *copy() {
+        PhyTree *out = new PhyTree();
         out->branch_length = this->branch_length;
         out->branch_support = this->branch_support;
         out->name = this->name;
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            out->addChild((*i)->copy(),(*i)->branch_length,(*i)->branch_support);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            out->addChild((*i)->copy(), (*i)->branch_length, (*i)->branch_support);
         }
         return out;
     }
@@ -184,8 +185,8 @@ public:
         PhyTree *parent = this->parent;
         assert(parent != NULL);
 
-        for(unsigned int i=0; i < parent->children.size(); ++i) {
-            if(parent->children[i] == this) {
+        for (unsigned int i = 0; i < parent->children.size(); ++i) {
+            if (parent->children[i] == this) {
                 return i;
             }
         }
@@ -198,7 +199,7 @@ public:
         assert(this->parent != NULL);
 
         unsigned int index = this->indexOf();
-        std::vector<PhyTree*>::iterator iter = this->parent->children.begin()+index;
+        std::vector<PhyTree *>::iterator iter = this->parent->children.begin() + index;
 
         this->parent->children.erase(iter);
         this->parent = NULL;
@@ -207,8 +208,8 @@ public:
         this->branch_support = 1;
     }
 
-    PhyTree* pluckChild(unsigned int index) {
-        std::vector<PhyTree*>::iterator iter = this->children.begin()+index;
+    PhyTree *pluckChild(unsigned int index) {
+        std::vector<PhyTree *>::iterator iter = this->children.begin() + index;
         PhyTree *child = *iter;
 
         this->children.erase(iter);
@@ -231,11 +232,11 @@ public:
 //	}
 
     unsigned int countLeaves() {
-        if(this->isLeaf()) {
+        if (this->isLeaf()) {
             return 1;
         } else {
             unsigned int leaves = 0;
-            for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+            for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
                 leaves += (*i)->countLeaves();
             }
             return leaves;
@@ -243,11 +244,11 @@ public:
     }
 
     double computeLength() {
-        if(this->isLeaf()) {
+        if (this->isLeaf()) {
             return 0;
         } else {
             double length = 0;
-            for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+            for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
                 length += (*i)->branch_length + (*i)->computeLength();
             }
             return length;
@@ -274,27 +275,27 @@ public:
         return this->branch_support;
     }
 
-    PhyTree& operator[](int i) {
+    PhyTree &operator[](int i) {
         return *this->children[i];
     }
 
-    const PhyTree& operator[](int i) const {
+    const PhyTree &operator[](int i) const {
         return *this->children[i];
     }
 
-    std::vector<PhyTree*>::iterator firstChild() {
+    std::vector<PhyTree *>::iterator firstChild() {
         return this->children.begin();
     }
 
-    std::vector<PhyTree*>::iterator lastChild() {
+    std::vector<PhyTree *>::iterator lastChild() {
         return this->children.end();
     }
 
-    std::vector<PhyTree*>::const_iterator firstChild() const {
+    std::vector<PhyTree *>::const_iterator firstChild() const {
         return this->children.begin();
     }
 
-    std::vector<PhyTree*>::const_iterator lastChild() const {
+    std::vector<PhyTree *>::const_iterator lastChild() const {
         return this->children.end();
     }
 
@@ -316,42 +317,47 @@ public:
 
     //=======================================================================================================
     //DP-PIP
-    std::vector<PhyTree*> get_children(){
+    std::vector<PhyTree *> get_children() {
 
         return this->children;
     }
+
     //=======================================================================================================
     //DP-PIP
-    PhyTree* get_left_child(){
+    PhyTree *get_left_child() {
 
-        if(this->n_children()>0){
+        if (this->n_children() > 0) {
             return this->children[0];
-        }else{
+        } else {
             return NULL;
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    PhyTree* get_right_child(){
+    PhyTree *get_right_child() {
 
-        if(this->n_children()>0){
+        if (this->n_children() > 0) {
             return this->children[1];
-        }else{
+        } else {
             return NULL;
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
     double get_iota() const {
         return this->iota;
     }
+
     //=======================================================================================================
     //DP-PIP
     double get_beta() const {
         return this->beta;
     }
+
     //=======================================================================================================
     //DP-PIP
     //unsigned int get_Pc_size() const {
@@ -359,11 +365,11 @@ public:
     //}
     //=======================================================================================================
     //DP-PIP
-    static bool empty(Eigen::VectorXd &v){
+    static bool empty(Eigen::VectorXd &v) {
 
-        if(v.rows() * v.cols() == 0){
+        if (v.rows() * v.cols() == 0) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -382,20 +388,21 @@ public:
     */
     //=======================================================================================================
     //DP-PIP
-    void setName(std::string name){
-        this->name=name;
+    void setName(std::string name) {
+        this->name = name;
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_missing_node_name(std::string s){
+    void set_missing_node_name(std::string s) {
 
-        static int num=0;
+        static int num = 0;
 
-        if(this->isLeaf()){
+        if (this->isLeaf()) {
 
-        }else{
+        } else {
 
-            if(this->name.empty()){
+            if (this->name.empty()) {
                 std::string name(s);
                 name.append(std::to_string(num++));
                 this->setName(name);
@@ -405,7 +412,7 @@ public:
 
         }
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->set_missing_node_name(s);
         }
 
@@ -432,189 +439,204 @@ public:
     */
     //=======================================================================================================
     //DP-PIP
-    const Eigen::MatrixXd& get_Pr(){
+    const Eigen::MatrixXd &get_Pr() {
 
         return this->Pr;
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_iota(double tau,double mu){
+    void set_iota(double tau, double mu) {
 
-        if(fabs(mu)<1e-8){
-			perror("ERROR in set_iota: mu too small");
+        if (fabs(mu) < 1e-8) {
+            perror("ERROR in set_iota: mu too small");
         }
 
-        double T=tau+1/mu;
+        double T = tau + 1 / mu;
 
-        if(fabs(T)<1e-8){
-			perror("ERROR in set_iota: T too small");
+        if (fabs(T) < 1e-8) {
+            perror("ERROR in set_iota: T too small");
         }
 
-        if(this->parent==NULL){
-            this->iota=(1/mu)/T;
-        }else{
-            this->iota=this->branch_length/T;
+        if (this->parent == NULL) {
+            this->iota = (1 / mu) / T;
+        } else {
+            this->iota = this->branch_length / T;
         }
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->set_iota(tau,mu);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->set_iota(tau, mu);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
     double get_nu_local() const {
         return this->nu;
     }
+
     //=======================================================================================================
     //DP-PIP
     double get_tau_local() const {
         return this->tau;
     }
-    //=======================================================================================================
-    //DP-PIP
-    void compute_nu_local(double tau,double lambda,double mu){
-        this->nu=lambda*(tau+1/mu);
-    }
-    //=======================================================================================================
-    //DP-PIP
-    void compute_tau_local(){
 
-        if(this->isLeaf()) {
-            this->tau=this->branch_length;
+    //=======================================================================================================
+    //DP-PIP
+    void compute_nu_local(double tau, double lambda, double mu) {
+        this->nu = lambda * (tau + 1 / mu);
+    }
+
+    //=======================================================================================================
+    //DP-PIP
+    void compute_tau_local() {
+
+        if (this->isLeaf()) {
+            this->tau = this->branch_length;
         } else {
             this->get_left_child()->compute_tau_local();
             this->get_right_child()->compute_tau_local();
 
-            this->tau=this->get_left_child()->tau+this->get_right_child()->tau;
+            this->tau = this->get_left_child()->tau + this->get_right_child()->tau;
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_iota_local_down(double tau,double mu){
+    void set_iota_local_down(double tau, double mu) {
 
-        this->iota=this->branch_length/(tau+1/mu);
+        this->iota = this->branch_length / (tau + 1 / mu);
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->set_iota_local_down(tau,mu);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->set_iota_local_down(tau, mu);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_iota_local(double tau,double mu){
+    void set_iota_local(double tau, double mu) {
 
-        this->iota=(1/mu)/(tau+1/mu);
+        this->iota = (1 / mu) / (tau + 1 / mu);
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->set_iota_local_down(tau,mu);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->set_iota_local_down(tau, mu);
         }
 
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_beta(double tau,double mu){
+    void set_beta(double tau, double mu) {
 
-        if(fabs(mu)<1e-8){
+        if (fabs(mu) < 1e-8) {
 //			error("ERROR in set_beta: mu too small");
         }
 
-        if(this->parent==NULL){
-            this->beta=1;
-        }else{
+        if (this->parent == NULL) {
+            this->beta = 1;
+        } else {
 
-            if(fabs(this->branch_length)<1e-8){
+            if (fabs(this->branch_length) < 1e-8) {
 //				error("ERROR in set_beta: branch_length too small");
             }
 
-            this->beta=(1-exp(-mu*this->branch_length))/(mu*this->branch_length);
+            this->beta = (1 - exp(-mu * this->branch_length)) / (mu * this->branch_length);
         }
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->set_beta(tau,mu);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->set_beta(tau, mu);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_beta_down(double tau,double mu){
+    void set_beta_down(double tau, double mu) {
 
-        if(fabs(mu)<1e-8){
+        if (fabs(mu) < 1e-8) {
 //			error("ERROR in set_beta: mu too small");
         }
 
-        if(fabs(this->branch_length)<1e-8){
+        if (fabs(this->branch_length) < 1e-8) {
 //			error("ERROR in set_beta: branch_length too small");
         }
 
-        this->beta=(1-exp(-mu*this->branch_length))/(mu*this->branch_length);
+        this->beta = (1 - exp(-mu * this->branch_length)) / (mu * this->branch_length);
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->set_beta_down(tau,mu);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->set_beta_down(tau, mu);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_beta_local(double tau,double mu){
+    void set_beta_local(double tau, double mu) {
 
-        this->beta=1.0;
+        this->beta = 1.0;
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
-            (*i)->set_beta_down(tau,mu);
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
+            (*i)->set_beta_down(tau, mu);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_tau(double tau){
+    void set_tau(double tau) {
 
-        this->tau=tau;
+        this->tau = tau;
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->set_tau(tau);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void set_nu(double nu){
+    void set_nu(double nu) {
 
-        this->nu=nu;
+        this->nu = nu;
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->set_nu(nu);
         }
 
     }
+
     //=======================================================================================================
     //DP-PIP
-    void print_local_var(){
+    void print_local_var() {
 
-        std::cout<<"----------------------\n";
-        std::cout<<"Name: "<<this->name<<"\n";
-        std::cout<<"tau: "<<this->tau<<"\n";
-        std::cout<<"nu: "<<this->nu<<"\n";
-        std::cout<<"iota: "<<this->iota<<"\n";
-        std::cout<<"beta: "<<this->beta<<"\n";
+        std::cout << "----------------------\n";
+        std::cout << "Name: " << this->name << "\n";
+        std::cout << "tau: " << this->tau << "\n";
+        std::cout << "nu: " << this->nu << "\n";
+        std::cout << "iota: " << this->iota << "\n";
+        std::cout << "beta: " << this->beta << "\n";
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->print_local_var();
         }
     }
+
     //=======================================================================================================
     //DP-PIP
-    void print_br(){
+    void print_br() {
 
-        std::cout<<"Name: "<<this->name<<" bl: "<<this->branch_length<<std::endl;
+        std::cout << "Name: " << this->name << " bl: " << this->branch_length << std::endl;
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->print_br();
         }
     }
+
     //=======================================================================================================
     //DP-PIP
 //	void print_Pr(){
@@ -630,7 +652,7 @@ public:
 //	}
     //=======================================================================================================
     //DP-PIP
-    void printOnlyName(){
+    void printOnlyName() {
 
         /*
         if(this->isLeaf()){
@@ -642,15 +664,14 @@ public:
         }
         */
 
-        std::cout<<"node name: "<<this->name<<"\n";
-        if(this->n_children()==2){
-            std::cout<<"      L child: "<<this->get_left_child()->getName()<<"\n";
-            std::cout<<"      R child: "<<this->get_right_child()->getName()<<"\n";
+        std::cout << "node name: " << this->name << "\n";
+        if (this->n_children() == 2) {
+            std::cout << "      L child: " << this->get_left_child()->getName() << "\n";
+            std::cout << "      R child: " << this->get_right_child()->getName() << "\n";
         }
 
 
-
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->printOnlyName();
         }
 
@@ -788,80 +809,82 @@ public:
     }
     */
     //=======================================================================================================
-    void null_parent(){
-        this->parent=NULL;
+    void null_parent() {
+        this->parent = NULL;
     }
+
     //=======================================================================================================
-    bool swap2(PhyTree *t1,PhyTree *t2){
-        PhyTree *pt1; 		// parent of t1
-        PhyTree *pt2; 		// parent of t2
+    bool swap2(PhyTree *t1, PhyTree *t2) {
+        PhyTree *pt1;        // parent of t1
+        PhyTree *pt2;        // parent of t2
         unsigned int index1;
         unsigned int index2;
 
-        if(t1->isLeaf() && t2->isLeaf()){
+        if (t1->isLeaf() && t2->isLeaf()) {
             return false;
         }
 
-        if(t1->isLeaf()){
+        if (t1->isLeaf()) {
             PhyTree *tmp_ptr;
-            tmp_ptr=t1;
-            t1=t2;
-            t2=tmp_ptr;
+            tmp_ptr = t1;
+            t1 = t2;
+            t2 = tmp_ptr;
         }
 
-        index1=t1->indexOf();
-        pt1=t1->parent;
+        index1 = t1->indexOf();
+        pt1 = t1->parent;
 
-        index2=t2->indexOf();
-        pt2=t2->parent;
+        index2 = t2->indexOf();
+        pt2 = t2->parent;
 
         PhyTree *child_t1;
         unsigned int index_child_t1;
-        index_child_t1=0;
-        child_t1=t1->children[index_child_t1];
-        if(child_t1==pt2){
-            index_child_t1=1;
-            child_t1=t1->children[index_child_t1];
+        index_child_t1 = 0;
+        child_t1 = t1->children[index_child_t1];
+        if (child_t1 == pt2) {
+            index_child_t1 = 1;
+            child_t1 = t1->children[index_child_t1];
         }
-        pt2->children[index2]=child_t1;
-        child_t1->parent=pt2;
+        pt2->children[index2] = child_t1;
+        child_t1->parent = pt2;
 
-        t1->children[index_child_t1]=t2;
-        t2->parent=t1;
+        t1->children[index_child_t1] = t2;
+        t2->parent = t1;
 
         return true;
     }
+
     //=======================================================================================================
-    void swap(PhyTree *t1,PhyTree *t2){
-        PhyTree *pt1; 		// parent of t1
-        PhyTree *pt2; 		// parent of t2
-        unsigned int index1; 	// left/right child index for t1
-        unsigned int index2; 	// left/right child index for t2
+    void swap(PhyTree *t1, PhyTree *t2) {
+        PhyTree *pt1;        // parent of t1
+        PhyTree *pt2;        // parent of t2
+        unsigned int index1;    // left/right child index for t1
+        unsigned int index2;    // left/right child index for t2
 
-        index1=t1->indexOf();
-        pt1=t1->parent;
+        index1 = t1->indexOf();
+        pt1 = t1->parent;
 
-        index2=t2->indexOf();
-        pt2=t2->parent;
+        index2 = t2->indexOf();
+        pt2 = t2->parent;
 
-        if(t1==pt2){
-            std::cout<<"CASO1\n";
+        if (t1 == pt2) {
+            std::cout << "CASO1\n";
             pt1->children[index1] = t2;
             t2->parent = pt1;
             t1->children[index2] = t2->children[index2];
             t2->children[index2] = t1;
             t1->parent = t2;
-            t1->children[index2]->parent=t1;
-        }else if(t2==pt1){
-            std::cout<<"CASO2\n";
+            t1->children[index2]->parent = t1;
+        } else if (t2 == pt1) {
+            std::cout << "CASO2\n";
             pt2->children[index2] = t1;
             t1->parent = pt2;
             t2->children[index1] = t1->children[index1];
             t1->children[index1] = t2;
             t2->parent = t1;
-            t2->children[index1]->parent=t2;
-        }else{
-            std::cout<<"CASO3\n";
+            t2->children[index1]->parent = t2;
+        } else {
+            std::cout << "CASO3\n";
             /*
             pt1->children[index1] = t2;
             pt2->children[index2] = t1;
@@ -871,7 +894,7 @@ public:
             //PhyTree *ct1;
             PhyTree *ct2;
             //ct1=t1->children[index1];
-            ct2=t2->children[index2];
+            ct2 = t2->children[index2];
 
             pt1->children[index1] = t2;
             t2->parent = pt1;
@@ -879,131 +902,223 @@ public:
             t1->parent = t2;
             t2->children[index2] = t1;
 
-            pt2->children[index2]=ct2;
-            ct2->parent=pt2;
+            pt2->children[index2] = ct2;
+            ct2->parent = pt2;
         }
     }
+
     //=======================================================================================================
-    void append_MSA_fv(Eigen::VectorXd fv){
+    void append_MSA_fv(Eigen::VectorXd fv) {
         this->MSA_fv.push_back(fv);
     }
+
     //=======================================================================================================
-    Eigen::VectorXd &get_MSA_fv(int idx){
+    Eigen::VectorXd &get_MSA_fv(int idx) {
         return this->MSA_fv.at(idx);
     }
+
     //=======================================================================================================
-    void set_MSA_fv(Eigen::VectorXd &fv){
+    void set_MSA_fv(Eigen::VectorXd &fv) {
         this->MSA_fv.push_back(fv);
     }
+
     //=======================================================================================================
-    unsigned int get_MSA_fv_size(){
+    unsigned int get_MSA_fv_size() {
         return this->MSA_fv.size();
     }
+
     //=======================================================================================================
-    void update_MSA_fv(int dim_alphabet){
-        unsigned int l1,l2;
+    void update_MSA_fv(int dim_alphabet) {
+        unsigned int l1, l2;
         PhyTree *n1;
         PhyTree *n2;
-        Eigen::VectorXd fv0,fv1,fv2;
+        Eigen::VectorXd fv0, fv1, fv2;
 
 
-        fv0=Eigen::VectorXd::Zero(dim_alphabet);
+        fv0 = Eigen::VectorXd::Zero(dim_alphabet);
 
-        n1=this->children[0];
-        n2=this->children[1];
+        n1 = this->children[0];
+        n2 = this->children[1];
 
-        l1=n1->get_MSA_fv_size();
-        l2=n2->get_MSA_fv_size();
+        l1 = n1->get_MSA_fv_size();
+        l2 = n2->get_MSA_fv_size();
 
-        if(l1!=l2){
+        if (l1 != l2) {
             perror("diff size\n");
             exit(EXIT_FAILURE);
         }
 
         this->MSA_fv.clear();
 
-        for(unsigned int k=0;k<l1;k++){
-            fv1=n1->get_MSA_fv(k);
-            fv2=n2->get_MSA_fv(k);
-            for(int i=0;i<dim_alphabet;i++){
-                fv0[i]=fv1[i]*fv2[i];
+        for (unsigned int k = 0; k < l1; k++) {
+            fv1 = n1->get_MSA_fv(k);
+            fv2 = n2->get_MSA_fv(k);
+            //TODO: use cwiseproduct
+            for (int i = 0; i < dim_alphabet; i++) {
+                fv0[i] = fv1[i] * fv2[i];
             }
             this->MSA_fv.push_back(fv0);
         }
 
     }
+
     //=======================================================================================================
-    void set_setA(bool b){
-        this->setA=b;
+    void set_setA(bool b) {
+        this->setA = b;
     }
+
     //=======================================================================================================
-    bool get_setA(){
+    bool get_InsertionHistories() {
         return this->setA;
     }
+
     //=======================================================================================================
-    void set_descCount(int b){
-        this->descCount=b;
+    void set_descCount(int b) {
+        this->descCount = b;
     }
+
     //=======================================================================================================
-    int get_descCount(){
+    int get_descCount() {
         return this->descCount;
     }
+
     //=======================================================================================================
-    void set_leaf_character(char ch){
-        this->character=ch;
+    void set_leaf_character(char ch) {
+        this->character = ch;
     }
+
     //=======================================================================================================
-    char get_leaf_character(){
+    char get_leaf_character() {
         return this->character;
     }
+
     //=======================================================================================================
-    void clear_fv(){
+    void clear_fv() {
 
         this->MSA_fv.clear();
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->clear_fv();
         }
     }
-    //=======================================================================================================
-    void tmp_initPr(int dim){
 
-        if(this->Pr.rows()*this->Pr.cols()!=0){
-            this->Pr.resize(0,0);
+    //=======================================================================================================
+    void tmp_initPr(int dim) {
+
+        if (this->Pr.rows() * this->Pr.cols() != 0) {
+            this->Pr.resize(0, 0);
         }
 
-        if(this->parent!=NULL){
-            this->Pr.resize(dim,dim);
-            for(int i=0;i<dim;i++){
-                for(int j=0;j<dim;j++){
-                    this->Pr(i,j)=0.1*this->getBranchLength();
+        if (this->parent != NULL) {
+            this->Pr.resize(dim, dim);
+            for (int i = 0; i < dim; i++) {
+                for (int j = 0; j < dim; j++) {
+                    this->Pr(i, j) = 0.1 * this->getBranchLength();
                 }
             }
 //			std::cout<<"NODE="<<this->getName()<<"\n";
 //			std::cout<<this->Pr<<"\n";
         }
 
-        for(std::vector<PhyTree*>::iterator i=this->children.begin(); i < this->children.end(); ++i) {
+        for (std::vector<PhyTree *>::iterator i = this->children.begin(); i < this->children.end(); ++i) {
             (*i)->tmp_initPr(dim);
         }
 
     }
     //=======================================================================================================
+
+    //=======================================================================================================
+    void set_leaf_state(std::string &MSA_col) {
+        int idx;
+        idx = 0;
+        set_leaf_state(MSA_col, idx);
+
+    }
+    //=======================================================================================================
+
+    //=======================================================================================================
+    void set_leaf_state(std::string &MSA_col, int &idx) {
+
+        if (this->isLeaf()) {
+            this->set_leaf_character(MSA_col[idx]);
+            idx++;
+        } else {
+            this->children[0]->set_leaf_state(MSA_col, idx);
+            this->children[1]->set_leaf_state(MSA_col, idx);
+        }
+
+    }
+
+
+    //=======================================================================================================
+    void set_ancestral_flag(std::string &MSA_col, int num_gaps) {
+        int descCount;
+        if (this->isLeaf()) {
+            descCount = this->descCount;
+            this->set_setA(descCount == num_gaps);
+        } else {
+            this->children[0]->set_ancestral_flag(MSA_col, num_gaps);
+            this->children[1]->set_ancestral_flag(MSA_col, num_gaps);
+            descCount = this->descCount;
+            this->set_setA(descCount == num_gaps);
+        }
+
+    }
+
+    //=======================================================================================================
+    void set_ancestral_flag(std::string &MSA_col) {
+        int num_gaps;
+
+        num_gaps = 0;
+        // TODO: wrapping up this function separately
+        for (int i = 0; i < MSA_col.size(); i++) {
+            num_gaps += (MSA_col[i] != '-');
+        }
+
+        //std::cout<<"num non gaps="<<num_gaps<<"\n";
+
+//        set_descCount(node);
+        this->set_descCount();
+        this->set_ancestral_flag(MSA_col, num_gaps);
+    }
+
+    void set_descCount() {
+
+        if (this->isLeaf()) {
+            this->descCount = this->get_leaf_character() == '-' ? 0 : 1;
+            //std::cout<<"set_descCount:"<<node->getName()<<": "<<node->get_descCount()<<"\n";
+        } else {
+            this->children[0]->set_descCount();
+            this->children[1]->set_descCount();
+            this->descCount = this->children[0]->descCount + this->children[1]->descCount;
+            //std::cout<<"set_descCount:"<<node->getName()<<": "<<node->get_descCount()<<"\n";
+        }
+
+    }
+
 };
 
 
-PhyTree* midpointRoot(PhyTree *root);
+PhyTree *midpointRoot(PhyTree *root);
 
 std::vector<std::string> get_tree_order_ancestral(const PhyTree *tree);
+
 std::vector<std::string> get_tree_order(const PhyTree *tree);
 
-void update_fv_values(std::vector<PhyTree *> &p,int alphabet_size);
-void set_ancestral_flag(PhyTree *node,std::string &MSA_col,int num_gaps);
-void set_ancestral_flag(PhyTree *node,std::string &MSA_col);
-void set_leaf_state(PhyTree *node,std::string &MSA_col,int &idx);
-void set_leaf_state(PhyTree *node,std::string &MSA_col);
+void update_fv_values(std::vector<PhyTree *> &p, int alphabet_size);
+
+void set_ancestral_flag(PhyTree *node, std::string &MSA_col, int num_gaps);
+
+void set_ancestral_flag(PhyTree *node, std::string &MSA_col);
+
+void set_leaf_state(PhyTree *node, std::string &MSA_col, int &idx);
+
+void set_leaf_state(PhyTree *node, std::string &MSA_col);
+
 void print_ancestral_flag(PhyTree *node);
+
 void print_leaf_state(PhyTree *node);
+
 void print_descCount(PhyTree *tree);
 
 #endif /* TSHLIB_PHYTREE_HPP */
