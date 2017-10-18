@@ -94,7 +94,12 @@ SET(SOURCES
         PhyTree.hpp
         TreeSearch.cpp
         TreeSearch.hpp
-        nni_spr.h TreeRearrangment.cpp TreeRearrangment.hpp Likelihood.cpp Likelihood.hpp Alignment.cpp Alignment.hpp)
+        TreeRearrangment.cpp
+        TreeRearrangment.hpp
+        Likelihood.cpp
+        Likelihood.hpp
+        Alignment.cpp
+        Alignment.hpp)
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})

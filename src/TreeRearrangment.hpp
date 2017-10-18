@@ -45,7 +45,13 @@
 #define TSHLIB_TREEREARRANGEMENT_HPP
 
 #include "PhyTree.hpp"
-#include "nni_spr.h"
+
+struct move_info {
+    PhyTree *node1;
+    PhyTree *node2;
+    int ID;
+    double lk;
+};
 
 
 class TreeRearrangment {
