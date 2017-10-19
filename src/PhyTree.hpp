@@ -63,6 +63,7 @@ class PhyTree {
 
 private:
     std::string name;
+    int node_id;
     double branch_length;
     double branch_support;
     PhyTree *parent;
@@ -137,6 +138,7 @@ public:
         this->branch_length = 0;
         this->branch_support = 1;
         this->name = name;
+        this->node_id = nullptr;
 
         //==============================
         //DP-PIP
@@ -258,6 +260,10 @@ public:
 
     std::string getName() const {
         return this->name;
+    }
+
+    int getNodeID() {
+        return this->node_id;
     }
 
     PhyTree *getParent() {
@@ -391,6 +397,12 @@ public:
     //DP-PIP
     void setName(std::string name) {
         this->name = name;
+    }
+
+    int setNodeID(int id) {
+        if (id) {
+            return this->node_id = id;
+        }
     }
 
     //=======================================================================================================

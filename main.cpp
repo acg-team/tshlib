@@ -57,11 +57,11 @@
 int main(int argc, char **argv) {
 
 
-    PhyTree *t1;
-    PhyTree *t2;
+    //PhyTree *t1;
+    //PhyTree *t2;
     //std::string tree_file="/home/max/PIP_C++/NNI_SPR/tree_5_leaves_r_bl.nwk";
     std::string tree_file = argv[1];
-    PhyTree *tree = NULL;
+    PhyTree *tree = nullptr;
     double mu;
     double lambda;
     double tau;
@@ -122,11 +122,11 @@ int main(int argc, char **argv) {
     std::string seq4_label = "D";
     std::string seq5_label = "E";
 
-    std::string seq1_DNA = "A";
-    std::string seq2_DNA = "-";
-    std::string seq3_DNA = "-";
-    std::string seq4_DNA = "-";
-    std::string seq5_DNA = "-";
+    std::string seq1_DNA = "A-C";
+    std::string seq2_DNA = "-TC";
+    std::string seq3_DNA = "-TC";
+    std::string seq4_DNA = "-CC";
+    std::string seq5_DNA = "-CG";
 
     MSA.emplace_back(seq1_label, seq1_DNA);
     MSA.emplace_back(seq2_label, seq2_DNA);
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
     // set "pseudo" probability matrix
     tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML
 
-    int MSA_len;
+    unsigned long MSA_len;
     double lk;
     Eigen::VectorXd pi;
 
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
         //std::cout<<"col["<<i<<"]="<<s<<"\n";
 
         // assign char at the leaves
-        tree->set_leaf_state(s); //TODO: move as method of tree
+        tree->set_leaf_state(s);
         //print_leaf_state(tree);
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
     //----------------------------------------------------------
     // PERFORM SPR MOVES and RECOMPUTE LK
 
-    move_info m;
+    //move_info m;
     move_info n;
     int max_idx;
     double max_val;
