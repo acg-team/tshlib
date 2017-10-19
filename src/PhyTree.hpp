@@ -138,7 +138,7 @@ public:
         this->branch_length = 0;
         this->branch_support = 1;
         this->name = name;
-        this->node_id = nullptr;
+        this->node_id = 0;
 
         //==============================
         //DP-PIP
@@ -399,9 +399,9 @@ public:
         this->name = name;
     }
 
-    int setNodeID(int id) {
+    void setNodeID(int id) {
         if (id) {
-            return this->node_id = id;
+            this->node_id = id;
         }
     }
 
