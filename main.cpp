@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
     extended_alphabet_size = 5; // DNA alphabet
 
     // set "pseudo" probability matrix
-    tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML
+    tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
 
     unsigned long MSA_len;
     double lk;

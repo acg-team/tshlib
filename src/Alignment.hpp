@@ -39,10 +39,10 @@
  * @bug
  * @warning
  *
- * @see For more information visit: http://www.lorenzogatti.me
+ * @see For more information visit:
  */
-#ifndef TSHEXE_ALIGNMENT_HPP
-#define TSHEXE_ALIGNMENT_HPP
+#ifndef TSHLIB_ALIGNMENT_HPP
+#define TSHLIB_ALIGNMENT_HPP
 
 #include <string>
 #include <vector>
@@ -54,4 +54,4 @@ class Alignment {
 
 std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index);
 
-#endif //TSHEXE_ALIGNMENT_HPP
+#endif //TSHLIB_ALIGNMENT_HPP
