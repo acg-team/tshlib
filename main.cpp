@@ -209,10 +209,20 @@ int main(int argc, char **argv) {
 
     auto ts_stack = new TreeRearrangment(node, radius, true);
     ts_stack->fillListMoves(false);
+    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << "size TreeRearrangement list:" << ts_stack->mset_moves.size() << "\n";
 
+    for (unsigned int i = 0; i < ts_stack->mset_moves.size(); i++) {
+
+
+        std::cout << "list[" << i << "]=(" << ts_stack->mset_sourcenode->getName() << ";"
+                  << ts_stack->mset_moves.at(i)->getTargetNode()->getName() << ")\n";
+    }
+
+    std::cout << "--------------------------------------------------------------------\n";
     get_list_nodes_within_radius(node, radius, nni_spr_stack);
 
-    std::cout << "size list:" << nni_spr_stack.size() << "\n";
+    std::cout << "size move_info list:" << nni_spr_stack.size() << "\n";
 
     for (unsigned int i = 0; i < nni_spr_stack.size(); i++) {
         std::cout << "list[" << i << "]=(" << (nni_spr_stack.at(i)).node1->getName() << ";"

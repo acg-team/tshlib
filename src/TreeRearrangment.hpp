@@ -80,6 +80,12 @@ public:
      */
     void deleteTargetNode();
 
+    /*!
+     * @brief Returns the target node pointer
+     * @return PhyTree pointer of the node
+     */
+    PhyTree *getTargetNode();
+
 protected:
 
     int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
@@ -95,12 +101,6 @@ protected:
 class TreeRearrangment {
 
 private:
-    PhyTree *mset_sourcenode;       /* Starting node from which starting the tree exploration */
-    std::string mset_id;            /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-    int mset_radius;                /* Radius of the node search (for NNI must set it to 1) */
-    bool mset_preserve_blenghts;    /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
-    std::vector<Move *> mset_moves; /* Vector containing the pre-computed moves */
-    std::string mset_strategy;      /* Description of the node search strategy */
 
     /*!
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
@@ -126,6 +126,13 @@ private:
 
 
 public:
+    PhyTree *mset_sourcenode;       /* Starting node from which starting the tree exploration */
+    std::string mset_id;            /* Tree-rearrangment ID. Useful in case of parallel independent executions */
+    int mset_radius;                /* Radius of the node search (for NNI must set it to 1) */
+    bool mset_preserve_blenghts;    /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
+    std::vector<Move *> mset_moves; /* Vector containing the pre-computed moves */
+    std::string mset_strategy;      /* Description of the node search strategy */
+
 
     TreeRearrangment(PhyTree *node_source, int radius, bool preserve_blengths);
 
@@ -139,8 +146,8 @@ public:
 
 protected:
 
-};
 
+};
 
 void
 nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, bool save, std::vector<move_info> &list_nodes);

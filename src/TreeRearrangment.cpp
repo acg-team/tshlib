@@ -168,6 +168,12 @@ void Move::deleteTargetNode() {
 
 }
 
+PhyTree *Move::getTargetNode() {
+
+    return this->move_targetnode;
+
+}
+
 
 
 //===================================================================================================================
