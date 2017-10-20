@@ -66,7 +66,15 @@ std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA
 //================================
 
 std::string Alignment::extractAlignmentColumn(int index) {
-    return std::string();
+
+    std::string column;
+
+    for (std::vector<int>::size_type i = 0; i != this->align_dataset.size(); i++) {
+        column.push_back(this->align_dataset.at(i)->seq_data[index]);
+
+    }
+
+    return column;
 }
 
 
@@ -90,6 +98,22 @@ void Alignment::addSequence(std::string label, std::string data, std::vector<uns
 
     this->align_dataset.emplace_back(new Sequence(label, data, weight));
 
+}
+
+long int Alignment::getAlignmentSize() {
+
+    long length = 0;
+
+    for (std::vector<int>::size_type i = 0; i != this->align_dataset.size(); i++) {
+
+        if (length < this->align_dataset[i]->seq_data.size()) {
+
+            length = this->align_dataset[i]->seq_data.size();
+        }
+
+
+    }
+    return length;
 }
 
 //================================

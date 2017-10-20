@@ -84,6 +84,8 @@ public:
 
     void addSequence(std::string label, std::string data, std::vector<unsigned int> weight);
 
+    long int getAlignmentSize();
+
     std::string extractAlignmentColumn(int index);
 
     ~Alignment();

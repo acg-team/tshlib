@@ -152,6 +152,7 @@ int main(int argc, char **argv) {
     alignment->addSequence(seq5_label, seq5_DNA);
 
     std::cout << alignment->align_dataset.size() << std::endl;
+
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
     int is_DNA_AA_Codon;
@@ -176,7 +177,8 @@ int main(int argc, char **argv) {
     pi[4] = 0.0;
 
     // get MSA length
-    MSA_len = MSA.at(0).second.size();
+    //MSA_len = MSA.at(0).second.size();
+    MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
 
     //std::cout<<"MSA_len="<<MSA_len<<"\n";
 
@@ -186,7 +188,9 @@ int main(int argc, char **argv) {
     for (int i = 0; i < MSA_len; i++) {
 
         // extract MSA column
-        std::string s = create_col_MSA(MSA, i);
+
+        std::string s = alignment->extractAlignmentColumn(i);
+        //std::string s = create_col_MSA(MSA, i);
         //std::cout<<"col["<<i<<"]="<<s<<"\n";
 
         // assign char at the leaves
