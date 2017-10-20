@@ -1,14 +1,30 @@
 #ifndef ALPHABET_H
 #define ALPHABET_H
 
-#include "../../../../Desktop/dppip_3D_local_tree/main.h"
-#include "../../../../Desktop/dppip_3D_local_tree/debug.h"
+
 #include <string>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #define GAP_CHAR '-'
 #define GAP_STR "-"
+
+
+//=======================================================
+//DP-PIP
+#define MATCH  '1'
+#define GAPX   '2'
+#define GAPY   '3'
+#define UNKNOW '4'
+//=======================================================
+//DP-PIP
+// for gamma distribution
+#define MODELPAREPS   1.E-4
+//=======================================================
+typedef double score_t;
+typedef float dp_score_t;
+typedef unsigned int index_t;
+typedef double distance_t;
 
 class Alphabet {
 protected:
@@ -203,107 +219,107 @@ public:
 };
 
 
-#define sequence_t std::basic_string
+#define sequence_t std::string
 
-template<class T>
-sequence_t<T> sequenceFromString(const std::string &str) {
-    sequence_t<T> seq;
-    seq.reserve(str.length());
+//template<class T>
+//sequence_t<T> sequenceFromString(const std::string &str) {
+//    sequence_t<T> seq;
+//    seq.reserve(str.length());
+//
+//    for (index_t i = 0; i < str.length(); ++i) {
+//        T c = T(str[i]);
+//        if (c == T::GAP) {
+//            perror("No support for gapped sequences (yet)");
+//        }
+//        seq += c;
+//    }
+//
+//    return seq;
+//}
+//
+//template<>
+//sequence_t<Codon> sequenceFromString<Codon>(const std::string &str);
+//
+////=======================================================================================================
+////DP-PIP
+//template<class T>
+//sequence_t<T> sequenceFromStringPIP(const std::string &str) {
+//    sequence_t<T> seq;
+//    seq.reserve(str.length());
+//
+//    for (index_t i = 0; i < str.length(); ++i) {
+//        T c = T(str[i]);
+//        /*
+//        if(c == T::GAP) {
+//            error("No support for gapped sequences (yet)");
+//        }
+//        */
+//        seq += c;
+//    }
+//
+//    return seq;
+//}
+////=======================================================================================================
+//
+////=======================================================================================================
+////DP-PIP
+//
+//template<class T>
+//std::string stringFromSequence(const sequence_t<T> &seq) {
+//    std::string str;
+//    str.reserve(seq.length());
+//
+//    for (index_t i = 0; i < seq.length(); ++i) {
+//
+//        //str +=seq[i].asChar();
+//        //==================================
+//        //DP-PIP
+//        std::cerr << "ERROR in stringFromSequence\n";
+//        //==================================
+//    }
+//
+//    return str;
+//}
+//
+//template<>
+//std::string stringFromSequence<char>(const sequence_t<char> &seq);
+//
+//template<>
+//std::string stringFromSequence<AA>(const sequence_t<AA> &seq);
+//
+//template<>
+//std::string stringFromSequence<DNA>(const sequence_t<DNA> &seq);
+//
+//template<>
+//std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq);
+////=======================================================================================================
+//
+//template<class T>
+//std::string stringFromSequence(const sequence_t<T> &seq, const std::string &orig) {
+//    std::string str;
+//    str.reserve(orig.length());
+//
+//    index_t j = 0;
+//    for (index_t i = 0; i < seq.length(); ++i) {
+//        if (seq[i].isGap()) {
+//            str += seq[i].asChar();
+//        } else {
+//            str += orig[j++];
+//        }
+//    }
+//
+//    assert(j == orig.length());
+//
+//    return str;
+//}
+////=======================================================================================================
+////DP-PIP
+////template<> std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq);
+////=======================================================================================================
+//
+//template<>
+//std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq, const std::string &orig);
 
-    for (index_t i = 0; i < str.length(); ++i) {
-        T c = T(str[i]);
-        if (c == T::GAP) {
-            error("No support for gapped sequences (yet)");
-        }
-        seq += c;
-    }
-
-    return seq;
-}
-
-template<>
-sequence_t<Codon> sequenceFromString<Codon>(const std::string &str);
-
-//=======================================================================================================
-//DP-PIP
-template<class T>
-sequence_t<T> sequenceFromStringPIP(const std::string &str) {
-    sequence_t<T> seq;
-    seq.reserve(str.length());
-
-    for (index_t i = 0; i < str.length(); ++i) {
-        T c = T(str[i]);
-        /*
-        if(c == T::GAP) {
-            error("No support for gapped sequences (yet)");
-        }
-        */
-        seq += c;
-    }
-
-    return seq;
-}
-//=======================================================================================================
-
-//=======================================================================================================
-//DP-PIP
-
-template<class T>
-std::string stringFromSequence(const sequence_t<T> &seq) {
-    std::string str;
-    str.reserve(seq.length());
-
-    for (index_t i = 0; i < seq.length(); ++i) {
-
-        //str +=seq[i].asChar();
-        //==================================
-        //DP-PIP
-        std::cerr << "ERROR in stringFromSequence\n";
-        //==================================
-    }
-
-    return str;
-}
-
-template<>
-std::string stringFromSequence<char>(const sequence_t<char> &seq);
-
-template<>
-std::string stringFromSequence<AA>(const sequence_t<AA> &seq);
-
-template<>
-std::string stringFromSequence<DNA>(const sequence_t<DNA> &seq);
-
-template<>
-std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq);
-//=======================================================================================================
-
-template<class T>
-std::string stringFromSequence(const sequence_t<T> &seq, const std::string &orig) {
-    std::string str;
-    str.reserve(orig.length());
-
-    index_t j = 0;
-    for (index_t i = 0; i < seq.length(); ++i) {
-        if (seq[i].isGap()) {
-            str += seq[i].asChar();
-        } else {
-            str += orig[j++];
-        }
-    }
-
-    assert(j == orig.length());
-
-    return str;
-}
-//=======================================================================================================
-//DP-PIP
-//template<> std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq);
-//=======================================================================================================
-
-template<>
-std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq, const std::string &orig);
-
-sequence_t<AA> translateCodons(const sequence_t<Codon> &seq);
+//sequence_t<AA> translateCodons(const sequence_t<Codon> &seq);
 
 #endif /* ALPHABET_H */

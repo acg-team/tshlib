@@ -46,11 +46,54 @@
 
 #include <string>
 #include <vector>
+#include "Alphabet.h"
+
+class Sequence {
+private:
+public:
+    std::string seq_name;
+    std::string seq_data;
+    std::vector<unsigned int> seq_weight;
+    bool seq_compressed;
+
+    Sequence(std::string label, std::string data);
+
+    Sequence(std::string label, std::string data, std::vector<unsigned int> weight);
+
+    ~Sequence();
+
+protected:
+
+};
 
 
 class Alignment {
 
+private:
+
+public:
+
+    int align_alphabetsize;
+    std::vector<Sequence *> align_dataset;
+
+    Alignment();
+
+    Alignment(int dim);
+
+    void addSequence(std::string label, std::string data);
+
+    void addSequence(std::string label, std::string data, std::vector<unsigned int> weight);
+
+    std::string extractAlignmentColumn(int index);
+
+    ~Alignment();
+
+protected:
+
+
 };
+
+
 
 std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index);
 

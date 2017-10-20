@@ -45,12 +45,16 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <type_traits>
 
 #include "PhyTree.hpp"
 #include "TreeRearrangment.hpp"
 #include "Alignment.hpp"
 #include "Likelihood.hpp"
 #include "newick.hpp"
+#include "Alphabet.h"
+
+
 
 
 //===================================================================================================================
@@ -69,6 +73,7 @@ int main(int argc, char **argv) {
 
     mu = 0.1;
     lambda = 0.2;
+
 
     //----------------------------------------------------------
     // INIT TREE
@@ -102,6 +107,10 @@ int main(int argc, char **argv) {
     //----------------------------------------------------------
     // LOAD MSA
 
+    //Alignment ;
+    auto *alignment = new Alignment;
+
+
     std::vector<std::pair<std::string, std::string> > MSA;
 
 /*    std::string seq1_label="A";
@@ -128,11 +137,21 @@ int main(int argc, char **argv) {
     std::string seq4_DNA = "-CC";
     std::string seq5_DNA = "-CG";
 
+
     MSA.emplace_back(seq1_label, seq1_DNA);
     MSA.emplace_back(seq2_label, seq2_DNA);
     MSA.emplace_back(seq3_label, seq3_DNA);
     MSA.emplace_back(seq4_label, seq4_DNA);
     MSA.emplace_back(seq5_label, seq5_DNA);
+
+
+    alignment->addSequence(seq1_label, seq1_DNA);
+    alignment->addSequence(seq2_label, seq2_DNA);
+    alignment->addSequence(seq3_label, seq3_DNA);
+    alignment->addSequence(seq4_label, seq4_DNA);
+    alignment->addSequence(seq5_label, seq5_DNA);
+
+    std::cout << alignment->align_dataset.size() << std::endl;
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
     int is_DNA_AA_Codon;

@@ -45,9 +45,10 @@
 #include <string>
 #include <vector>
 #include "Alignment.hpp"
-
+#include "Alphabet.h"
 
 //=======================================================================================================
+
 //DP-PIP
 std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index) {
     std::string colMSA;
@@ -58,3 +59,68 @@ std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA
 
     return colMSA;
 }
+//=======================================================================================================
+
+
+
+//================================
+
+std::string Alignment::extractAlignmentColumn(int index) {
+    return std::string();
+}
+
+
+Alignment::Alignment(int dim) {
+
+    this->align_alphabetsize = dim;
+}
+
+
+Alignment::Alignment() {
+
+    this->align_alphabetsize = 0;
+}
+
+void Alignment::addSequence(std::string label, std::string data) {
+
+    this->align_dataset.emplace_back(new Sequence(label, data));
+}
+
+void Alignment::addSequence(std::string label, std::string data, std::vector<unsigned int> weight) {
+
+    this->align_dataset.emplace_back(new Sequence(label, data, weight));
+
+}
+
+//================================
+
+Alignment::~Alignment() = default;
+//================================
+
+
+
+Sequence::Sequence(std::string label, std::string data) {
+
+    this->seq_name = label;
+    this->seq_data = data;
+    this->seq_compressed = false;
+
+    for (std::vector<int>::size_type i = 0; i != this->seq_data.size(); i++) {
+        this->seq_weight.push_back(1);
+    }
+
+}
+
+//================================
+Sequence::Sequence(std::string label, std::string data, std::vector<unsigned int> weight) {
+
+    this->seq_name = label;
+    this->seq_data = data;
+    this->seq_compressed = true;
+    this->seq_weight = weight;
+
+}
+
+//================================
+Sequence::~Sequence() = default;
+

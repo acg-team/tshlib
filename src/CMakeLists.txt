@@ -99,7 +99,10 @@ SET(SOURCES
         Likelihood.cpp
         Likelihood.hpp
         Alignment.cpp
-        Alignment.hpp)
+        Alignment.hpp
+        Alphabet.cpp
+        Alphabet.h
+        )
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
