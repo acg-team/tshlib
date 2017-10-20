@@ -207,6 +207,9 @@ int main(int argc, char **argv) {
     node = tree->get_left_child();
     radius = 3;
 
+    auto ts_stack = new TreeRearrangment(node, radius, true);
+    ts_stack->fillListMoves(false);
+
     get_list_nodes_within_radius(node, radius, nni_spr_stack);
 
     std::cout << "size list:" << nni_spr_stack.size() << "\n";

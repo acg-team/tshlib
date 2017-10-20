@@ -54,7 +54,57 @@ struct move_info {
 };
 
 
+class Move {
+
+private:
+
+public:
+
+    Move();
+
+    ~Move();
+
+    void setTargetNode(PhyTree *target_node);
+
+    void deleteTargetNode();
+
+protected:
+
+    int move_id;
+    std::string move_name;
+    std::string move_desc;
+    PhyTree *move_targetnode;
+    double move_lk;
+    bool move_applied;
+    std::string move_class;
+
+};
+
 class TreeRearrangment {
+
+private:
+    PhyTree *mset_sourcenode;
+    std::string mset_id;
+    int mset_radius;
+    bool mset_preserve_blenghts;
+    std::vector<Move *> mset_moves;
+    std::string mset_strategy;
+
+    void getNodesInRadius(PhyTree *node_source, int radius, bool save);
+
+    void getNodesInRadiusUp(PhyTree *node_source, int radius, int direction);
+
+    void addMove(Move *move);
+
+
+public:
+    TreeRearrangment(PhyTree *node_source, int radius, bool preserve_blengths);
+
+    ~TreeRearrangment();
+
+    void fillListMoves(bool saveMove);
+
+protected:
 
 };
 

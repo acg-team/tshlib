@@ -43,6 +43,138 @@
 #include "TreeRearrangment.hpp"
 
 
+TreeRearrangment::~TreeRearrangment() = default;
+
+TreeRearrangment::TreeRearrangment(PhyTree *node_source, int radius = 1, bool preserve_blengths = true) {
+
+    this->mset_sourcenode = node_source;
+    this->mset_id = std::to_string(node_source->getNodeID()) + ":" + std::to_string(radius);
+    this->mset_radius = radius;
+    this->mset_preserve_blenghts = preserve_blengths;
+    this->mset_strategy = "undefined";
+
+}
+
+void TreeRearrangment::getNodesInRadius(PhyTree *node_source, int radius, bool save) {
+
+    PhyTree *node = node_source;
+    auto *m = new Move;
+
+    if (!save) {
+        save = true;
+
+    } else {
+
+        m->setTargetNode(node);
+        this->addMove(m);
+    }
+
+    if (radius <= 0) {
+        return;
+    }
+
+    if (!node->isLeaf()) {
+        radius--;
+        this->getNodesInRadius(node->get_left_child(), radius, save);
+        this->getNodesInRadius(node->get_right_child(), radius, save);
+    }
+
+
+}
+
+void TreeRearrangment::fillListMoves(bool saveMove = false) {
+
+
+    this->getNodesInRadius(this->mset_sourcenode, this->mset_radius, saveMove);
+
+    if (this->mset_sourcenode->getParent() != nullptr) {
+        this->getNodesInRadiusUp(this->mset_sourcenode->getParent(), this->mset_radius,
+                                 this->mset_sourcenode->indexOf());
+        //nodes_within_radius_up(node, node->getParent(), radius, node->indexOf(), list_nodes);
+    }
+
+}
+
+void TreeRearrangment::addMove(Move *move) {
+
+    this->mset_moves.emplace_back(move);
+
+}
+
+void TreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int direction) {
+
+    PhyTree *node = node_source;
+    auto *m = new Move;
+    unsigned int idx;
+
+    //TODO: check binary tree condition!
+    m->setTargetNode(node);
+    this->addMove(m);
+
+    if (radius > 0) {
+
+        radius--;
+        if (direction == 0) {
+            if (node->getParent() != nullptr) {
+
+                idx = node->indexOf();
+                this->getNodesInRadiusUp(node->getParent(), radius, idx);
+                //nodes_within_radius_up(start_node, node->getParent(), radius, idx, list_nodes);
+            }
+
+            this->getNodesInRadius(node->get_right_child(), radius, true);
+            //nodes_within_radius(start_node, node->get_right_child(), radius, true, list_nodes);
+
+        } else if (direction == 1) {
+            if (node->getParent() != nullptr) {
+
+                idx = node->indexOf();
+                this->getNodesInRadiusUp(node->getParent(), radius, idx);
+                //nodes_within_radius_up(start_node, node->getParent(), radius, idx, list_nodes);
+            }
+
+            this->getNodesInRadius(node->get_left_child(), radius, true);
+            //nodes_within_radius(start_node, node->get_left_child(), radius, true, list_nodes);
+        }
+    }
+}
+
+//===================================================================================================================
+Move::~Move() = default;
+
+Move::Move() {
+
+    this->move_id = NULL;
+    this->move_name = "undefined";
+    this->move_desc = "undefined";
+    this->move_class = "undefined";
+
+    this->move_targetnode = nullptr;
+    this->move_lk = -INFINITY;
+
+    this->move_applied = false;
+
+}
+
+void Move::setTargetNode(PhyTree *target_node) {
+
+    this->move_targetnode = target_node;
+
+}
+
+void Move::deleteTargetNode() {
+
+    this->move_targetnode = nullptr;
+
+}
+
+
+
+//===================================================================================================================
+//===================================================================================================================
+
+
+
 //===================================================================================================================
 //double recompute_lk(PhyTree *tree,double k){
 //    return k;
