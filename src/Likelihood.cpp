@@ -39,7 +39,7 @@
  * @bug
  * @warning
  *
- * @see For more information visit: http://www.lorenzogatti.me
+ * @see For more information visit:
  */
 #include "Likelihood.hpp"
 

@@ -228,6 +228,8 @@ int main(int argc, char **argv) {
         std::cout << "list[" << i << "]=(" << (nni_spr_stack.at(i)).node1->getName() << ";"
                   << (nni_spr_stack.at(i)).node2->getName() << ")\n";
     }
+
+
     //----------------------------------------------------------
     // PERFORM SPR MOVES and RECOMPUTE LK
 
