@@ -57,6 +57,7 @@
 #include <Eigen/src/Core/IO.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
+
 //=====================
 
 class PhyTree {
@@ -79,7 +80,10 @@ private:
     bool setA;
     int descCount;
     char character;
-    //================================================================
+    //=================================================================
+    //Likelihood *node_lk;
+    int depth;
+
 
     void print_prefix(std::string prefix) const {
 
@@ -1108,6 +1112,7 @@ public:
         }
 
     }
+
 
 };
 

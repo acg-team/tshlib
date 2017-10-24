@@ -1,8 +1,8 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti
+ * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti
+ * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
  *******************************************************************************
  *
  * This file is part of tshlib
@@ -22,10 +22,10 @@
  *******************************************************************************/
 
 /**
- * @file Alignment.hpp
+ * @file Sequence.hpp
  * @author Lorenzo Gatti
  * @author Massimo Maiolo
- * @date 18 10 2017
+ * @date 24 10 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
  * @maintainer Massimo Maiolo
@@ -41,47 +41,30 @@
  *
  * @see For more information visit:
  */
-#ifndef TSHLIB_ALIGNMENT_HPP
-#define TSHLIB_ALIGNMENT_HPP
+
+#ifndef TSHEXE_SEQUENCE_HPP
+#define TSHEXE_SEQUENCE_HPP
 
 #include <string>
 #include <vector>
-#include "Alphabet.h"
-#include "Sequence.hpp"
 
 
-class Alignment {
-
+class Sequence {
 private:
-
 public:
+    std::string seq_name;
+    std::string seq_data;
+    std::vector<unsigned int> seq_weight;
+    bool seq_compressed;
 
-    int align_alphabetsize;
-    bool align_compressed;
-    std::vector<Sequence *> align_dataset;
-    std::vector<unsigned int> align_weight;
+    Sequence(std::string label, std::string data);
 
-    Alignment();
+    Sequence(std::string label, std::string data, std::vector<unsigned int> weight);
 
-    Alignment(bool compressed);
-
-    void addSequence(std::string label, std::string data);
-
-    void addWeight(std::vector<unsigned int> column_weight);
-
-    long int getAlignmentSize();
-
-    std::string extractColumn(int index);
-
-    ~Alignment();
+    ~Sequence();
 
 protected:
 
-
 };
 
-
-
-std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index);
-
-#endif //TSHLIB_ALIGNMENT_HPP
+#endif //TSHEXE_SEQUENCE_HPP

@@ -185,27 +185,23 @@ int main(int argc, char **argv) {
     double LK = 0;
 
     // compute lk
-    for (int i = 0; i < MSA_len; i++) {
+    for (int i = 0; i < alignment->getAlignmentSize(); i++) {
 
         // extract MSA column
-
-        std::string s = alignment->extractAlignmentColumn(i);
-        //std::string s = create_col_MSA(MSA, i);
-        //std::cout<<"col["<<i<<"]="<<s<<"\n";
+        std::string s = alignment->extractColumn(i);
 
         // assign char at the leaves
         tree->set_leaf_state(s);
-        //print_leaf_state(tree);
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
-        //print_descCount(tree);
-        //print_ancestral_flag(tree);
 
         tree->clear_fv();
 
         // compute column likelihood
         //TODO: Add weight per column
+
+
         lk = compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
 
         std::cout << "col_lk=" << lk << "\n";

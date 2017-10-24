@@ -44,7 +44,9 @@
 #ifndef TSHEXE_LIKELIHOOD_HPP
 #define TSHEXE_LIKELIHOOD_HPP
 
+#include <vector>
 #include "PhyTree.hpp"
+
 
 
 const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -80,6 +82,28 @@ const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
                              -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 class Likelihood {
+private:
+
+public:
+    //PhyTree *link_node;
+    std::vector<double> fv;
+    std::vector<double> pi;
+    bool partial_lk;
+
+    Likelihood();
+
+    //Likelihood(PhyTree *node);
+    ~Likelihood();
+
+
+    void Init();
+
+    void Reset();
+
+    void Update();
+
+
+protected:
 
 };
 

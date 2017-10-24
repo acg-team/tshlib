@@ -1,8 +1,8 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti
+ * Licensed Materials - Property of Lorenzo Gatti and Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti
+ * Copyright (C) 2015-2017 by Lorenzo Gatti and Massimo Maiolo
  *******************************************************************************
  *
  * This file is part of tshlib
@@ -166,10 +166,7 @@ compute_lk_recursive(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_
 
 //=======================================================================================================
 //DP-PIP
-double compute_col_lk(PhyTree &tree,
-                      Eigen::VectorXd &pi,
-                      int is_DNA_AA_Codon,
-                      int alphabet_size) {
+double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
 
     double lk;
 
@@ -203,3 +200,4 @@ double phi(int m, double nu, double p0) {
 
     return p;
 }
+

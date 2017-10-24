@@ -47,25 +47,31 @@
 #include "Alignment.hpp"
 #include "Alphabet.h"
 
-//=======================================================================================================
 
-//DP-PIP
-std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index) {
-    std::string colMSA;
+Alignment::Alignment(bool compressed) {
 
-    for (unsigned int i = 0; i < MSA.size(); i++) {
-        colMSA.append(MSA.at(i).second, index, 1);
-    }
-
-    return colMSA;
+    this->align_compressed = compressed;
+    this->align_alphabetsize = 0;
 }
-//=======================================================================================================
 
 
+Alignment::Alignment() {
+    this->align_compressed = false;
+    this->align_alphabetsize = 0;
+}
 
-//================================
 
-std::string Alignment::extractAlignmentColumn(int index) {
+Alignment::~Alignment() = default;
+
+
+void Alignment::addWeight(std::vector<unsigned int> column_weight) {
+    if (this->align_compressed) {
+        this->align_weight = column_weight;
+    }
+}
+
+
+std::string Alignment::extractColumn(int index) {
 
     std::string column;
 
@@ -78,25 +84,18 @@ std::string Alignment::extractAlignmentColumn(int index) {
 }
 
 
-Alignment::Alignment(int dim) {
-
-    this->align_alphabetsize = dim;
-}
-
-
-Alignment::Alignment() {
-
-    this->align_alphabetsize = 0;
-}
-
 void Alignment::addSequence(std::string label, std::string data) {
 
     this->align_dataset.emplace_back(new Sequence(label, data));
-}
 
-void Alignment::addSequence(std::string label, std::string data, std::vector<unsigned int> weight) {
+    // Add automatic weight if the alignment is not compressed
+    if (!this->align_compressed && this->align_weight.size() != data.size()) {
+        this->align_weight.clear();
+        for (std::vector<int>::size_type i = 0; i != data.size(); i++) {
+            this->align_weight.emplace_back(1);
+        }
+    }
 
-    this->align_dataset.emplace_back(new Sequence(label, data, weight));
 
 }
 
@@ -116,35 +115,13 @@ long int Alignment::getAlignmentSize() {
     return length;
 }
 
-//================================
 
-Alignment::~Alignment() = default;
-//================================
+std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index) {
+    std::string colMSA;
 
-
-
-Sequence::Sequence(std::string label, std::string data) {
-
-    this->seq_name = label;
-    this->seq_data = data;
-    this->seq_compressed = false;
-
-    for (std::vector<int>::size_type i = 0; i != this->seq_data.size(); i++) {
-        this->seq_weight.push_back(1);
+    for (unsigned int i = 0; i < MSA.size(); i++) {
+        colMSA.append(MSA.at(i).second, index, 1);
     }
 
+    return colMSA;
 }
-
-//================================
-Sequence::Sequence(std::string label, std::string data, std::vector<unsigned int> weight) {
-
-    this->seq_name = label;
-    this->seq_data = data;
-    this->seq_compressed = true;
-    this->seq_weight = weight;
-
-}
-
-//================================
-Sequence::~Sequence() = default;
-

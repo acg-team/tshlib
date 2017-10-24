@@ -102,7 +102,7 @@ SET(SOURCES
         Alignment.hpp
         Alphabet.cpp
         Alphabet.h
-        )
+        Sequence.cpp Sequence.hpp)
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
