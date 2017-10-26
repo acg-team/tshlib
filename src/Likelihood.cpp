@@ -92,7 +92,14 @@ compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_
     }
 
 }
+//=======================================================================================================
+double compute_log_lk_empty_col(PhyTree &node,Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+    double p0;
 
+    compute_lk_empty_col(node, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+
+    return log(p0);
+}
 //=======================================================================================================
 //DP-PIP
 Eigen::VectorXd

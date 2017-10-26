@@ -57,8 +57,17 @@
 #include <Eigen/src/Core/IO.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
-
 //=====================
+
+class PhyTree;
+typedef struct node;
+struct node{
+    node *next;
+    node *back;
+    PhyTree *data;
+    int ID;
+};
+
 
 class PhyTree {
 
@@ -831,46 +840,180 @@ public:
     }
 
     //=======================================================================================================
-    bool swap2(PhyTree *t1, PhyTree *t2) {
-        PhyTree *pt1;        // parent of t1
-        PhyTree *pt2;        // parent of t2
-        unsigned int index1;
-        unsigned int index2;
+    bool swap_up(PhyTree *p, PhyTree *q,unsigned int child) {
 
-        if (t1->isLeaf() && t2->isLeaf()) {
+    }
+    //=======================================================================================================
+    bool swap_right(PhyTree *p, PhyTree *q,unsigned int child) {
+
+    }
+    //=======================================================================================================
+    bool swap_left(PhyTree *p, PhyTree *q,unsigned int child) {
+
+        if(p->isLeaf() && q->isLeaf()){
             return false;
         }
 
-        if (t1->isLeaf()) {
-            PhyTree *tmp_ptr;
-            tmp_ptr = t1;
-            t1 = t2;
-            t2 = tmp_ptr;
+        PhyTree *p0;
+        PhyTree *p1;
+
+        p0=p->children[0];
+        p1=p->children[1];
+
+        if(p0->isLeaf() && p1->isLeaf()){
+            return false;
         }
 
-        index1 = t1->indexOf();
-        pt1 = t1->parent;
-
-        index2 = t2->indexOf();
-        pt2 = t2->parent;
-
-        PhyTree *child_t1;
-        unsigned int index_child_t1;
-        index_child_t1 = 0;
-        child_t1 = t1->children[index_child_t1];
-        if (child_t1 == pt2) {
-            index_child_t1 = 1;
-            child_t1 = t1->children[index_child_t1];
+        if(p0->isLeaf()){
+            PhyTree *tmp;
+            tmp=p0;
+            p0=p1;
+            p1=tmp;
         }
-        pt2->children[index2] = child_t1;
-        child_t1->parent = pt2;
 
-        t1->children[index_child_t1] = t2;
-        t2->parent = t1;
+        p->children[0]=q->children[0];
+        q->children[0]->parent=p;
+
+        p->children[1]=q;
+        q->parent=p;
+
+
+
+//        node *p1;
+//        node *p2;
+//        node *p3;
+//        node *p4;
+//        node *p5;
+//        node *p6;
+//        node *p7;
+//        node *p8;
+//        node *p9;
+//
+//        //-----------------
+//        p1->next=p2;
+//        p1->back=NULL;
+//        p1->data=p;
+//        //-----------------
+//        p2->next=p3;
+//        p2->back=p4;
+//        p2->data=p;
+//        //-----------------
+//        p3->next=p1;
+//        p3->back=p7;
+//        p3->data=p;
+//        //-----------------
+//        p4->next=p5;
+//        p4->back=p2;
+//        p4->data=p->children[0];
+//        //-----------------
+//        p5->next=p6;
+//        p5->back=p8;
+//        p5->data=p->children[0];
+//        //-----------------
+//        p6->next=p4;
+//        p6->back=p9;
+//        p6->data=p->children[0];
+//        //-----------------
+//        p7->next=NULL;
+//        p7->back=p3;
+//        p7->data=p->children[1];
+//        //-----------------
+//        p8->next=NULL;
+//        p8->back=p5;
+//        p8->data=p->children[0]->children[0];
+//        //-----------------
+//        p9->next=NULL;
+//        p9->back=p6;
+//        p9->data=p->children[0]->children[1];
+//        //-----------------
+//
+//        p4->back=p7;
+//        p7->back=p4;
+//
+//        p2->back=p8;
+//        p8->back=p2;
+//
+//        p3->back=p5;
+//        p5->back=p3;
+
 
         return true;
     }
+    //=======================================================================================================
+    bool swap2(PhyTree *p, PhyTree *q) {
+        PhyTree *parent_p;        // parent of p
+        PhyTree *parent_q;        // parent of t2q
+        PhyTree *parent_parent_p; //parent of parent of p
+        PhyTree *sister_p; // t1's sister
+        unsigned int index_p;
+        unsigned int index_sister_p;
+        unsigned int index_parent_p;
+        unsigned int index_q;
 
+        if(p->parent==NULL){
+            return false;
+        }
+        if(q->parent==NULL){
+            return false;
+        }
+        if(p->parent->parent==NULL){
+            return false;
+        }
+
+//        if(p->isLeaf() || q->isLeaf()){
+//            return false;
+//        }
+
+        parent_p=p->parent;
+        index_p=p->indexOf();
+
+        index_sister_p=index_p==0?1:0;
+        sister_p=parent_p->children[index_sister_p];
+
+        parent_q=q->parent;
+        index_q=q->indexOf();
+
+        parent_parent_p=parent_p->parent;
+        index_parent_p=parent_p->indexOf();
+
+        if(parent_q==p){
+            PhyTree *sister_q;
+            PhyTree *child_q;
+            unsigned int index_sister_q;
+            index_sister_q=index_q==0?1:0;
+            sister_q=parent_q->children[index_sister_q];
+            child_q=q->children[index_sister_q];
+            parent_q->children[index_sister_q]=child_q;
+            child_q->parent=p;
+            q->children[index_sister_q]=sister_q;
+            sister_q->parent=q;
+            return true;
+        }
+        if(parent_p==q){
+            PhyTree *child_p;
+            unsigned int index_child_p;
+            index_child_p=index_sister_p; //by convention
+            child_p=p->children[index_child_p];
+            parent_p->children[index_sister_p]=child_p;
+            child_p->parent=parent_p;
+            p->children[index_child_p]=sister_p;
+            sister_p->parent=p;
+            return true;
+        }
+
+
+        //remove parent_p node and attach p's sister to its grand parent
+        parent_parent_p->children[index_parent_p]=sister_p;
+        sister_p->parent=parent_parent_p;
+
+        //add parent of p node as q's parent
+        parent_q->children[index_q]=parent_p;
+        parent_p->parent=parent_q;
+        parent_p->children[index_sister_p]=q;
+        q->parent=parent_p;
+
+        return true;
+    }
     //=======================================================================================================
     void swap(PhyTree *t1, PhyTree *t2) {
         PhyTree *pt1;        // parent of t1
@@ -1098,7 +1241,7 @@ public:
         this->set_descCount();
         this->set_ancestral_flag(MSA_col, num_gaps);
     }
-
+    //=======================================================================================================
     void set_descCount() {
 
         if (this->isLeaf()) {
@@ -1112,8 +1255,118 @@ public:
         }
 
     }
+    //=======================================================================================================
+    void create_unrooted_tree(std::vector<node *> &utree,PhyTree *tree,node *parent){
 
 
+        if(tree->isLeaf()){
+
+            node *n = new node;
+
+            parent->back=n;
+            n->next=NULL;
+            n->back=parent;
+            n->data=tree;
+
+            utree.push_back(n);
+        }else{
+
+            node *node_1= new node;
+            node *node_2= new node;
+            node *node_3= new node;
+
+            parent->back=node_1;
+
+            node_1->next=node_2;
+            node_1->back=parent;
+            node_1->data=tree;
+
+            node_2->next=node_3;
+            node_2->data=tree;
+
+            node_3->next=node_1;
+            node_3->data=tree;
+
+            utree.push_back(node_1);
+            utree.push_back(node_2);
+            utree.push_back(node_3);
+
+            create_unrooted_tree(utree,tree->children[0],node_2);
+            create_unrooted_tree(utree,tree->children[1],node_3);
+        }
+
+    }
+    //=======================================================================================================
+    std::vector<node *> create_unrooted_tree(PhyTree *tree,int num_leaves){
+        std::vector<node *> utree;
+
+        if(tree->n_children()!=2){
+            perror("not binary tree\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if(num_leaves<3){
+            perror("min 3 leaves\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if(tree->children[0]->n_children()!=2){
+            PhyTree *tmp;
+            tmp=tree->children[0];
+            tree->children[0]=tree->children[1];
+            tree->children[1]=tmp;
+        }
+
+        node *pseudo_root_1 = new node;
+        node *pseudo_root_2 = new node;
+        node *pseudo_root_3 = new node;
+
+        pseudo_root_1->next=pseudo_root_2;
+        pseudo_root_1->data=tree->children[0];
+        pseudo_root_2->next=pseudo_root_3;
+        pseudo_root_2->data=tree->children[0];
+        pseudo_root_3->next=pseudo_root_1;
+        pseudo_root_3->data=tree->children[0];
+
+        utree.push_back(pseudo_root_1);
+        utree.push_back(pseudo_root_2);
+        utree.push_back(pseudo_root_3);
+
+        create_unrooted_tree(utree,tree->children[1],pseudo_root_1);
+        create_unrooted_tree(utree,tree->children[0]->children[0],pseudo_root_2);
+        create_unrooted_tree(utree,tree->children[0]->children[1],pseudo_root_3);
+
+        return utree;
+    }
+    //=======================================================================================================
+    bool utree_swap(node *p, node *q) {
+
+        if(p==q){
+            perror("same pointer!");
+            exit(EXIT_FAILURE);
+        }
+
+        if(p->next==NULL || q->next==NULL){
+            return false;
+        }
+
+        node *n1;
+        node *n2;
+
+        n1=p->next->back;
+        n2=p->next->next->back;
+
+        n1->back=n2;
+        n2->back=n1;
+
+        p->next->back=q->back;
+        q->back->back=p->next;
+
+        p->next->next->back=q;
+        q->back=p->next->next;
+
+    }
+    //=======================================================================================================
 };
 
 

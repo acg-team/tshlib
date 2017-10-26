@@ -111,6 +111,8 @@ protected:
 Eigen::VectorXd
 compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
+double compute_log_lk_empty_col(PhyTree &node,Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+
 Eigen::VectorXd
 compute_lk_recursive(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 

@@ -186,17 +186,16 @@ PhyTree *Move::getTargetNode() {
 //    return k;
 //}
 //===================================================================================================================
-void
-nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, bool save, std::vector<move_info> &list_nodes) {
+void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius,std::vector<move_info> &list_nodes) {
 
-    if (!save) {
-        save = true;
-    } else {
+//    if (!save) {
+//          save = true;
+//    } else {
         move_info m;
         m.node1 = start_node;
         m.node2 = node;
         list_nodes.push_back(m);
-    }
+//    }
 
     if (radius <= 0) {
         return;
@@ -204,8 +203,8 @@ nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, bool save, s
 
     if (!node->isLeaf()) {
         radius--;
-        nodes_within_radius(start_node, node->get_left_child(), radius, save, list_nodes);
-        nodes_within_radius(start_node, node->get_right_child(), radius, save, list_nodes);
+        nodes_within_radius(start_node, node->get_left_child(),radius,list_nodes);
+        nodes_within_radius(start_node, node->get_right_child(),radius,list_nodes);
     }
 
 }
@@ -232,27 +231,30 @@ void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int 
             idx = node->indexOf();
             nodes_within_radius_up(start_node, node->getParent(), radius, idx, list_nodes);
         }
-        nodes_within_radius(start_node, node->get_right_child(), radius, true, list_nodes);
+        nodes_within_radius(start_node, node->get_right_child(), radius, list_nodes);
     } else if (direction == 1) {
         if (node->getParent() != NULL) {
             idx = node->indexOf();
             nodes_within_radius_up(start_node, node->getParent(), radius, idx, list_nodes);
         }
-        nodes_within_radius(start_node, node->get_left_child(), radius, true, list_nodes);
+        nodes_within_radius(start_node, node->get_left_child(), radius, list_nodes);
     }
 
 }
 
 //===================================================================================================================
-void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes) {
-    bool save;
+void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes_left,std::vector<move_info> &list_nodes_right, std::vector<move_info> &list_nodes_up) {
+    //bool save;
 
-    save = false;
+    //save = false;
 
-    nodes_within_radius(node, node, radius, save, list_nodes);
+    //nodes_within_radius(node, node, radius, save, list_nodes_down);
+    //radius--;
+    nodes_within_radius(node, node->get_left_child(),radius,list_nodes_left);
+    nodes_within_radius(node, node->get_right_child(),radius,list_nodes_right);
 
     if (node->getParent() != NULL) {
-        nodes_within_radius_up(node, node->getParent(), radius, node->indexOf(), list_nodes);
+        nodes_within_radius_up(node, node->getParent(), radius, node->indexOf(), list_nodes_up);
     }
 
 }

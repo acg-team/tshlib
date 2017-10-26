@@ -53,6 +53,12 @@ struct move_info {
     double lk;
 };
 
+struct utree_move_info {
+    node *node1;
+    node *node2;
+    int ID;
+    double lk;
+};
 
 class Move {
 
@@ -149,13 +155,11 @@ protected:
 
 };
 
-void
-nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, bool save, std::vector<move_info> &list_nodes);
+void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::vector<move_info> &list_nodes);
 
-void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int direction,
-                            std::vector<move_info> &list_nodes);
+void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int direction,std::vector<move_info> &list_nodes);
 
-void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes);
+void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes_left, std::vector<move_info> &list_nodes_right,std::vector<move_info> &list_nodes_up);
 
 std::vector<PhyTree *> fill_with_nodes(PhyTree *n);
 
