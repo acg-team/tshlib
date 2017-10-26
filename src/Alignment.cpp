@@ -67,6 +67,7 @@ Alignment::~Alignment() = default;
 void Alignment::addWeight(std::vector<unsigned int> column_weight) {
     if (this->align_compressed) {
         this->align_weight = column_weight;
+        this->align_compressed = true;
     }
 }
 
@@ -98,6 +99,7 @@ void Alignment::addSequence(std::string label, std::string data) {
 
 
 }
+
 
 long int Alignment::getAlignmentSize() {
 

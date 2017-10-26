@@ -84,6 +84,15 @@ const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
 class Likelihood {
 private:
 
+    virtual void InitEmptyColumn();
+
+    virtual void ComputeRecursiveLK();
+
+    virtual double computeNu();
+
+    virtual double computePhy();
+
+
 public:
     //PhyTree *link_node;
     std::vector<double> fv;
@@ -96,11 +105,11 @@ public:
     ~Likelihood();
 
 
-    void Init();
+    virtual void Init();
 
-    void Reset();
+    void Clear();
 
-    void Update();
+    virtual void Update();
 
 
 protected:
