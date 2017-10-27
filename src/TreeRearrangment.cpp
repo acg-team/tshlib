@@ -42,6 +42,7 @@
  */
 #include "TreeRearrangment.hpp"
 
+/*
 
 TreeRearrangment::~TreeRearrangment() = default;
 
@@ -187,18 +188,19 @@ VirtualNode *UMove::getTargetNode() {
 
 
 
+*/
 
 
 
-void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius,std::vector<move_info> &list_nodes) {
+void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::vector<move_info> &list_nodes) {
 
 //    if (!save) {
 //          save = true;
 //    } else {
-        move_info m;
-        m.node1 = start_node;
-        m.node2 = node;
-        list_nodes.push_back(m);
+    move_info m;
+    m.node1 = start_node;
+    m.node2 = node;
+    list_nodes.push_back(m);
 //    }
 
     if (radius <= 0) {
@@ -207,8 +209,8 @@ void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius,std::vec
 
     if (!node->isLeaf()) {
         radius--;
-        nodes_within_radius(start_node, node->get_left_child(),radius,list_nodes);
-        nodes_within_radius(start_node, node->get_right_child(),radius,list_nodes);
+        nodes_within_radius(start_node, node->get_left_child(), radius, list_nodes);
+        nodes_within_radius(start_node, node->get_right_child(), radius, list_nodes);
     }
 
 }

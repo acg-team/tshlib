@@ -52,12 +52,229 @@
 #include <loguru.hpp>
 
 #include "PhyTree.hpp"
-#include "Utree.hpp"
 #include "TreeRearrangment.hpp"
 #include "Alignment.hpp"
 #include "Likelihood.hpp"
 #include "newick.hpp"
 #include "Alphabet.h"
+
+
+std::string utree_formatNewickR(node *n, bool is_root) {
+
+    if (n->next == NULL) {
+        return n->data->getName();
+    } else {
+        std::stringstream newick;
+        if (is_root) {
+            newick << "(";
+            newick << utree_formatNewickR(n->back, false) << ":" << n->back->data->getBranchLength();
+            newick << ",";
+            newick << utree_formatNewickR(n->next->back, false) << ":" << n->next->back->data->getBranchLength();
+            newick << ",";
+            newick << utree_formatNewickR(n->next->next->back, false) << ":"
+                   << n->next->next->back->data->getBranchLength();
+            newick << ")";
+        } else {
+            newick << "(";
+            newick << utree_formatNewickR(n->next->back, false) << ":" << n->next->back->data->getBranchLength();
+            newick << ",";
+            newick << utree_formatNewickR(n->next->next->back, false) << ":"
+                   << n->next->next->back->data->getBranchLength();
+            newick << ")";
+        }
+
+        return newick.str();
+    }
+
+}
+
+std::string utree_formatNewick(node *utree_pseudo_root) {
+    std::string s;
+
+    if (utree_pseudo_root->next == NULL) {
+        return NULL;
+    }
+
+    /*
+    s=utree_formatNewickR(utree_pseudo_root->back)+
+            utree_formatNewickR(utree_pseudo_root->next->back)+
+            utree_formatNewickR(utree_pseudo_root->next->next->back)+ ";";
+    */
+
+    s = utree_formatNewickR(utree_pseudo_root, true) + ";";
+
+    return s;
+}
+
+void print_node_neighbours(node *n) {
+
+    std::cout << n->data->getName() << " ";
+
+    if (n->next != NULL) {
+        std::cout << "(";
+        std::cout << "^" << n->back->data->getName() << ";";
+        std::cout << "<" << n->next->back->data->getName() << ";";
+        std::cout << n->next->next->back->data->getName() << ">";
+        std::cout << ")";
+    } else {
+        std::cout << "(";
+        std::cout << "^" << n->back->data->getName() << ";";
+        std::cout << "<" << "-" << ";";
+        std::cout << "-" << ">";
+        std::cout << ")";
+    }
+
+    std::cout << "\n";
+
+}
+
+void print_utree_rec(node *n) {
+
+    print_node_neighbours(n);
+
+    if (n->next != NULL) {
+        print_utree_rec(n->next->back);
+        print_utree_rec(n->next->next->back);
+    }
+
+}
+
+void print_utree(node *n) {
+
+    print_node_neighbours(n);
+
+    if (n->next != NULL) {
+        print_utree_rec(n->back);
+        print_utree_rec(n->next->back);
+        print_utree_rec(n->next->next->back);
+    }
+
+}
+
+void utree_nodes_within_radius(node *start_node, node *new_node, int radius,
+                               std::vector<utree_move_info> &list_nodes) {
+
+    /*
+    utree_move_info m;
+    m.node1 = start_node;
+    m.node2 = new_node;
+    list_nodes.push_back(m);
+
+    if (radius <= 0) {
+        return;
+    }
+
+    if (new_node->next!=NULL){
+        radius--;
+        utree_nodes_within_radius(start_node,new_node->next->back,radius,list_nodes);
+        utree_nodes_within_radius(start_node,new_node->next->next->back,radius,list_nodes);
+    }
+    */
+
+    utree_move_info m;
+    m.node1 = start_node;
+    if (new_node->next != NULL) {
+        new_node = new_node->next;
+    }
+    m.node2 = new_node;
+    list_nodes.push_back(m);
+
+    if (radius <= 0) {
+        return;
+    }
+
+    if (new_node->next != NULL) {
+        radius--;
+        utree_nodes_within_radius(start_node, new_node->back, radius, list_nodes);
+        utree_nodes_within_radius(start_node, new_node->next->back, radius, list_nodes);
+    }
+
+}
+
+void utree_get_list_nodes_within_radius(node *n,
+                                        int radius,
+                                        std::vector<utree_move_info> &list_nodes_left,
+                                        std::vector<utree_move_info> &list_nodes_right,
+                                        std::vector<utree_move_info> &list_nodes_up) {
+
+    if (n->next != NULL) {
+        utree_nodes_within_radius(n, n->back, radius, list_nodes_up);
+        utree_nodes_within_radius(n, n->next->back, radius, list_nodes_left);
+        utree_nodes_within_radius(n, n->next->next->back, radius, list_nodes_right);
+    }
+
+}
+
+void copy_vector(std::vector<node *> &dest, std::vector<node *> &source) {
+
+    for (unsigned int i = 0; i < source.size(); i++) {
+        node *n = new node;
+        node *m = source.at(i);
+        n->next = m->next;
+        n->back = m->back;
+        n->data = m->data;
+        n->ID = m->ID;
+        dest.push_back(n);
+    }
+
+}
+
+void SPR_move(PhyTree *tree, std::vector<node *> &utree, node *source, node *target, int file_tree_idx) {
+    node *p_child_1;
+    node *p_child_2;
+    node *q_child;
+    bool valid_move;
+    FILE *fid;
+    char tree_filename[80];
+    std::string ss;
+
+    std::cout << "node_1:\n";
+    print_node_neighbours(source);
+    std::cout << "node_2:\n";
+    print_node_neighbours(target);
+    //std::cout<<"\n";
+
+
+    p_child_1 = source->next->back;
+    p_child_2 = source->next->next->back;
+    q_child = target->back;
+
+    valid_move = tree->utree_swap(source, target);
+
+    if (valid_move) {
+
+        std::cout << "-------------\n";
+        std::cout << utree_formatNewick(utree.at(0)) << "\n";
+        std::cout << "-------------\n";
+
+
+        //---------------------------------------------------------
+        //file_tree_idx++;
+        sprintf(tree_filename, "%s_%d.nwk", "../data/out/tree", file_tree_idx);
+        std::cout << tree_filename << "\n";
+        fid = fopen(tree_filename, "w");
+        ss = utree_formatNewick(utree.at(0));
+        fprintf(fid, "%s", ss.c_str());
+        fclose(fid);
+        //---------------------------------------------------------
+
+
+        source->next->back = p_child_1;
+        p_child_1->back = source->next;
+        source->next->next->back = p_child_2;
+        p_child_2->back = source->next->next;
+        target->back = q_child;
+        q_child->back = target;
+
+        std::cout << "****************\n";
+        std::cout << utree_formatNewick(utree.at(0)) << "\n";
+        std::cout << "****************\n";
+
+    } else {
+        std::cout << "I am skipping this...\n\n";
+    }
+
+}
 
 int main(int argc, char **argv) {
 
