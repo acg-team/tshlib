@@ -464,21 +464,21 @@ int main(int argc, char **argv) {
 
 
     //---------------------------------------------------------------
-//    u_node=utree.at(0);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
-//
-//    u_node=utree.at(4);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
+    u_node=utree.at(0);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(4);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
 
     u_node=utree.at(7);
     std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
@@ -488,45 +488,45 @@ int main(int argc, char **argv) {
                                        utree_nni_spr_stack_right,
                                        utree_nni_spr_stack_up);
 
-//    u_node=utree.at(3);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
-//
-//    u_node=utree.at(10);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
-//
-//    u_node=utree.at(11);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
-//
-//    u_node=utree.at(12);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
-//
-//    u_node=utree.at(13);
-//    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
-//    print_node_neighbours(u_node);
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
+    u_node=utree.at(3);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(10);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(11);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(12);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(13);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
     //---------------------------------------------------------------
     std::cout << "size list_left:" << utree_nni_spr_stack_left.size() << "\n";
     for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
@@ -545,6 +545,8 @@ int main(int argc, char **argv) {
         std::cout << "list[" << i << "]=(" << (utree_nni_spr_stack_up.at(i)).node1->data->getName() << ";"
                   << (utree_nni_spr_stack_up.at(i)).node2->data->getName() << ")\n";
     }
+
+    exit(1);
     //------------------------------------------------------------------------------------------------------------------
     // PERFORM SPR MOVES and RECOMPUTE logLK
 

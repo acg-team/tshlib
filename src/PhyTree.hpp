@@ -1117,6 +1117,8 @@ public:
         p->next->next->back=q;
         q->back=p->next->next;
 
+        return true;
+
     }
 
 };
