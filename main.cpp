@@ -247,70 +247,83 @@ int main(int argc, char **argv) {
 
 
     //---------------------------------------------------------------
-//    u_node=utree.at(0);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node,
-//                                       radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_right,
-//                                       utree_nni_spr_stack_up);
-
-    u_node = utree.at(5);
-    std::cout << "UNODE:" << u_node->data->getName() << std::endl;
+    u_node=utree.at(0);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
     utree_get_list_nodes_within_radius(u_node, radius,
                                        utree_nni_spr_stack_left,
                                        utree_nni_spr_stack_right,
                                        utree_nni_spr_stack_up);
-//    u_node=utree.at(6);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left);
-//    u_node=utree.at(9);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left);
-//    u_node=utree.at(10);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left);
-//    u_node=utree.at(11);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left);
-//    u_node=utree.at(12);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left);
-//    u_node=utree.at(13);
-//    std::cout<<"UNODE:"<<u_node->data->getName()<<"\n";
-//    utree_get_list_nodes_within_radius(u_node, radius,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left,
-//                                       utree_nni_spr_stack_left);
+
+    u_node=utree.at(4);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(7);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(3);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(10);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(11);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(12);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
+
+    u_node=utree.at(13);
+    std::cout<<"UNODE:"; //<<u_node->data->getName()<<"\n";
+    print_node_neighbours(u_node);
+    utree_get_list_nodes_within_radius(u_node, radius,
+                                       utree_nni_spr_stack_left,
+                                       utree_nni_spr_stack_right,
+                                       utree_nni_spr_stack_up);
     //---------------------------------------------------------------
-    std::cout << "size list_left:" << utree_nni_spr_stack_left.size() << std::endl;
+    std::cout << "size list_left:" << utree_nni_spr_stack_left.size() << "\n";
     for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
         std::cout << "list[" << i << "]=(" << (utree_nni_spr_stack_left.at(i)).node1->data->getName() << ";"
                   << (utree_nni_spr_stack_left.at(i)).node2->data->getName() << ")\n";
     }
 
-    std::cout << "size list_right:" << utree_nni_spr_stack_right.size() << std::endl;
+    std::cout << "size list_right:" << utree_nni_spr_stack_right.size() << "\n";
     for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
         std::cout << "list[" << i << "]=(" << (utree_nni_spr_stack_right.at(i)).node1->data->getName() << ";"
                   << (utree_nni_spr_stack_right.at(i)).node2->data->getName() << ")\n";
     }
 
-    std::cout << "size list_up:" << utree_nni_spr_stack_up.size() << std::endl;
+    std::cout << "size list_up:" << utree_nni_spr_stack_up.size() << "\n";
     for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
         std::cout << "list[" << i << "]=(" << (utree_nni_spr_stack_up.at(i)).node1->data->getName() << ";"
                   << (utree_nni_spr_stack_up.at(i)).node2->data->getName() << ")\n";
@@ -337,7 +350,28 @@ int main(int argc, char **argv) {
     std::cout<<"\n\n";
     */
 
+    FILE *fid;
+    int file_tree_idx;
+    char tree_filename [80];
+    std::string ss;
+
     node *source;
+    node *target;
+
+
+
+
+    //---------------------------------------------------------
+    file_tree_idx=0;
+    sprintf(tree_filename,"%s_%d.nwk","../data/out/tree",file_tree_idx);
+    fid=fopen(tree_filename,"w");
+    ss=utree_formatNewick(utree.at(0));
+    fprintf(fid,"%s",ss.c_str());
+    fclose(fid);
+    //---------------------------------------------------------
+
+
+
 
     max_idx = -1;
     max_val = -INFINITY;
@@ -346,66 +380,41 @@ int main(int argc, char **argv) {
     for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
         un = utree_nni_spr_stack_left.at(i);
 
-        source = un.node1;
+        source=un.node1;
+        target=un.node2;
 
-        std::cout << "node_1:" << std::endl;
-        print_node_neighbours(source);
-        std::cout << "node_2:" << std::endl;
-        print_node_neighbours(un.node2);
-        std::cout << std::endl;
+        file_tree_idx++;
+        SPR_move(tree,utree,source,target,file_tree_idx);
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
+        un = utree_nni_spr_stack_left.at(i);
 
+        source=un.node1;
+        if(un.node2->next!=NULL) {
+            target = un.node2->next;
 
-        p_child_1 = source->next->back;
-        p_child_2 = source->next->next->back;
-        q_child = un.node2->back;
-
-        valid_move = tree->utree_swap(source, un.node2);
-
-        if (valid_move) {
-
-            std::cout << "-------------" << std::endl;
-            std::cout << utree_formatNewick(utree.at(0)) << std::endl;
-            std::cout << "-------------" << std::endl;
-
-            source->next->back = p_child_1;
-            p_child_1->back = source->next;
-            source->next->next->back = p_child_2;
-            p_child_2->back = source->next->next;
-            un.node2->back = q_child;
-            q_child->back = un.node2;
-
-            p.clear();
-        } else {
-            std::cout << "I am skipping this..." << std::endl;
+            file_tree_idx++;
+            SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
     for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
         un = utree_nni_spr_stack_left.at(i);
 
-        source = un.node1->next->next;
+        source=un.node1->next->next;
+        target=un.node2;
 
-        p_child_1 = source->next->back;
-        p_child_2 = source->next->next->back;
-        q_child = un.node2->back;
+        file_tree_idx++;
+        SPR_move(tree,utree,source,target,file_tree_idx);
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
+        un = utree_nni_spr_stack_left.at(i);
 
-        valid_move = tree->utree_swap(source, un.node2);
+        source=un.node1->next->next;
+        if(un.node2->next!=NULL) {
+            target = un.node2->next;
 
-        if (valid_move) {
-
-            std::cout << "-------------" << std::endl;
-            std::cout << utree_formatNewick(utree.at(0)) << std::endl;
-            std::cout << "-------------" << std::endl;
-
-            source->next->back = p_child_1;
-            p_child_1->back = source->next;
-            source->next->next->back = p_child_2;
-            p_child_2->back = source->next->next;
-            un.node2->back = q_child;
-            q_child->back = un.node2;
-
-            p.clear();
-        } else {
-            std::cout << "I am skipping this..." << std::endl;
+            file_tree_idx++;
+            SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
     //---------------------------------------------------------------------
@@ -413,70 +422,86 @@ int main(int argc, char **argv) {
     for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
         un = utree_nni_spr_stack_right.at(i);
 
-        source = un.node1;
+        source=un.node1;
+        target=un.node2;
 
-        std::cout << "node_1:" << std::endl;
-        print_node_neighbours(source);
-        std::cout << "node_2:" << std::endl;
-        print_node_neighbours(un.node2);
-        std::cout << std::endl;
+        file_tree_idx++;
+        SPR_move(tree,utree,source,target,file_tree_idx);
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
+        un = utree_nni_spr_stack_right.at(i);
 
+        source=un.node1;
+        if(un.node2->next!=NULL) {
+            target = un.node2->next;
 
-        p_child_1 = source->next->back;
-        p_child_2 = source->next->next->back;
-        q_child = un.node2->back;
-
-        valid_move = tree->utree_swap(source, un.node2);
-
-        if (valid_move) {
-
-            std::cout << "-------------" << std::endl;
-            std::cout << utree_formatNewick(utree.at(0)) << std::endl;
-            std::cout << "-------------" << std::endl;
-
-            source->next->back = p_child_1;
-            p_child_1->back = source->next;
-            source->next->next->back = p_child_2;
-            p_child_2->back = source->next->next;
-            un.node2->back = q_child;
-            q_child->back = un.node2;
-
-            p.clear();
-        } else {
-            std::cout << "I am skipping this..." << std::endl;
+            file_tree_idx++;
+            SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
     for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
         un = utree_nni_spr_stack_right.at(i);
 
-        source = un.node1->next->next;
+        source=un.node1->next;
+        target=un.node2;
 
-        p_child_1 = source->next->back;
-        p_child_2 = source->next->next->back;
-        q_child = un.node2->back;
+        file_tree_idx++;
+        SPR_move(tree,utree,source,target,file_tree_idx);
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
+        un = utree_nni_spr_stack_right.at(i);
 
-        valid_move = tree->utree_swap(source, un.node2);
+        source=un.node1->next;
+        if(un.node2->next!=NULL) {
+            target = un.node2->next;
 
-        if (valid_move) {
-
-            std::cout << "-------------" << std::endl;
-            std::cout << utree_formatNewick(utree.at(0)) << std::endl;
-            std::cout << "-------------" << std::endl;
-
-            source->next->back = p_child_1;
-            p_child_1->back = source->next;
-            source->next->next->back = p_child_2;
-            p_child_2->back = source->next->next;
-            un.node2->back = q_child;
-            q_child->back = un.node2;
-
-            p.clear();
-        } else {
-            std::cout << "I am skipping this..." << std::endl;
+            file_tree_idx++;
+            SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
     //---------------------------------------------------------------------
+    std::cout<<"processing up\n";
+    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
+        un = utree_nni_spr_stack_up.at(i);
 
+        source=un.node1->next;
+        target=un.node2;
+
+        file_tree_idx++;
+        SPR_move(tree,utree,source,target,file_tree_idx);
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
+        un = utree_nni_spr_stack_up.at(i);
+
+        source=un.node1->next;
+        if(un.node2->next!=NULL) {
+            target = un.node2->next;
+
+            file_tree_idx++;
+            SPR_move(tree, utree, source, target, file_tree_idx);
+        }
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
+        un = utree_nni_spr_stack_up.at(i);
+
+        source=un.node1->next->next;
+        target=un.node2;
+
+        file_tree_idx++;
+        SPR_move(tree,utree,source,target,file_tree_idx);
+    }
+    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
+        un = utree_nni_spr_stack_up.at(i);
+
+        source=un.node1->next->next;
+        if(un.node2->next!=NULL) {
+            target = un.node2->next;
+
+            file_tree_idx++;
+            SPR_move(tree, utree, source, target, file_tree_idx);
+        }
+    }
+    //---------------------------------------------------------------------
 
 //    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
 //        // perform SPR move
