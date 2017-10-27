@@ -11,7 +11,30 @@
 
 
 class Utree {
+public:
 
+    Utree();
+
+    ~Utree();
+
+    void setPseudoRoot();
+
+    void removePseudoRoot();
+
+    void addMember();
+
+    void removeMember();
+
+    void swapMembers();
+
+    void getMemberNeighbors(int radius);
+
+    void printTree();
+
+protected:
+private:
+    VirtualNode utree_start_node;
+    std::vector<VirtualNode *> members;
 };
 
 
@@ -25,8 +48,7 @@ void print_utree_rec(node *n);
 
 void print_node_neighbours(node *n);
 
-void utree_nodes_within_radius(node *start_node, node *new_node, int radius,
-                               std::vector<utree_move_info> &list_nodes);
+void utree_nodes_within_radius(node *start_node, node *new_node, int radius, std::vector<utree_move_info> &list_nodes);
 
 void utree_get_list_nodes_within_radius(node *n,
                                         int radius,

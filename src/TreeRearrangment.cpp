@@ -101,7 +101,7 @@ void TreeRearrangment::addMove(Move *move) {
 
 }
 
-void TreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int direction) {
+void RTreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int direction) {
 
     PhyTree *node = node_source;
     auto *m = new Move;
@@ -149,14 +149,19 @@ Move::Move() {
     this->move_desc = "undefined";
     this->move_class = "undefined";
 
-    this->move_targetnode = nullptr;
     this->move_lk = -INFINITY;
 
     this->move_applied = false;
 
 }
 
-void Move::setTargetNode(PhyTree *target_node) {
+void RMove::setTargetNode(PhyTree *target_node) {
+
+    this->move_targetnode = target_node;
+
+}
+
+void UMove::setTargetNode(VirtualNode *target_node) {
 
     this->move_targetnode = target_node;
 
@@ -168,7 +173,13 @@ void Move::deleteTargetNode() {
 
 }
 
-PhyTree *Move::getTargetNode() {
+PhyTree *RMove::getTargetNode() {
+
+    return this->move_targetnode;
+
+}
+
+VirtualNode *UMove::getTargetNode() {
 
     return this->move_targetnode;
 
@@ -176,16 +187,9 @@ PhyTree *Move::getTargetNode() {
 
 
 
-//===================================================================================================================
-//===================================================================================================================
 
 
 
-//===================================================================================================================
-//double recompute_lk(PhyTree *tree,double k){
-//    return k;
-//}
-//===================================================================================================================
 void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius,std::vector<move_info> &list_nodes) {
 
 //    if (!save) {
