@@ -42,6 +42,7 @@
  */
 #include "TreeRearrangment.hpp"
 
+/*
 
 TreeRearrangment::~TreeRearrangment() = default;
 
@@ -101,7 +102,7 @@ void TreeRearrangment::addMove(Move *move) {
 
 }
 
-void TreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int direction) {
+void RTreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int direction) {
 
     PhyTree *node = node_source;
     auto *m = new Move;
@@ -149,14 +150,19 @@ Move::Move() {
     this->move_desc = "undefined";
     this->move_class = "undefined";
 
-    this->move_targetnode = nullptr;
     this->move_lk = -INFINITY;
 
     this->move_applied = false;
 
 }
 
-void Move::setTargetNode(PhyTree *target_node) {
+void RMove::setTargetNode(PhyTree *target_node) {
+
+    this->move_targetnode = target_node;
+
+}
+
+void UMove::setTargetNode(VirtualNode *target_node) {
 
     this->move_targetnode = target_node;
 
@@ -168,7 +174,13 @@ void Move::deleteTargetNode() {
 
 }
 
-PhyTree *Move::getTargetNode() {
+PhyTree *RMove::getTargetNode() {
+
+    return this->move_targetnode;
+
+}
+
+VirtualNode *UMove::getTargetNode() {
 
     return this->move_targetnode;
 
@@ -176,25 +188,19 @@ PhyTree *Move::getTargetNode() {
 
 
 
-//===================================================================================================================
-//===================================================================================================================
+*/
 
 
 
-//===================================================================================================================
-//double recompute_lk(PhyTree *tree,double k){
-//    return k;
-//}
-//===================================================================================================================
-void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius,std::vector<move_info> &list_nodes) {
+void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::vector<move_info> &list_nodes) {
 
 //    if (!save) {
 //          save = true;
 //    } else {
-        move_info m;
-        m.node1 = start_node;
-        m.node2 = node;
-        list_nodes.push_back(m);
+    move_info m;
+    m.node1 = start_node;
+    m.node2 = node;
+    list_nodes.push_back(m);
 //    }
 
     if (radius <= 0) {
@@ -203,8 +209,8 @@ void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius,std::vec
 
     if (!node->isLeaf()) {
         radius--;
-        nodes_within_radius(start_node, node->get_left_child(),radius,list_nodes);
-        nodes_within_radius(start_node, node->get_right_child(),radius,list_nodes);
+        nodes_within_radius(start_node, node->get_left_child(), radius, list_nodes);
+        nodes_within_radius(start_node, node->get_right_child(), radius, list_nodes);
     }
 
 }

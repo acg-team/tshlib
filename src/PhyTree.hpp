@@ -68,14 +68,6 @@ struct node{
     int ID;
 };
 
-class VirtualNode {
-private:
-public:
-    VirtualNode *vnode_next;
-    VirtualNode *vnode_back;
-    int vnode_id;
-protected:
-};
 
 class PhyTree {
 
