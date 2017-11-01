@@ -54,7 +54,7 @@ static void maxDistPairR(const PhyTree *root, std::vector<double> &distances, st
                          const PhyTree *&max, double &max_dist) {
     if (!root->isLeaf()) {
         if (root->n_children() != 2) {
-//			error("multifurcations not supported");
+
         }
         std::vector<double> distances2;
         std::vector<const PhyTree *> leaves2;

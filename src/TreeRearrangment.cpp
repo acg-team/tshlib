@@ -42,11 +42,12 @@
  */
 #include "TreeRearrangment.hpp"
 
-/*
 
-TreeRearrangment::~TreeRearrangment() = default;
+template<class NodeType>
+TreeRearrangment<NodeType>::~TreeRearrangment() = default;
 
-TreeRearrangment::TreeRearrangment(PhyTree *node_source, int radius = 1, bool preserve_blengths = true) {
+template<class NodeType>
+TreeRearrangment<NodeType>::TreeRearrangment(NodeType *node_source, int radius, bool preserve_blengths) {
 
     this->mset_sourcenode = node_source;
     this->mset_id = std::to_string(node_source->getNodeID()) + ":" + std::to_string(radius);
@@ -56,10 +57,11 @@ TreeRearrangment::TreeRearrangment(PhyTree *node_source, int radius = 1, bool pr
 
 }
 
-void TreeRearrangment::getNodesInRadius(PhyTree *node_source, int radius, bool save) {
+template<class NodeType>
+void TreeRearrangment<NodeType>::getNodesInRadius(NodeType *node_source, int radius, bool save) {
 
     PhyTree *node = node_source;
-    auto *m = new Move;
+    Move<NodeType> *m;
 
     if (!save) {
         save = true;
@@ -83,7 +85,8 @@ void TreeRearrangment::getNodesInRadius(PhyTree *node_source, int radius, bool s
 
 }
 
-void TreeRearrangment::fillListMoves(bool saveMove = false) {
+template<class NodeType>
+void TreeRearrangment<NodeType>::fillListMoves(bool saveMove) {
 
 
     this->getNodesInRadius(this->mset_sourcenode, this->mset_radius, saveMove);
@@ -96,16 +99,18 @@ void TreeRearrangment::fillListMoves(bool saveMove = false) {
 
 }
 
-void TreeRearrangment::addMove(Move *move) {
+template<class NodeType>
+void TreeRearrangment<NodeType>::addMove(Move<NodeType> *move) {
 
     this->mset_moves.emplace_back(move);
 
 }
 
-void RTreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int direction) {
+template<class NodeType>
+void TreeRearrangment<NodeType>::getNodesInRadiusUp(NodeType *node_source, int radius, int direction) {
 
-    PhyTree *node = node_source;
-    auto *m = new Move;
+    NodeType *node = node_source;
+    Move<NodeType> *m;
     unsigned int idx;
 
     //TODO: check binary tree condition!
@@ -140,10 +145,11 @@ void RTreeRearrangment::getNodesInRadiusUp(PhyTree *node_source, int radius, int
     }
 }
 
-//===================================================================================================================
-Move::~Move() = default;
+template<class NodeType>
+Move<NodeType>::~Move() = default;
 
-Move::Move() {
+template<class NodeType>
+Move<NodeType>::Move() {
 
     this->move_id = NULL;
     this->move_name = "undefined";
@@ -156,39 +162,27 @@ Move::Move() {
 
 }
 
-void RMove::setTargetNode(PhyTree *target_node) {
+template<class NodeType>
+void Move<NodeType>::setTargetNode(NodeType *target_node) {
 
     this->move_targetnode = target_node;
 
 }
 
-void UMove::setTargetNode(VirtualNode *target_node) {
-
-    this->move_targetnode = target_node;
-
-}
-
-void Move::deleteTargetNode() {
+template<class NodeType>
+void Move<NodeType>::deleteTargetNode() {
 
     this->move_targetnode = nullptr;
 
 }
 
-PhyTree *RMove::getTargetNode() {
+template<class NodeType>
+NodeType *Move<NodeType>::getTargetNode() {
 
     return this->move_targetnode;
 
 }
 
-VirtualNode *UMove::getTargetNode() {
-
-    return this->move_targetnode;
-
-}
-
-
-
-*/
 
 
 
@@ -215,7 +209,6 @@ void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::ve
 
 }
 
-//===================================================================================================================
 void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int direction,
                             std::vector<move_info> &list_nodes) {
     unsigned int idx;
@@ -248,16 +241,16 @@ void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int 
 
 }
 
-//===================================================================================================================
-void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes_left,std::vector<move_info> &list_nodes_right, std::vector<move_info> &list_nodes_up) {
+void
+get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes_left, std::vector<move_info> &list_nodes_right, std::vector<move_info> &list_nodes_up) {
     //bool save;
 
     //save = false;
 
     //nodes_within_radius(node, node, radius, save, list_nodes_down);
     //radius--;
-    nodes_within_radius(node, node->get_left_child(),radius,list_nodes_left);
-    nodes_within_radius(node, node->get_right_child(),radius,list_nodes_right);
+    nodes_within_radius(node, node->get_left_child(), radius, list_nodes_left);
+    nodes_within_radius(node, node->get_right_child(), radius, list_nodes_right);
 
     if (node->getParent() != NULL) {
         nodes_within_radius_up(node, node->getParent(), radius, node->indexOf(), list_nodes_up);
@@ -265,7 +258,6 @@ void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_in
 
 }
 
-//===================================================================================================================
 std::vector<PhyTree *> fill_with_nodes(PhyTree *n) {
     std::vector<PhyTree *> list_nodes_n;
 
@@ -278,7 +270,6 @@ std::vector<PhyTree *> fill_with_nodes(PhyTree *n) {
     return list_nodes_n;
 }
 
-//===================================================================================================================
 std::vector<PhyTree *> get_unique(std::vector<PhyTree *> &list_nodes_n1, std::vector<PhyTree *> &list_nodes_n2) {
     std::vector<PhyTree *> list_nodes;
     PhyTree *n1;
@@ -313,8 +304,6 @@ std::vector<PhyTree *> get_unique(std::vector<PhyTree *> &list_nodes_n1, std::ve
     return list_nodes;
 }
 
-
-//===================================================================================================================
 std::vector<PhyTree *> get_path_from_nodes(PhyTree *n1, PhyTree *n2) {
     std::vector<PhyTree *> list_nodes_n0;
     std::vector<PhyTree *> list_nodes_n1;

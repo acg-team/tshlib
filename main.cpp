@@ -50,6 +50,7 @@
 #define LOGURU_WITH_STREAMS 1
 
 #include <loguru.hpp>
+#include <Utree.hpp>
 
 #include "PhyTree.hpp"
 #include "TreeRearrangment.hpp"
@@ -60,7 +61,7 @@
 
 std::string utree_formatNewickR(node *n, bool is_root) {
 
-    if (n->next == NULL) {
+    if (n->next == nullptr) {
         return n->data->getName();
     } else {
         std::stringstream newick;
@@ -85,11 +86,12 @@ std::string utree_formatNewickR(node *n, bool is_root) {
 
 }
 
+
 std::string utree_formatNewick(node *utree_pseudo_root) {
     std::string s;
 
-    if (utree_pseudo_root->next == NULL) {
-        return NULL;
+    if (utree_pseudo_root->next == nullptr) {
+        return nullptr;
     }
 
     s = utree_formatNewickR(utree_pseudo_root, true) + ";";
@@ -97,12 +99,13 @@ std::string utree_formatNewick(node *utree_pseudo_root) {
     return s;
 }
 
+
 void print_node_neighbours(node *n) {
 
     std::string descnode;
     descnode += n->data->getName() + " ";
 
-    if (n->next != NULL) {
+    if (n->next != nullptr) {
         descnode += "(^" + n->back->data->getName() + ";";
         descnode += "<" + n->next->back->data->getName() + ";";
         descnode += n->next->next->back->data->getName() + ">)";
@@ -114,33 +117,36 @@ void print_node_neighbours(node *n) {
     LOG_S(INFO) << descnode;
 }
 
+
 void print_utree_rec(node *n) {
 
     print_node_neighbours(n);
 
-    if (n->next != NULL) {
+    if (n->next != nullptr) {
         print_utree_rec(n->next->back);
         print_utree_rec(n->next->next->back);
     }
 
 }
 
+
 void print_utree(node *n) {
 
     print_node_neighbours(n);
 
-    if (n->next != NULL) {
+    if (n->next != nullptr) {
         print_utree_rec(n->back);
         print_utree_rec(n->next->back);
         print_utree_rec(n->next->next->back);
     }
 }
 
+
 void utree_nodes_within_radius(node *start_node, node *new_node, int radius, std::vector<utree_move_info> &list_nodes) {
 
     utree_move_info m;
     m.node1 = start_node;
-    if (new_node->next != NULL) {
+    if (new_node->next != nullptr) {
         new_node = new_node->next;
     }
     m.node2 = new_node;
@@ -150,7 +156,7 @@ void utree_nodes_within_radius(node *start_node, node *new_node, int radius, std
         return;
     }
 
-    if (new_node->next != NULL) {
+    if (new_node->next != nullptr) {
         radius--;
         utree_nodes_within_radius(start_node, new_node->back, radius, list_nodes);
         utree_nodes_within_radius(start_node, new_node->next->back, radius, list_nodes);
@@ -158,13 +164,14 @@ void utree_nodes_within_radius(node *start_node, node *new_node, int radius, std
 
 }
 
+
 void utree_get_list_nodes_within_radius(node *n,
                                         int radius,
                                         std::vector<utree_move_info> &list_nodes_left,
                                         std::vector<utree_move_info> &list_nodes_right,
                                         std::vector<utree_move_info> &list_nodes_up) {
 
-    if (n->next != NULL) {
+    if (n->next != nullptr) {
         utree_nodes_within_radius(n, n->back, radius, list_nodes_up);
         utree_nodes_within_radius(n, n->next->back, radius, list_nodes_left);
         utree_nodes_within_radius(n, n->next->next->back, radius, list_nodes_right);
@@ -172,11 +179,11 @@ void utree_get_list_nodes_within_radius(node *n,
 
 }
 
+
 void copy_vector(std::vector<node *> &dest, std::vector<node *> &source) {
 
-    for (unsigned int i = 0; i < source.size(); i++) {
+    for (auto m : source) {
         node *n = new node;
-        node *m = source.at(i);
         n->next = m->next;
         n->back = m->back;
         n->data = m->data;
@@ -245,10 +252,71 @@ void SPR_move(PhyTree *tree, std::vector<node *> &utree, node *source, node *tar
 }
 
 
+namespace fasta_parser {
+
+    std::vector<std::pair<std::string, std::string>> getBuffer(std::string in_fastafile) {
+        std::ifstream in_fasta(in_fastafile.c_str());
+        std::string line;
+        std::string line2;
+        std::vector<std::pair<std::string, std::string>> sequences;
+        while (in_fasta.is_open()) {
+            if (!std::getline(in_fasta, line)) {
+                in_fasta.close();
+                break;
+            }
+            if (line.find('>') != std::string::npos) {
+
+                LOG_S(DEBUG2) << "Found header: " << line;
+
+                // parse next line since it must be the sequence
+                std::getline(in_fasta, line2);
+                //std::pair<std::string, std::string> p;
+
+                sequences.emplace_back(line, line2);
+
+
+            }
+        }
+
+        return sequences;
+    }
+
+
+    Alignment *createAlignment(std::string in_fastafile) {
+
+        auto *alignment = new Alignment;
+        std::vector<std::pair<std::string, std::string>> msa;
+        msa = fasta_parser::getBuffer(in_fastafile);
+
+        for (int i = 0; i < msa.size(); i++) {
+            alignment->addSequence(msa.at(i).first, msa.at(i).second);
+        }
+
+        return alignment;
+
+    };
+
+
+}
+
+
+
 int main(int argc, char **argv) {
+
+    /* LOGURU LOGGING ENGINE
+     * Possible Loggin Levels
+     * FATAL   -3
+     * ERROR   -2
+     * WARNING -1
+     * INFO    +0
+     * DEBUG1  +1
+     * DEBUG1  +2
+     */
     loguru::init(argc, argv);
-    LOG_S(INFO) << "test";
+
+    LOG_S(DEBUG1) << "test";
     std::string tree_file = argv[1];
+    std::string msa_file = argv[2];
     PhyTree *tree = nullptr;
     double mu;
     double lambda;
@@ -274,7 +342,7 @@ int main(int argc, char **argv) {
     tau = tree->computeLength();
 
     // compute the normalizing Poisson intensity
-    nu = compute_nu(tau, lambda, mu);
+    nu = LKFunc::compute_nu(tau, lambda, mu);
 
     // set insertion probability to each node
     tree->set_iota(tau, mu);
@@ -283,56 +351,28 @@ int main(int argc, char **argv) {
     tree->set_beta(tau, mu);
 
     // print newick tree
-    LOG_S(INFO) << tree->formatNewick();
+    LOG_S(DEBUG1) << "[Initial Tree Topology] " << tree->formatNewick();
     //------------------------------------------------------------------------------------------------------------------
-    // LOAD MSA
+    // LOAD MSA FROM FILE
 
-    //Alignment ;
     auto *alignment = new Alignment;
-
-    std::vector<std::pair<std::string, std::string> > MSA;
-
-    //TODO: Create a class MSA (+ weight per each column as in codonPhyML)
-    std::string seq1_label = "A";
-    std::string seq2_label = "B";
-    std::string seq3_label = "C";
-    std::string seq4_label = "D";
-    std::string seq5_label = "E";
-
-    std::string seq1_DNA = "A-C";
-    std::string seq2_DNA = "-TC";
-    std::string seq3_DNA = "-TC";
-    std::string seq4_DNA = "-CC";
-    std::string seq5_DNA = "-CG";
-
-
-    MSA.emplace_back(seq1_label, seq1_DNA);
-    MSA.emplace_back(seq2_label, seq2_DNA);
-    MSA.emplace_back(seq3_label, seq3_DNA);
-    MSA.emplace_back(seq4_label, seq4_DNA);
-    MSA.emplace_back(seq5_label, seq5_DNA);
-
-    alignment->addSequence(seq1_label, seq1_DNA);
-    alignment->addSequence(seq2_label, seq2_DNA);
-    alignment->addSequence(seq3_label, seq3_DNA);
-    alignment->addSequence(seq4_label, seq4_DNA);
-    alignment->addSequence(seq5_label, seq5_DNA);
-
-    LOG_S(INFO) << alignment->align_dataset.size();
+    alignment = fasta_parser::createAlignment(msa_file);
 
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
 
     int is_DNA_AA_Codon;
     int extended_alphabet_size;
-    int num_leaves;
+    unsigned long num_leaves;
     unsigned long MSA_len;
     double log_col_lk;
     double logLK;
     Eigen::VectorXd pi;
     double p0;
 
-    num_leaves = MSA.size();
+
+    num_leaves = alignment->align_dataset.size();
+    LOG_S(DEBUG1) << "[Sequences in MSA] Leaves: " << num_leaves;
 
     // 1:DNA, 2:AA, 3:Codon
     is_DNA_AA_Codon = 1;
@@ -354,12 +394,15 @@ int main(int argc, char **argv) {
     // get MSA length
     MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
 
+    //------------------------------------------------------------------------------------------------------------------
+    // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
     // compute log_col_lk
     for (int i = 0; i < MSA_len; i++) {
 
         // extract MSA column
-        std::string s = create_col_MSA(MSA, i);
+        std::string s = alignment->extractColumn(i);
+        LOG_S(DEBUG1) << "[Extracted column] (" << i << ") = " << s;
 
         // assign char at the leaves
         tree->set_leaf_state(s);
@@ -367,130 +410,80 @@ int main(int argc, char **argv) {
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
 
+        // Initialise FV matrices at each node
         tree->clear_fv();
 
-        // compute column likelihood
+        // Compute column likelihood
         //TODO: Add weight per column
-        log_col_lk = compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+        log_col_lk = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
 
-        LOG_S(INFO) << "log_col_lk=" << log_col_lk;
+        LOG_S(DEBUG1) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
         logLK += log_col_lk;
     }
 
     // compute empty column likelihood
-    p0 = compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    LOG_S(DEBUG1) << "[Initial LK] p0 = " << p0;
 
-    LOG_S(INFO) << "p0=" << p0;
-
-    logLK += phi(MSA_len, nu, p0);
+    logLK += LKFunc::phi(MSA_len, nu, p0);
+    LOG_S(DEBUG1) << "[Initial LK] LK = " << logLK;
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
+    LOG_S(DEBUG1) << "[Creating UTree]";
+
+    auto real_utree = new Utree;
+
     std::vector<node *> utree;
-    node *utree_pseudo_root;
+    //node *utree_pseudo_root;
 
-    utree = tree->create_unrooted_tree(tree, num_leaves);
+    createUtree(tree, real_utree);
 
-    utree_pseudo_root = utree.at(0);
-
+    //utree = tree->create_unrooted_tree(tree, num_leaves);
+    //utree_pseudo_root = utree.at(0);
+    exit(1);
     //------------------------------------------------------------------------------------------------------------------
     // GET ALL NODES WITHIN RADIUS
     // TODO: implement high-level heuristic to decide which TS to use according to node level
 
-    int radius;
-
-    radius = 3;
+    int radius = 3;
 
     //----------------------------------------------------
     std::vector<utree_move_info> utree_nni_spr_stack_left;
     std::vector<utree_move_info> utree_nni_spr_stack_right;
     std::vector<utree_move_info> utree_nni_spr_stack_up;
-    node *u_node;
 
-    u_node = utree_pseudo_root;
 
     //---------------------------------------------------------------
-    u_node = utree.at(0);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
+    node *u_node;
 
-    u_node = utree.at(4);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
+    for (auto &i : utree) {
+        u_node = i;
+        print_node_neighbours(u_node);
+        utree_get_list_nodes_within_radius(u_node, radius,
+                                           utree_nni_spr_stack_left,
+                                           utree_nni_spr_stack_right,
+                                           utree_nni_spr_stack_up);
+    }
 
-    u_node = utree.at(7);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
-
-    u_node = utree.at(3);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
-
-    u_node = utree.at(10);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
-
-    u_node = utree.at(11);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
-
-    u_node = utree.at(12);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
-
-    u_node = utree.at(13);
-    LOG_S(INFO) << "UNODE:"; //<<u_node->data->getName()<<"";
-    print_node_neighbours(u_node);
-    utree_get_list_nodes_within_radius(u_node, radius,
-                                       utree_nni_spr_stack_left,
-                                       utree_nni_spr_stack_right,
-                                       utree_nni_spr_stack_up);
     //---------------------------------------------------------------
     LOG_S(INFO) << "size list_left:" << utree_nni_spr_stack_left.size();
     for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
-        LOG_S(INFO) << "list[" << i << "]=(" << (utree_nni_spr_stack_left.at(i)).node1->data->getName() << ";"
-                    << (utree_nni_spr_stack_left.at(i)).node2->data->getName() << ")";
+        LOG_S(DEBUG2) << "list[" << i << "]=(" << (utree_nni_spr_stack_left.at(i)).node1->data->getName() << ";"
+                      << (utree_nni_spr_stack_left.at(i)).node2->data->getName() << ")";
     }
 
     LOG_S(INFO) << "size list_right:" << utree_nni_spr_stack_right.size();
     for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
-        LOG_S(INFO) << "list[" << i << "]=(" << (utree_nni_spr_stack_right.at(i)).node1->data->getName() << ";"
-                    << (utree_nni_spr_stack_right.at(i)).node2->data->getName() << ")";
+        LOG_S(DEBUG2) << "list[" << i << "]=(" << (utree_nni_spr_stack_right.at(i)).node1->data->getName() << ";"
+                      << (utree_nni_spr_stack_right.at(i)).node2->data->getName() << ")";
     }
 
     LOG_S(INFO) << "size list_up:" << utree_nni_spr_stack_up.size();
     for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
-        LOG_S(INFO) << "list[" << i << "]=(" << (utree_nni_spr_stack_up.at(i)).node1->data->getName() << ";"
-                    << (utree_nni_spr_stack_up.at(i)).node2->data->getName() << ")";
+        LOG_S(DEBUG2) << "list[" << i << "]=(" << (utree_nni_spr_stack_up.at(i)).node1->data->getName() << ";"
+                      << (utree_nni_spr_stack_up.at(i)).node2->data->getName() << ")";
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -499,12 +492,12 @@ int main(int argc, char **argv) {
     int max_idx;
     double max_val;
     std::vector<PhyTree *> p;
-    bool valid_move;
+    //bool valid_move;
     utree_move_info un;
 
-    node *p_child_1;
-    node *p_child_2;
-    node *q_child;
+    //node *p_child_1;
+    //node *p_child_2;
+    //node *q_child;
 
     FILE *fid;
     int file_tree_idx;
@@ -527,8 +520,8 @@ int main(int argc, char **argv) {
     max_val = -INFINITY;
     //---------------------------------------------------------------------
     LOG_S(INFO) << "processing left";
-    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
-        un = utree_nni_spr_stack_left.at(i);
+    for (const auto &i : utree_nni_spr_stack_left) {
+        un = i;
 
         source = un.node1;
         target = un.node2;
@@ -536,19 +529,19 @@ int main(int argc, char **argv) {
         file_tree_idx++;
         SPR_move(tree, utree, source, target, file_tree_idx);
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
-        un = utree_nni_spr_stack_left.at(i);
+    for (const auto &i : utree_nni_spr_stack_left) {
+        un = i;
 
         source = un.node1;
-        if (un.node2->next != NULL) {
+        if (un.node2->next != nullptr) {
             target = un.node2->next;
 
             file_tree_idx++;
             SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
-        un = utree_nni_spr_stack_left.at(i);
+    for (const auto &i : utree_nni_spr_stack_left) {
+        un = i;
 
         source = un.node1->next->next;
         target = un.node2;
@@ -556,11 +549,11 @@ int main(int argc, char **argv) {
         file_tree_idx++;
         SPR_move(tree, utree, source, target, file_tree_idx);
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
-        un = utree_nni_spr_stack_left.at(i);
+    for (const auto &i : utree_nni_spr_stack_left) {
+        un = i;
 
         source = un.node1->next->next;
-        if (un.node2->next != NULL) {
+        if (un.node2->next != nullptr) {
             target = un.node2->next;
 
             file_tree_idx++;
@@ -569,8 +562,8 @@ int main(int argc, char **argv) {
     }
     //---------------------------------------------------------------------
     LOG_S(INFO) << "processing right";
-    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
-        un = utree_nni_spr_stack_right.at(i);
+    for (const auto &i : utree_nni_spr_stack_right) {
+        un = i;
 
         source = un.node1;
         target = un.node2;
@@ -578,19 +571,19 @@ int main(int argc, char **argv) {
         file_tree_idx++;
         SPR_move(tree, utree, source, target, file_tree_idx);
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
-        un = utree_nni_spr_stack_right.at(i);
+    for (const auto &i : utree_nni_spr_stack_right) {
+        un = i;
 
         source = un.node1;
-        if (un.node2->next != NULL) {
+        if (un.node2->next != nullptr) {
             target = un.node2->next;
 
             file_tree_idx++;
             SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
-        un = utree_nni_spr_stack_right.at(i);
+    for (const auto &i : utree_nni_spr_stack_right) {
+        un = i;
 
         source = un.node1->next;
         target = un.node2;
@@ -598,11 +591,11 @@ int main(int argc, char **argv) {
         file_tree_idx++;
         SPR_move(tree, utree, source, target, file_tree_idx);
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
-        un = utree_nni_spr_stack_right.at(i);
+    for (const auto &i : utree_nni_spr_stack_right) {
+        un = i;
 
         source = un.node1->next;
-        if (un.node2->next != NULL) {
+        if (un.node2->next != nullptr) {
             target = un.node2->next;
 
             file_tree_idx++;
@@ -611,8 +604,8 @@ int main(int argc, char **argv) {
     }
     //---------------------------------------------------------------------
     LOG_S(INFO) << "processing up";
-    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
-        un = utree_nni_spr_stack_up.at(i);
+    for (const auto &i : utree_nni_spr_stack_up) {
+        un = i;
 
         source = un.node1->next;
         target = un.node2;
@@ -620,19 +613,19 @@ int main(int argc, char **argv) {
         file_tree_idx++;
         SPR_move(tree, utree, source, target, file_tree_idx);
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
-        un = utree_nni_spr_stack_up.at(i);
+    for (const auto &i : utree_nni_spr_stack_up) {
+        un = i;
 
         source = un.node1->next;
-        if (un.node2->next != NULL) {
+        if (un.node2->next != nullptr) {
             target = un.node2->next;
 
             file_tree_idx++;
             SPR_move(tree, utree, source, target, file_tree_idx);
         }
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
-        un = utree_nni_spr_stack_up.at(i);
+    for (const auto &i : utree_nni_spr_stack_up) {
+        un = i;
 
         source = un.node1->next->next;
         target = un.node2;
@@ -640,11 +633,11 @@ int main(int argc, char **argv) {
         file_tree_idx++;
         SPR_move(tree, utree, source, target, file_tree_idx);
     }
-    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
-        un = utree_nni_spr_stack_up.at(i);
+    for (const auto &i : utree_nni_spr_stack_up) {
+        un = i;
 
         source = un.node1->next->next;
-        if (un.node2->next != NULL) {
+        if (un.node2->next != nullptr) {
             target = un.node2->next;
 
             file_tree_idx++;
@@ -658,6 +651,7 @@ int main(int argc, char **argv) {
     utree_nni_spr_stack_left.empty();
     utree_nni_spr_stack_right.empty();
     utree_nni_spr_stack_up.empty();
+
 
     exit(0);
 }

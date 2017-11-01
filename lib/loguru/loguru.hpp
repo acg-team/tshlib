@@ -324,6 +324,8 @@ namespace loguru {
     using Verbosity = int;
 
 #undef FATAL
+#undef DEBUG1
+#undef DEBUG2
 #undef ERROR
 #undef WARNING
 #undef INFO
@@ -334,12 +336,15 @@ namespace loguru {
                 Verbosity_OFF = -9, // Never do LOG_F(OFF)
 
         // Prefer to use ABORT_F or ABORT_S over LOG_F(FATAL) or LOG_S(FATAL).
-                Verbosity_FATAL = -3,
+
+        Verbosity_FATAL = -3,
         Verbosity_ERROR = -2,
         Verbosity_WARNING = -1,
 
         // Normal messages. By default written to stderr.
                 Verbosity_INFO = 0,
+        Verbosity_DEBUG1 = 1,
+        Verbosity_DEBUG2 = 2,
 
         // Same as Verbosity_INFO in every way.
                 Verbosity_0 = 0,
@@ -1757,6 +1762,10 @@ namespace loguru {
                     g_stderr_verbosity = Verbosity_ERROR;
                 } else if (strcmp(value_str, "FATAL") == 0) {
                     g_stderr_verbosity = Verbosity_FATAL;
+                } else if (strcmp(value_str, "DEBUG1") == 0) {
+                    g_stderr_verbosity = Verbosity_DEBUG1;
+                } else if (strcmp(value_str, "DEBUG2") == 0) {
+                    g_stderr_verbosity = Verbosity_DEBUG2;
                 } else {
                     char *end = 0;
                     g_stderr_verbosity = static_cast<int>(strtol(value_str, &end, 10));

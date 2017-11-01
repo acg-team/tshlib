@@ -117,18 +117,19 @@ protected:
 };
 
 
-Eigen::VectorXd
-compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+namespace LKFunc {
+    Eigen::VectorXd
+    compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
-double compute_log_lk_empty_col(PhyTree &node,Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    double compute_log_lk_empty_col(PhyTree &node, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
-Eigen::VectorXd
-compute_lk_recursive(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    Eigen::VectorXd
+    compute_lk_recursive(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
-double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size);
+    double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size);
 
-double compute_nu(double tau, double lambda, double mu);
+    double compute_nu(double tau, double lambda, double mu);
 
-double phi(int m, double nu, double p0);
-
+    double phi(int m, double nu, double p0);
+}
 #endif //TSHEXE_LIKELIHOOD_HPP

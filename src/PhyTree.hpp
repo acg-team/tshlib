@@ -127,12 +127,6 @@ private:
 
 public:
 
-    //================================================================
-    //DP-PIP
-    //ugly public
-    //double **fv_array;
-    //================================================================
-
     PhyTree(std::string name = "") {
         this->parent = NULL;
         this->branch_length = 0;

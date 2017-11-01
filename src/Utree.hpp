@@ -2,45 +2,105 @@
 // Created by Lorenzo Gatti on 26/10/17.
 //
 
-#ifndef TSHEXE_UTREE_H
-#define TSHEXE_UTREE_H
+#ifndef TSHLIB_UTREE_HPP
+#define TSHLIB_UTREE_HPP
 
 #include <string>
+#include <vector>
+#include <Eigen/Core>
+#include <Eigen/src/Core/IO.h>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/MatrixFunctions>
 #include "PhyTree.hpp"
-#include "TreeRearrangment.hpp"
 
 
 /*
- *          r
- *       /    \
- *   left  -  right
+ * VirtualNode contains the virtual directions for traversing the tree. Each VirtualNode represents
+ * either an internal node or a leaf.
+ *
+ *         [VN]
+ *          ||
+ *          ||
+ *  +----------------+
+ *  |       up       |
+ *  |     /    \     |  Node of a real phylogenetic tree
+ *  | left  -  right |
+ *  +----------------+
+ *    //          \\
+ *   //            \\
+ * [VN]            [VN]
  */
 
 class VirtualNode {
 private:
+
 public:
-    VirtualNode *vnode_root;
-    VirtualNode *vnode_left;
-    VirtualNode *vnode_right;
-    int vnode_id;
-    std::string vnode_name;
-    double vnode_branchlength;
-    double vnode_iota;
-    double vnode_beta;
-    Eigen::MatrixXd vnode_Pr;
-    double vnode_tau;
-    double vnode_nu;
-    std::vector<Eigen::VectorXd> vnode_MSA_fv;
-    bool vnode_setA;
-    int vnode_descCount;
-    char vnode_character;
-    int vnode_depth;
+
+    int vnode_id;                                   /* Node ID - Useful in case of parallel independent executions */
+    std::string vnode_name;                         /* Node Name - Useful in case of parallel independent executions */
+    double vnode_branchlength;                      /* Branch length connecting the node the parent node */
+    double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
+    double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
+    Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
+    double vnode_tau;                               /* Tau value up to this node */
+    double vnode_nu;                                /* Nu value associated to this node */
+    std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
+    bool vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
+    int vnode_descCount;                            /*  ? */
+    char vnode_character;                           /* Character associated to this node (only if terminal node) */
+    int vnode_depth;                                /* Depth level of the node in the tree */
+    bool vnode_leaf;                                /* Flag: terminal node in the tree topology */
+
+    VirtualNode();
+
+    ~VirtualNode();
+
+    virtual void addMember(VirtualNode *inNode);
+
+    virtual void RotateClockwise();
+
+    virtual void RotateCounterClockwise();
+
+    void getMemberNeighbors(int radius);
+
+
+    bool isTerminalNode();
+
 
 protected:
+    VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
+    VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
+    VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
+
+    virtual void setNodeRight(VirtualNode inNode);
+
+    virtual void setNodeLeft(VirtualNode inNode);
+
+    virtual void setNodeUp(VirtualNode inNode);
+
+    VirtualNode getNodeLeft();
+
+    VirtualNode getNodeRight();
+
+    VirtualNode getNodeUp();
+
+};
+
+template<class NodeType>
+class VirtualLeaf : public VirtualNode {
+
+};
+
+template<class NodeType>
+class VirtualInternalNode : public VirtualNode {
+public:
+
 };
 
 class Utree {
 public:
+
+    VirtualNode *utree_start_node;
 
     Utree();
 
@@ -50,43 +110,21 @@ public:
 
     void removePseudoRoot();
 
-    void addMember();
-
-    void removeMember();
-
-    void swapMembers();
-
-    void getMemberNeighbors(int radius);
+    void FindPseudoRoot();
 
     void printTree();
 
+    void printTreeNewick();
+
+
 protected:
+
 private:
-    VirtualNode utree_start_node;
-    std::vector<VirtualNode *> members;
+
+
 };
-/*
 
-std::string utree_formatNewickR(node *n, bool is_root);
-
-std::string utree_formatNewick(node *utree_pseudo_root);
-
-void print_utree(node *n);
-
-void print_utree_rec(node *n);
-
-void print_node_neighbours(node *n);
-
-void utree_nodes_within_radius(node *start_node, node *new_node, int radius, std::vector<utree_move_info> &list_nodes);
-
-void utree_get_list_nodes_within_radius(node *n,
-                                        int radius,
-                                        std::vector<utree_move_info> &list_nodes_left,
-                                        std::vector<utree_move_info> &list_nodes_right,
-                                        std::vector<utree_move_info> &list_nodes_up);
-
-void copy_vector(std::vector<node *> &dest, std::vector<node *> &source);
-*/
+void createUtree(PhyTree *in_tree, Utree *out_tree);
 
 
-#endif //TSHEXE_UTREE_H
+#endif //TSHLIB_UTREE_HPP
