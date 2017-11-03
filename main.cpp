@@ -431,18 +431,50 @@ int main(int argc, char **argv) {
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
-    LOG_S(DEBUG1) << "[Creating UTree]";
-
     auto real_utree = new Utree;
 
     std::vector<node *> utree;
-    //node *utree_pseudo_root;
+    node *utree_pseudo_root;
 
-    createUtree(tree, real_utree);
+    UtreeUtils::convertUtree(tree, real_utree);
+    LOG_S(DEBUG1) << "[Initial Utree topology] " << real_utree->printTreeNewick();
 
-    //utree = tree->create_unrooted_tree(tree, num_leaves);
-    //utree_pseudo_root = utree.at(0);
-    exit(1);
+    //------------------------------------------------------------------------------------------------------------------
+    // TEST Function findPseudoRoot either fixing the root on a leaf or on the middle node
+
+    std::string strpath;
+    std::vector<VirtualNode *> path2root;
+    VirtualNode *startNode = real_utree->topology.at(0)->getNodeLeft()->getNodeLeft();
+    // ------------------------------------
+    real_utree->fixPseudoRootOnLeaf = false;
+    path2root = real_utree->findPseudoRoot(startNode);
+
+
+    for (auto &node: path2root) {
+        strpath += "->" + node->vnode_name;
+    }
+
+    LOG_S(DEBUG2) << "[Path back to root] (Root on middle node) " << strpath;
+    path2root.clear();
+    strpath.clear();
+
+    // ------------------------------------
+    real_utree->fixPseudoRootOnLeaf = true;
+    path2root = real_utree->findPseudoRoot(startNode);
+
+
+    for (auto &tnode: path2root) {
+        strpath += "->" + tnode->vnode_name;
+    }
+    LOG_S(DEBUG2) << "[Path back to root] (Root on leaf node) " << strpath;
+    path2root.clear();
+    strpath.clear();
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    utree = tree->create_unrooted_tree(tree, num_leaves);
+    utree_pseudo_root = utree.at(0);
+
     //------------------------------------------------------------------------------------------------------------------
     // GET ALL NODES WITHIN RADIUS
     // TODO: implement high-level heuristic to decide which TS to use according to node level
@@ -456,7 +488,7 @@ int main(int argc, char **argv) {
 
 
     //---------------------------------------------------------------
-    node *u_node;
+    node * u_node;
 
     for (auto &i : utree) {
         u_node = i;
@@ -466,7 +498,7 @@ int main(int argc, char **argv) {
                                            utree_nni_spr_stack_right,
                                            utree_nni_spr_stack_up);
     }
-
+    exit(1);
     //---------------------------------------------------------------
     LOG_S(INFO) << "size list_left:" << utree_nni_spr_stack_left.size();
     for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {

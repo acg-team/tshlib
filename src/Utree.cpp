@@ -3,93 +3,268 @@
 //
 
 #include <string>
+#include <random>
+
 #include "Utree.hpp"
-#include "PhyTree.hpp"
 
 
-/*
+void ::UtreeUtils::_traverseTree(VirtualNode *target, PhyTree *source) {
 
-void create_unrooted_tree(std::vector<node *> &utree,PhyTree *tree,node *parent){
-
-
-    if(tree->isLeaf()){
-
-        node *n = new node;
-
-        parent->back=n;
-        n->next=NULL;
-        n->back=parent;
-        n->data=tree;
-
-        utree.push_back(n);
-    }else{
-
-        node *node_1= new node;
-        node *node_2= new node;
-        node *node_3= new node;
-
-        parent->back=node_1;
-
-        node_1->next=node_2;
-        node_1->back=parent;
-        node_1->data=tree;
-
-        node_2->next=node_3;
-        node_2->data=tree;
-
-        node_3->next=node_1;
-        node_3->data=tree;
-
-        utree.push_back(node_1);
-        utree.push_back(node_2);
-        utree.push_back(node_3);
-
-        create_unrooted_tree(utree,tree->children[0],node_2);
-        create_unrooted_tree(utree,tree->children[1],node_3);
-    }
-
-}
-*/
-
-void cascade(VirtualNode *parent, VirtualNode *child) {
-
-    if (!parent->isTerminalNode()) {
-
+    for (unsigned long i = 0; i < source->n_children(); i++) {
         auto ichild = new VirtualNode();
-        cascade(child, ichild);
+        if (!source->get_children().at(i)->isLeaf()) {
 
+            ichild->vnode_id = source->get_children().at(i)->getNodeID();
+            ichild->vnode_name = source->get_children().at(i)->getName();
+            ichild->vnode_branchlength = source->get_children().at(i)->getBranchLength();
+
+            target->addMember(ichild);
+            _traverseTree(ichild, source->get_children().at(i));
+
+        } else {
+
+            ichild->vnode_id = source->get_children().at(i)->getNodeID();
+            ichild->vnode_name = source->get_children().at(i)->getName();
+            ichild->vnode_branchlength = source->get_children().at(i)->getBranchLength();
+            // Set all the other directions to null
+            ichild->setNodeLeft(nullptr);
+            ichild->setNodeRight(nullptr);
+
+            // Set the LEAF flag to true
+            ichild->vnode_leaf = true;
+            target->addMember(ichild);
+
+        }
     }
 
 }
 
-void createUtree(PhyTree *in_tree, Utree *out_tree) {
+void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
 
+    // For each node descending the root, create either a new VirtualNode
+    for (int i = 0; i < in_tree->n_children(); i++) {
 
-    // For each node descending the root, create either a new VirtualInternalNode or a VirtualLeaf
-    for (int i = 0; i < in_tree->get_children().at(0)->n_children(); i++) {
+        auto ichild = new VirtualNode;
 
-        auto inode = new VirtualNode;
+        ichild->vnode_id = in_tree->get_children().at(i)->getNodeID();
+        ichild->vnode_name = in_tree->get_children().at(i)->getName();
+        ichild->vnode_branchlength = in_tree->get_children().at(i)->getBranchLength();
 
-        cascade(out_tree->utree_start_node, inode);
+        // If the node in PhyTree is a leaf, skip the recursion
+        if (in_tree->get_children().at(i)->isLeaf()) {
 
+            ichild->vnode_leaf = true;
 
-        out_tree->utree_start_node->addMember(inode);
+        } else {
+
+            _traverseTree(ichild, in_tree->get_children().at(i));
+        }
+
+        out_tree->addMember(ichild);
     }
+
+
+    // Collapse multiforcating trees to star tree pointing to the same pseudoroot
+    // Pick root node at random within the node-vector
+
+    std::default_random_engine generator;
+    std::uniform_int_distribution<unsigned long> distribution(0, out_tree->topology.size() - 1);
+    unsigned long randomIndex = distribution(generator);
+
+
+    for (unsigned long i = 0; i < out_tree->topology.size(); i++) {
+        if (i != randomIndex) {
+            out_tree->topology.at(i)->setNodeUp(out_tree->topology.at(randomIndex));
+        } else {
+            if (randomIndex == 0) {
+                randomIndex = randomIndex + 1;
+            } else {
+                randomIndex = randomIndex - 1;
+            }
+            out_tree->topology.at(i)->setNodeUp(out_tree->topology.at(randomIndex));
+        }
+    }
+
 }
 
 
 VirtualNode::VirtualNode() {
+    // Initialise a new VirtualNode completely disconnected from the tree
+    this->vnode_right = nullptr;
+    this->vnode_left = nullptr;
+    this->vnode_up = nullptr;
+    this->vnode_branchlength = 0;
+    this->vnode_leaf = false;
 
-}
+};
 
 void VirtualNode::addMember(VirtualNode *inNode) {
 
-    this->vnode_up;
-    this->vnode_right;
-    this->vnode_left;
+    // Connect this node to the parent node
+    inNode->setNodeUp(this);
+
+    // Check which direction is still available (either left or right)
+    if (!this->vnode_left) {
+        this->setNodeLeft(inNode);
+        return;
+    } else if (!this->vnode_right) {
+        this->setNodeRight(inNode);
+        return;
+    } else {
+        perror("No direction available in the VirtualNode to add a new child");
+    }
+
 
 }
 
 bool VirtualNode::isTerminalNode() {
+
     return this->vnode_leaf;
+
 }
+
+void VirtualNode::setNodeRight(VirtualNode *inNode) {
+
+    this->vnode_right = inNode;
+
+}
+
+void VirtualNode::setNodeLeft(VirtualNode *inNode) {
+
+    this->vnode_left = inNode;
+
+}
+
+void VirtualNode::setNodeUp(VirtualNode *inNode) {
+
+    this->vnode_up = inNode;
+
+}
+
+VirtualNode *VirtualNode::getNodeUp() {
+
+    return this->vnode_up ?: nullptr;
+}
+
+void VirtualNode::RotateClockwise() {
+
+    auto *curr_vn_up = new VirtualNode;
+    auto *curr_vn_left = new VirtualNode;
+    auto *curr_vn_right = new VirtualNode;
+
+    this->setNodeUp(curr_vn_left);
+    this->setNodeLeft(curr_vn_right);
+    this->setNodeRight(curr_vn_up);
+
+}
+
+void VirtualNode::RotateCounterClockwise() {
+
+    auto *curr_vn_up = new VirtualNode;
+    auto *curr_vn_left = new VirtualNode;
+    auto *curr_vn_right = new VirtualNode;
+
+    this->setNodeUp(curr_vn_right);
+    this->setNodeLeft(curr_vn_up);
+    this->setNodeRight(curr_vn_left);
+
+}
+
+VirtualNode *VirtualNode::getNodeLeft() {
+    return this->vnode_left ?: nullptr;
+}
+
+VirtualNode *VirtualNode::getNodeRight() {
+    return this->vnode_right ?: nullptr;
+}
+
+
+void Utree::addMember(VirtualNode *iNode) {
+
+    this->topology.push_back(iNode);
+
+
+}
+
+std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *iNode) {
+
+    // This method returns a vector which contains all the nodes in the path
+    // from the start node to the pseudoroot
+    std::vector<VirtualNode *> path2root;
+
+    auto *CurrentNode = new VirtualNode;
+
+    // Add the first element of the path to the root
+    path2root.push_back(iNode);
+
+    CurrentNode = iNode;
+
+    // Add all the other nodes traversing the tree in post-order
+    do {
+        CurrentNode = CurrentNode->getNodeUp();
+        path2root.push_back(CurrentNode);
+
+    } while (CurrentNode != CurrentNode->getNodeUp()->getNodeUp());
+
+    if (this->fixPseudoRootOnLeaf) {
+
+        path2root.push_back(CurrentNode->getNodeUp());
+
+    }
+
+    return path2root;
+}
+
+std::string Utree::printTreeNewick() {
+    std::string s, terminator;
+    s += "(";
+    for (int i = 0; i < this->topology.size(); i++) {
+        if (i == this->topology.size() - 1) {
+            terminator = ");";
+
+        } else {
+            terminator = ",";
+        }
+        s += _recursiveFormatNewick(this->topology.at(i)) + terminator;
+
+    }
+
+    return s;
+
+}
+
+std::string Utree::_recursiveFormatNewick(VirtualNode *n) {
+
+    if (n->isTerminalNode()) {
+        std::stringstream newick;
+        newick << n->vnode_name << ":" << n->vnode_branchlength;
+        return newick.str();
+    } else {
+        std::stringstream newick;
+        newick << "(";
+        newick << _recursiveFormatNewick(n->getNodeLeft());
+        newick << ",";
+        newick << _recursiveFormatNewick(n->getNodeRight());
+        newick << ")";
+        newick << ":" << n->vnode_branchlength;
+        return newick.str();
+    }
+
+
+}
+
+Utree::~Utree() {
+
+}
+
+Utree::Utree() {
+
+    this->fixPseudoRootOnLeaf = true;
+
+}
+
+
+
+
+
+

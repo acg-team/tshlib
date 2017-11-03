@@ -1068,10 +1068,11 @@ public:
         node *pseudo_root_3 = new node;
 
         pseudo_root_1->next=pseudo_root_2;
-        pseudo_root_1->data=tree->children[0];
         pseudo_root_2->next=pseudo_root_3;
-        pseudo_root_2->data=tree->children[0];
         pseudo_root_3->next=pseudo_root_1;
+
+        pseudo_root_1->data = tree->children[0];
+        pseudo_root_2->data = tree->children[0];
         pseudo_root_3->data=tree->children[0];
 
         utree.push_back(pseudo_root_1);
