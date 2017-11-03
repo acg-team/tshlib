@@ -49,22 +49,69 @@ public:
     int vnode_descCount;                            /*  ? */
     char vnode_character;                           /* Character associated to this node (only if terminal node) */
     int vnode_depth;                                /* Depth level of the node in the tree */
-    bool vnode_leaf;                                /* Flag: terminal node in the tree topology */
-
+    bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
+    int vnode_rotated;                             /* Flag: if node was rotaded during a tree rearrangement move */
     VirtualNode();
 
-    ~VirtualNode();
+    virtual ~VirtualNode();
 
-    virtual void addMember(VirtualNode *inNode);
 
+    virtual void connectNode(VirtualNode *inNode);
+
+    virtual void disconnectNode();
+
+    /*!
+     * @brief This function perfomrms a one-step clockwise rotation of the virtualnode pointers
+     */
     virtual void RotateClockwise();
 
+    virtual void RotateClockwise(bool revertRotations);
+
+    /*!
+     * @brief This function perfomrms a one-step counter-clockwise rotation of the virtualnode pointers
+     */
     virtual void RotateCounterClockwise();
+
+    virtual void RotateCounterClockwise(bool revertRotations);
+
+    /*!
+     * @brief This function resets any rotation previously performed on the node
+     */
+    virtual void ResetNodeDirections();
 
     void getMemberNeighbors(int radius);
 
+    /*!
+     * @brief The function prints the neighborhood of the node in the format <^nodeUp;nodeLeft;nodeRight >
+     * @return std::string with the node neighborhood
+     */
+    std::string printNeighbours();
+
+    virtual void setNodeRight(VirtualNode *inNode);
+
+    virtual void setNodeLeft(VirtualNode *inNode);
+
+    virtual void setNodeUp(VirtualNode *inNode);
+
+    VirtualNode *getNodeUp();
+
+    VirtualNode *getNodeLeft();
+
+    VirtualNode *getNodeRight();
 
     bool isTerminalNode();
+
+    int indexOf();
+
+    bool swapNode(VirtualNode *targetNode);
+
+    /*!
+     * @brief The function checks if the current node is a parent of another node using a recursive structure
+     * @param inNode VirtualNode pointer
+     * @return False if the node passed is not parent of the current one, True otherwise
+     */
+    bool isParent(VirtualNode *inNode);
+
 
 
 protected:
@@ -72,59 +119,52 @@ protected:
     VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
     VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
 
-    virtual void setNodeRight(VirtualNode inNode);
+    virtual void _oneway_connectNode(VirtualNode *inNode);
 
-    virtual void setNodeLeft(VirtualNode inNode);
+    virtual void _recursive_cw_rotation(VirtualNode *n, bool revertRotations);
 
-    virtual void setNodeUp(VirtualNode inNode);
+    virtual void _recursive_ccw_rotation(VirtualNode *n, bool revertRotations);
 
-    VirtualNode getNodeLeft();
 
-    VirtualNode getNodeRight();
-
-    VirtualNode getNodeUp();
 
 };
 
-template<class NodeType>
-class VirtualLeaf : public VirtualNode {
-
-};
-
-template<class NodeType>
-class VirtualInternalNode : public VirtualNode {
-public:
-
-};
 
 class Utree {
 public:
 
-    VirtualNode *utree_start_node;
+    std::vector<VirtualNode *> listVNodes;
+    std::vector<VirtualNode *> startVNodes;
+    bool fixPseudoRootOnNextSubtree;
 
     Utree();
 
-    ~Utree();
+    virtual ~Utree();
 
-    void setPseudoRoot();
+    std::vector<VirtualNode *> findPseudoRoot(VirtualNode *iNode);
 
-    void removePseudoRoot();
+    void addMember(VirtualNode *iNode, bool isStartNode = false);
 
-    void FindPseudoRoot();
 
-    void printTree();
-
-    void printTreeNewick();
+    std::string printTreeNewick(bool showInternalNodeNames);
 
 
 protected:
+    std::string _recursiveFormatNewick(VirtualNode *n, bool showInternalNodeNames);
+
+    virtual void _updateStartNodes();
 
 private:
 
-
 };
 
-void createUtree(PhyTree *in_tree, Utree *out_tree);
+
+namespace UtreeUtils {
+    void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
+
+    void convertUtree(PhyTree *in_tree, Utree *out_tree);
+
+}
 
 
 #endif //TSHLIB_UTREE_HPP

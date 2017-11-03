@@ -45,6 +45,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #define LOGURU_IMPLEMENTATION 1
 #define LOGURU_WITH_STREAMS 1
@@ -431,227 +432,100 @@ int main(int argc, char **argv) {
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
-    LOG_S(DEBUG1) << "[Creating UTree]";
-
     auto real_utree = new Utree;
 
     std::vector<node *> utree;
-    //node *utree_pseudo_root;
+    node *utree_pseudo_root;
 
-    createUtree(tree, real_utree);
+    UtreeUtils::convertUtree(tree, real_utree);
+    LOG_S(DEBUG1) << "[Initial Utree listVNodes] " << real_utree->printTreeNewick(true);
 
-    //utree = tree->create_unrooted_tree(tree, num_leaves);
-    //utree_pseudo_root = utree.at(0);
-    exit(1);
+    //------------------------------------------------------------------------------------------------------------------
+    // TEST Function findPseudoRoot either fixing the root on a leaf or on the middle node
+
+    std::string strpath;
+    std::vector<VirtualNode *> path2root;
+    //VirtualNode *startNode = real_utree->listVNodes.at(0)->getNodeLeft()->getNodeLeft();
+    VirtualNode *startNode = real_utree->listVNodes.at(0);
+    // ------------------------------------
+    real_utree->fixPseudoRootOnNextSubtree = false;
+    path2root = real_utree->findPseudoRoot(startNode);
+
+
+    for (auto &node: path2root) {
+        strpath += "->" + node->vnode_name;
+    }
+
+    LOG_S(DEBUG2) << "[Path back to root] (Root on middle node) " << strpath;
+    path2root.clear();
+    strpath.clear();
+
+    // ------------------------------------
+    real_utree->fixPseudoRootOnNextSubtree = true;
+    path2root = real_utree->findPseudoRoot(startNode);
+
+
+    for (auto &tnode: path2root) {
+        strpath += "->" + tnode->vnode_name;
+    }
+    LOG_S(DEBUG2) << "[Path back to root] (Root on next subtree) " << strpath;
+    path2root.clear();
+    strpath.clear();
+
     //------------------------------------------------------------------------------------------------------------------
     // GET ALL NODES WITHIN RADIUS
-    // TODO: implement high-level heuristic to decide which TS to use according to node level
 
-    int radius = 3;
+    int min_radius = 3;
+    int max_radius = 6;
 
-    //----------------------------------------------------
-    std::vector<utree_move_info> utree_nni_spr_stack_left;
-    std::vector<utree_move_info> utree_nni_spr_stack_right;
-    std::vector<utree_move_info> utree_nni_spr_stack_up;
+    // Print node description with neighbors
+    for (auto &vnode:real_utree->listVNodes) {
+        LOG_S(DEBUG2) << "[utree neighbours] " << vnode->printNeighbours();
+
+        // Initialise a new rearrangement list
+        auto ts_list = TreeRearrangment(vnode, min_radius, max_radius, true);
+
+        // Get all the target nodes with distance == radius from the source node
+        // excluding the starting node.
+        ts_list.fillListMoves(false);
+
+        // Print the list
+        ts_list.printListMoves();
+
+        LOG_S(DEBUG1) << "[tsh] Strategy " << ts_list.mset_strategy;
+        LOG_S(DEBUG2) << "[utree rearrangment] Found " << ts_list.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
+
+        for (unsigned long i = 0; i < ts_list.getNumberOfMoves(); i++) {
+            bool status;
 
 
-    //---------------------------------------------------------------
-    node *u_node;
+            try {
+                status = ts_list.applyMove(i);
+                if (status) {
 
-    for (auto &i : utree) {
-        u_node = i;
-        print_node_neighbours(u_node);
-        utree_get_list_nodes_within_radius(u_node, radius,
-                                           utree_nni_spr_stack_left,
-                                           utree_nni_spr_stack_right,
-                                           utree_nni_spr_stack_up);
-    }
+                    LOG_S(DEBUG2) << "[apply move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                                  << " | (" << ts_list.getSourceNode()->vnode_name << "->" << ts_list.getMove(i)->getTargetNode()->vnode_name << ")\t| "
+                                  << real_utree->printTreeNewick(true);
 
-    //---------------------------------------------------------------
-    LOG_S(INFO) << "size list_left:" << utree_nni_spr_stack_left.size();
-    for (unsigned int i = 0; i < utree_nni_spr_stack_left.size(); i++) {
-        LOG_S(DEBUG2) << "list[" << i << "]=(" << (utree_nni_spr_stack_left.at(i)).node1->data->getName() << ";"
-                      << (utree_nni_spr_stack_left.at(i)).node2->data->getName() << ")";
-    }
 
-    LOG_S(INFO) << "size list_right:" << utree_nni_spr_stack_right.size();
-    for (unsigned int i = 0; i < utree_nni_spr_stack_right.size(); i++) {
-        LOG_S(DEBUG2) << "list[" << i << "]=(" << (utree_nni_spr_stack_right.at(i)).node1->data->getName() << ";"
-                      << (utree_nni_spr_stack_right.at(i)).node2->data->getName() << ")";
-    }
+                }
+            } catch (const std::exception &e) {
 
-    LOG_S(INFO) << "size list_up:" << utree_nni_spr_stack_up.size();
-    for (unsigned int i = 0; i < utree_nni_spr_stack_up.size(); i++) {
-        LOG_S(DEBUG2) << "list[" << i << "]=(" << (utree_nni_spr_stack_up.at(i)).node1->data->getName() << ";"
-                      << (utree_nni_spr_stack_up.at(i)).node2->data->getName() << ")";
-    }
+                std::cout << "a standard exception was caught, with message '"
+                          << e.what() << "'" << std::endl;
 
-    //------------------------------------------------------------------------------------------------------------------
-    // PERFORM SPR MOVES and RECOMPUTE logLK
+            }
 
-    int max_idx;
-    double max_val;
-    std::vector<PhyTree *> p;
-    //bool valid_move;
-    utree_move_info un;
+            status = ts_list.revertMove(i);
+            if (status) {
 
-    //node *p_child_1;
-    //node *p_child_2;
-    //node *q_child;
-
-    FILE *fid;
-    int file_tree_idx;
-    char tree_filename[80];
-    std::string ss;
-
-    node *source;
-    node *target;
-
-    //---------------------------------------------------------
-    file_tree_idx = 0;
-    sprintf(tree_filename, "%s_%d.nwk", "../data/out/tree", file_tree_idx);
-    fid = fopen(tree_filename, "w");
-    ss = utree_formatNewick(utree.at(0));
-    fprintf(fid, "%s", ss.c_str());
-    fclose(fid);
-    //---------------------------------------------------------
-
-    max_idx = -1;
-    max_val = -INFINITY;
-    //---------------------------------------------------------------------
-    LOG_S(INFO) << "processing left";
-    for (const auto &i : utree_nni_spr_stack_left) {
-        un = i;
-
-        source = un.node1;
-        target = un.node2;
-
-        file_tree_idx++;
-        SPR_move(tree, utree, source, target, file_tree_idx);
-    }
-    for (const auto &i : utree_nni_spr_stack_left) {
-        un = i;
-
-        source = un.node1;
-        if (un.node2->next != nullptr) {
-            target = un.node2->next;
-
-            file_tree_idx++;
-            SPR_move(tree, utree, source, target, file_tree_idx);
+                LOG_S(DEBUG2) << "[revert move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << ts_list.getMove(i)->getTargetNode()->vnode_name << "->" << ts_list.getSourceNode()->vnode_name << ")\t| "
+                              << real_utree->printTreeNewick(true);
+            }
         }
+
     }
-    for (const auto &i : utree_nni_spr_stack_left) {
-        un = i;
-
-        source = un.node1->next->next;
-        target = un.node2;
-
-        file_tree_idx++;
-        SPR_move(tree, utree, source, target, file_tree_idx);
-    }
-    for (const auto &i : utree_nni_spr_stack_left) {
-        un = i;
-
-        source = un.node1->next->next;
-        if (un.node2->next != nullptr) {
-            target = un.node2->next;
-
-            file_tree_idx++;
-            SPR_move(tree, utree, source, target, file_tree_idx);
-        }
-    }
-    //---------------------------------------------------------------------
-    LOG_S(INFO) << "processing right";
-    for (const auto &i : utree_nni_spr_stack_right) {
-        un = i;
-
-        source = un.node1;
-        target = un.node2;
-
-        file_tree_idx++;
-        SPR_move(tree, utree, source, target, file_tree_idx);
-    }
-    for (const auto &i : utree_nni_spr_stack_right) {
-        un = i;
-
-        source = un.node1;
-        if (un.node2->next != nullptr) {
-            target = un.node2->next;
-
-            file_tree_idx++;
-            SPR_move(tree, utree, source, target, file_tree_idx);
-        }
-    }
-    for (const auto &i : utree_nni_spr_stack_right) {
-        un = i;
-
-        source = un.node1->next;
-        target = un.node2;
-
-        file_tree_idx++;
-        SPR_move(tree, utree, source, target, file_tree_idx);
-    }
-    for (const auto &i : utree_nni_spr_stack_right) {
-        un = i;
-
-        source = un.node1->next;
-        if (un.node2->next != nullptr) {
-            target = un.node2->next;
-
-            file_tree_idx++;
-            SPR_move(tree, utree, source, target, file_tree_idx);
-        }
-    }
-    //---------------------------------------------------------------------
-    LOG_S(INFO) << "processing up";
-    for (const auto &i : utree_nni_spr_stack_up) {
-        un = i;
-
-        source = un.node1->next;
-        target = un.node2;
-
-        file_tree_idx++;
-        SPR_move(tree, utree, source, target, file_tree_idx);
-    }
-    for (const auto &i : utree_nni_spr_stack_up) {
-        un = i;
-
-        source = un.node1->next;
-        if (un.node2->next != nullptr) {
-            target = un.node2->next;
-
-            file_tree_idx++;
-            SPR_move(tree, utree, source, target, file_tree_idx);
-        }
-    }
-    for (const auto &i : utree_nni_spr_stack_up) {
-        un = i;
-
-        source = un.node1->next->next;
-        target = un.node2;
-
-        file_tree_idx++;
-        SPR_move(tree, utree, source, target, file_tree_idx);
-    }
-    for (const auto &i : utree_nni_spr_stack_up) {
-        un = i;
-
-        source = un.node1->next->next;
-        if (un.node2->next != nullptr) {
-            target = un.node2->next;
-
-            file_tree_idx++;
-            SPR_move(tree, utree, source, target, file_tree_idx);
-        }
-    }
-
-
-    LOG_S(INFO) << "max_val:" << max_val << " at index: " << max_idx;
-
-    utree_nni_spr_stack_left.empty();
-    utree_nni_spr_stack_right.empty();
-    utree_nni_spr_stack_up.empty();
-
 
     exit(0);
 }

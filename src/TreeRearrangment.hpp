@@ -44,8 +44,9 @@
 #ifndef TSHLIB_TREEREARRANGEMENT_HPP
 #define TSHLIB_TREEREARRANGEMENT_HPP
 
+#include <map>
 #include "PhyTree.hpp"
-//#include "Utree.hpp"
+#include "Utree.hpp"
 
 struct move_info {
     PhyTree *node1;
@@ -63,13 +64,15 @@ struct utree_move_info {
 };
 
 
-template<class NodeType>
 class Move {
 
 private:
+    std::map<int, std::string> move_classes;
 
 protected:
+    VirtualNode *move_targetnode;       /* Pointer to the target node found during the node search */
 
+public:
     int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
     std::string move_name;          /* Move Name - Unused */
     std::string move_desc;          /* Move Desc - Unused */
@@ -77,11 +80,6 @@ protected:
     bool move_applied;              /* Indicator is set to true if the move is applied to the tree */
     std::string move_class;         /* Move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
 
-    NodeType *move_targetnode;       /* Pointer to the target node found during the node search */
-
-
-
-public:
     /*!
      * @brief Standard constructor
      */
@@ -90,7 +88,7 @@ public:
     /*!
     * @brief Standard deconstructor
     */
-    ~Move();
+    virtual ~Move();
 
     /*!
      * @brief Reset the protected move_targetnode field
@@ -101,67 +99,83 @@ public:
      * @brief Returns the target node pointer
      * @return PhyTree pointer of the node
      */
-    NodeType *getTargetNode();
+    VirtualNode *getTargetNode();
 
     /*!
      * @brief Set the protected move_targetnode field
      * @param target_node PhyTree Pointer to the target node
      */
-    void setTargetNode(NodeType *target_node);
+    void setTargetNode(VirtualNode *target_node);
+
+    void setMoveClass(int Value);
 
 };
 
-template<class NodeType>
+
 class TreeRearrangment {
 private:
 
-    std::string mset_id;            /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-    int mset_radius;                /* Radius of the node search (for NNI must set it to 1) */
-    bool mset_preserve_blenghts;    /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
-    std::vector<Move<NodeType> *> mset_moves; /* Vector containing the pre-computed moves */
-    std::string mset_strategy;      /* Description of the node search strategy */
+    std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
+    int mset_cur_radius;                /* Temporary radius */
+    int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
+    int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
+    bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
+    std::vector<Move *> mset_moves;     /* Vector containing the pre-computed moves */
 
-    NodeType *mset_sourcenode;       /* Starting node from which starting the tree exploration */
+    VirtualNode *mset_sourcenode;       /* Starting node from which starting the tree exploration */
 
 public:
+    std::string mset_strategy;          /* Description of the node search strategy */
 
 
-    TreeRearrangment(NodeType *node_source, int radius, bool preserve_blengths);
+    TreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
-    ~TreeRearrangment();
+    TreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths);
+
+    virtual ~TreeRearrangment();
+
+    VirtualNode *getSourceNode();
 
     /*!
      * @brief Perform a complete node search and fill the vector containing the candidate moves.
-     * @param saveMove bool ?
+     * @param includeSelf bool ?
      */
-    void fillListMoves(bool saveMove);
+    virtual void fillListMoves(bool includeSelf);
 
-    /*!
-     * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
-     * @param node_source PhyTree Pointer to the starting node
-     * @param radius int Radius of the search (NNI = 1, SPR > 1)
-     * @param save bool ?
-     */
-    void getNodesInRadius(NodeType *node_source, int radius, bool save);
+    virtual bool applyMove(unsigned long moveID);
 
+    Move *getMove(unsigned long moveID);
+
+    virtual bool revertMove(unsigned long moveID);
+
+    virtual void printListMoves();
+
+    unsigned long getNumberOfMoves();
 
 protected:
 
     /*!
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
+     * @param node_source VirtualNode pointer to the starting node
+     * @param radius int Radius of the search (NNI = 1, SPR > 1)
+     * @param includeSelf bool ?
+     */
+    virtual void getNodesInRadius(VirtualNode *node_source, int radius, bool includeSelf);
+
+
+    /*!
+     * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
      * @param node_source   PhyTree Pointer to the starting node
-     * @param radius        int Radius of the search (NNI = 1, SPR > 1)
+     * @param radius        int Radius of the search (NNI = 3, SPR > 3)
      * @param direction     int ?
      */
-    void getNodesInRadiusUp(NodeType *node_source, int radius, int direction);
+    void getNodesInRadiusUp(VirtualNode *node_source, int radius, int direction);
 
     /*!
      * @brief Append candidate move to the mset_moves vector
      * @param move Move Pointer to the candidate move object
      */
-    void addMove(Move<NodeType> *move);
-
-    void applyMove(int move_id);
+    void addMove(Move *move);
 
 };
 

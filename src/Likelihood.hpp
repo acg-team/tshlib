@@ -102,7 +102,7 @@ public:
     Likelihood();
 
     //Likelihood(PhyTree *node);
-    ~Likelihood();
+    virtual ~Likelihood();
 
 
     virtual void Init();

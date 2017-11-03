@@ -60,13 +60,15 @@
 //=====================
 
 class PhyTree;
-typedef struct node;
-struct node{
+
+typedef struct node {
     node *next;
     node *back;
     PhyTree *data;
     int ID;
 };
+
+
 
 
 class PhyTree {
@@ -89,9 +91,6 @@ private:
     bool setA;
     int descCount;
     char character;
-    //=================================================================
-    //Likelihood *node_lk;
-    int depth;
 
 
     void print_prefix(std::string prefix) const {
@@ -1068,10 +1067,11 @@ public:
         node *pseudo_root_3 = new node;
 
         pseudo_root_1->next=pseudo_root_2;
-        pseudo_root_1->data=tree->children[0];
         pseudo_root_2->next=pseudo_root_3;
-        pseudo_root_2->data=tree->children[0];
         pseudo_root_3->next=pseudo_root_1;
+
+        pseudo_root_1->data = tree->children[0];
+        pseudo_root_2->data = tree->children[0];
         pseudo_root_3->data=tree->children[0];
 
         utree.push_back(pseudo_root_1);
