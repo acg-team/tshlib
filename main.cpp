@@ -53,7 +53,6 @@
 #include <loguru.hpp>
 #include <Utree.hpp>
 
-#include "PhyTree.hpp"
 #include "TreeRearrangment.hpp"
 #include "Alignment.hpp"
 #include "Likelihood.hpp"
@@ -301,11 +300,10 @@ namespace fasta_parser {
 }
 
 
-
 int main(int argc, char **argv) {
 
     /* LOGURU LOGGING ENGINE
-     * Possible Loggin Levels
+     * Possible logging Levels
      * FATAL   -3
      * ERROR   -2
      * WARNING -1
@@ -429,6 +427,7 @@ int main(int argc, char **argv) {
 
     logLK += LKFunc::phi(MSA_len, nu, p0);
     LOG_S(DEBUG1) << "[Initial LK] LK = " << logLK;
+
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
@@ -441,7 +440,7 @@ int main(int argc, char **argv) {
     LOG_S(DEBUG1) << "[Initial Utree listVNodes] " << real_utree->printTreeNewick(true);
 
     //------------------------------------------------------------------------------------------------------------------
-    // TEST Function findPseudoRoot either fixing the root on a leaf or on the middle node
+    // TEST Function findPseudoRoot either fixing the root on a subtree or on the middle node
 
     std::string strpath;
     std::vector<VirtualNode *> path2root;
@@ -450,7 +449,6 @@ int main(int argc, char **argv) {
     // ------------------------------------
     real_utree->fixPseudoRootOnNextSubtree = false;
     path2root = real_utree->findPseudoRoot(startNode);
-
 
     for (auto &node: path2root) {
         strpath += "->" + node->vnode_name;
@@ -473,7 +471,7 @@ int main(int argc, char **argv) {
     strpath.clear();
 
     //------------------------------------------------------------------------------------------------------------------
-    // GET ALL NODES WITHIN RADIUS
+    // Get all the nodes between the radius boundaries
 
     int min_radius = 3;
     int max_radius = 6;
@@ -489,36 +487,26 @@ int main(int argc, char **argv) {
         // excluding the starting node.
         ts_list.fillListMoves(false);
 
-        // Print the list
+        // Print the list of moves for the current P node (source node)
         ts_list.printListMoves();
 
         LOG_S(DEBUG1) << "[tsh] Strategy " << ts_list.mset_strategy;
         LOG_S(DEBUG2) << "[utree rearrangment] Found " << ts_list.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
 
+        // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
         for (unsigned long i = 0; i < ts_list.getNumberOfMoves(); i++) {
             bool status;
 
-
-            try {
-                status = ts_list.applyMove(i);
-                if (status) {
-
-                    LOG_S(DEBUG2) << "[apply move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                                  << " | (" << ts_list.getSourceNode()->vnode_name << "->" << ts_list.getMove(i)->getTargetNode()->vnode_name << ")\t| "
-                                  << real_utree->printTreeNewick(true);
-
-
-                }
-            } catch (const std::exception &e) {
-
-                std::cout << "a standard exception was caught, with message '"
-                          << e.what() << "'" << std::endl;
-
+            status = ts_list.applyMove(i);
+            if (status) {
+                LOG_S(DEBUG2) << "[apply move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << ts_list.getSourceNode()->vnode_name << "->" << ts_list.getMove(i)->getTargetNode()->vnode_name << ")\t| "
+                              << real_utree->printTreeNewick(true);
             }
 
             status = ts_list.revertMove(i);
-            if (status) {
 
+            if (status) {
                 LOG_S(DEBUG2) << "[revert move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << ts_list.getMove(i)->getTargetNode()->vnode_name << "->" << ts_list.getSourceNode()->vnode_name << ")\t| "
                               << real_utree->printTreeNewick(true);
