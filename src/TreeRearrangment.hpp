@@ -136,7 +136,7 @@ public:
      * @brief Perform a complete node search and fill the vector containing the candidate moves.
      * @param includeSelf bool ?
      */
-    virtual void fillListMoves(bool includeSelf);
+    virtual void defineMoves(bool includeSelf);
 
     virtual bool applyMove(unsigned long moveID);
 
@@ -144,7 +144,7 @@ public:
 
     virtual bool revertMove(unsigned long moveID);
 
-    virtual void printListMoves();
+    virtual void printMoves();
 
     unsigned long getNumberOfMoves();
 

@@ -104,7 +104,7 @@ void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, Mo
 }
 
 
-void TreeRearrangment::fillListMoves(bool includeSelf) {
+void TreeRearrangment::defineMoves(bool includeSelf) {
 
     // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
 
@@ -186,7 +186,7 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 }
 
 
-void TreeRearrangment::printListMoves() {
+void TreeRearrangment::printMoves() {
 
     std::cout << "[set " << this->mset_id << "] " << this->mset_strategy << " strategy" << std::endl;
     std::cout << "[class]\t(P\t; Q)" << std::endl;

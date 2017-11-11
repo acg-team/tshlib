@@ -286,37 +286,37 @@ int main(int argc, char **argv) {
         LOG_S(DEBUG2) << "[utree neighbours] " << vnode->printNeighbours();
 
         // Initialise a new rearrangement list
-        auto ts_list = TreeRearrangment(vnode, min_radius, max_radius, true);
+        auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
 
         // Get all the target nodes with distance == radius from the source node
         // excluding the starting node.
-        ts_list.fillListMoves(false);
+        rearrangmentList.defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
-        ts_list.printListMoves();
+        rearrangmentList.printMoves();
 
-        LOG_S(DEBUG1) << "[tsh] Strategy " << ts_list.mset_strategy;
-        LOG_S(DEBUG2) << "[utree rearrangment] Found " << ts_list.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
+        LOG_S(DEBUG1) << "[tsh] Strategy " << rearrangmentList.mset_strategy;
+        LOG_S(DEBUG2) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
-        for (unsigned long i = 0; i < ts_list.getNumberOfMoves(); i++) {
+        for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
             bool status;
 
             // Apply the move
-            status = ts_list.applyMove(i);
+            status = rearrangmentList.applyMove(i);
 
             if (status) {
-                LOG_S(DEBUG2) << "[apply move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << ts_list.getSourceNode()->vnode_name << "->" << ts_list.getMove(i)->getTargetNode()->vnode_name << ")\t| "
+                LOG_S(DEBUG2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")\t| "
                               << real_utree->printTreeNewick(true);
             }
 
             // Revert the move, and return to the original tree
-            status = ts_list.revertMove(i);
+            status = rearrangmentList.revertMove(i);
 
             if (status) {
-                LOG_S(DEBUG2) << "[revert move]\t" << ts_list.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << ts_list.getMove(i)->getTargetNode()->vnode_name << "->" << ts_list.getSourceNode()->vnode_name << ")\t| "
+                LOG_S(DEBUG2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")\t| "
                               << real_utree->printTreeNewick(true);
             }
         }
