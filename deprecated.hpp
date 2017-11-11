@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti
+ * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
  * Copyright (C) 2015-2017 by Lorenzo Gatti
  *******************************************************************************
  *
- * This file is part of tshlib
+ * This file is part of tshexe
  *
  * tshexe is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -22,13 +22,12 @@
  *******************************************************************************/
 
 /**
- * @file Alignment.hpp
+ * @file deprecated.h
  * @author Lorenzo Gatti
  * @author Massimo Maiolo
- * @date 18 10 2017
+ * @date 11 11 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
- * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
  * @email massimo.maiolo@zhaw.ch
  * @status Development
@@ -41,46 +40,38 @@
  *
  * @see For more information visit:
  */
-#ifndef TSHLIB_ALIGNMENT_HPP
-#define TSHLIB_ALIGNMENT_HPP
+#ifndef TSHEXE_DEPRECATED_H
+#define TSHEXE_DEPRECATED_H
 
-#include <string>
-#include <vector>
-#include "Alphabet.h"
-#include "Sequence.hpp"
+struct utree_move_info {
+    node *node1;
+    node *node2;
+    int ID;
+    double lk;
+};
 
-
-class Alignment {
-
-private:
-
-public:
-
-    int align_alphabetsize;
-    bool align_compressed;
-    std::vector<Sequence *> align_dataset;
-    std::vector<unsigned int> align_weight;
-
-    Alignment();
-
-    Alignment(bool compressed);
-
-    void addSequence(std::string label, std::string data);
-
-    void addWeight(std::vector<unsigned int> column_weight);
-
-    long int getAlignmentSize();
-
-    std::string extractColumn(int index);
-
-    ~Alignment();
-
-protected:
-
-
+struct move_info {
+    PhyTree *node1;
+    PhyTree *node2;
+    int ID;
+    double lk;
 };
 
 
+void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::vector <move_info> &list_nodes);
+
+void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int direction, std::vector <move_info> &list_nodes);
+
+void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector <move_info> &list_nodes_left, std::vector <move_info> &list_nodes_right,
+                                  std::vector <move_info> &list_nodes_up);
+
+std::vector<PhyTree *> fill_with_nodes(PhyTree *n);
+
+std::vector<PhyTree *> get_unique(std::vector < PhyTree * > &list_nodes_n1, std::vector < PhyTree * > &list_nodes_n2);
+
+std::vector<PhyTree *> get_path_from_nodes(PhyTree *n1, PhyTree *n2);
+
+std::string create_col_MSA(std::vector <std::pair<std::string, std::string>> &MSA, int index);
 
 
-#endif //TSHLIB_ALIGNMENT_HPP
+#endif //TSHEXE_DEPRECATED_H

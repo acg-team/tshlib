@@ -11,7 +11,10 @@
 #include <Eigen/src/Core/IO.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
+
 #include "PhyTree.hpp"
+#include "Utilities.hpp"
+//#include "TreeRearrangment.hpp"
 
 
 /*
@@ -50,14 +53,28 @@ public:
     char vnode_character;                           /* Character associated to this node (only if terminal node) */
     int vnode_depth;                                /* Depth level of the node in the tree */
     bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
-    int vnode_rotated;                             /* Flag: if node was rotaded during a tree rearrangement move */
+    int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
+    int vnode_rotated;                              /* Flag: if node was rotaded during a tree rearrangement move */
+
+    /*!
+     *  Standard constructor
+     */
     VirtualNode();
 
+    /*!
+     * Virtual deconstructor
+     */
     virtual ~VirtualNode();
 
-
+    /*!
+     * @brief This function connects the current node to another one. It automatically performs a bidirectional connection
+     * @param inNode Target node to apply the connection to
+     */
     virtual void connectNode(VirtualNode *inNode);
 
+    /*!
+     * @brief This function disconnect the current node from any other one above it. The function is bidirectional.
+     */
     virtual void disconnectNode();
 
     /*!
@@ -79,13 +96,14 @@ public:
      */
     virtual void ResetNodeDirections();
 
-    void getMemberNeighbors(int radius);
+    //void getMemberNeighbors(int radius);
 
     /*!
      * @brief The function prints the neighborhood of the node in the format <^nodeUp;nodeLeft;nodeRight >
      * @return std::string with the node neighborhood
      */
     std::string printNeighbours();
+
 
     virtual void setNodeRight(VirtualNode *inNode);
 
@@ -99,11 +117,24 @@ public:
 
     VirtualNode *getNodeRight();
 
+    /*!
+     * @brief This function returns true if the node is terminal
+     * @return boolean value (true or false)
+     */
     bool isTerminalNode();
 
+    /*!
+     * @brief This function return the index of node as seen from the parent immediate above it.
+     * @return
+     */
     int indexOf();
 
-    bool swapNode(VirtualNode *targetNode);
+    /*!
+     * @brief This function swaps the current node and another one passed in the argument. The swap takes in consideration the topology of the tree.
+     * @param targetNode
+     * @return boolean value if the execution was performed correctly.
+     */
+    bool swapNode(VirtualNode *targetNode, MoveDirections move_direction);
 
     /*!
      * @brief The function checks if the current node is a parent of another node using a recursive structure

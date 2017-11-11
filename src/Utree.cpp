@@ -6,6 +6,7 @@
 #include <random>
 
 #include "Utree.hpp"
+#include "TreeRearrangment.hpp"
 
 
 void ::UtreeUtils::_traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source) {
@@ -315,7 +316,7 @@ int VirtualNode::indexOf() {
     }
 }
 
-bool VirtualNode::swapNode(VirtualNode *targetNode) {
+bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_direction) {
 
     bool execstatus = false;
 
@@ -338,6 +339,94 @@ bool VirtualNode::swapNode(VirtualNode *targetNode) {
         pnode_parent = this->getNodeUp();
         qnode_parent = targetNode->getNodeUp();
 
+
+/*        std::cout << pnode->printNeighbours() << std::endl;
+        std::cout <<qnode->printNeighbours() << std::endl;
+        std::cout <<pnode_parent->printNeighbours() << std::endl;
+        std::cout <<qnode_parent->printNeighbours() << std::endl;*/
+
+        bool invertQParents = false;
+        bool invertPParents = false;
+
+        switch (move_direction) {
+
+            case MoveDirections::left:
+                pnode->RotateCounterClockwise();
+                pnode_parent = pnode->getNodeUp();
+
+                pnode->disconnectNode();
+                qnode->disconnectNode();
+
+                qnode_parent->connectNode(pnode);
+                pnode_parent->connectNode(qnode);
+
+                break;
+
+            case MoveDirections::right:
+
+                pnode->RotateClockwise();
+                pnode_parent = pnode->getNodeUp();
+
+                pnode->disconnectNode();
+                qnode->disconnectNode();
+
+                qnode_parent->connectNode(pnode);
+                pnode_parent->connectNode(qnode);
+
+
+                break;
+
+            case MoveDirections::up:
+
+
+                // Prune nodes
+                pnode->disconnectNode();
+                qnode->disconnectNode();
+
+                // Save value of rotation
+                if (qnode->vnode_rotated != 0) {
+                    invertQParents = true;
+                }
+
+                if (pnode->vnode_rotated != 0) {
+                    invertPParents = true;
+                }
+
+                // Reset rotation
+                pnode->ResetNodeDirections();
+                qnode->ResetNodeDirections();
+
+                // Regraft nodes
+                if (invertQParents) {
+
+                    qnode->connectNode(pnode_parent);
+
+                } else {
+
+                    pnode_parent->connectNode(qnode);
+                }
+
+                if (invertPParents) {
+
+                    pnode->connectNode(qnode_parent);
+
+                } else {
+
+                    qnode_parent->connectNode(pnode);
+
+                }
+
+                //pnode_parent->connectNode(qnode);
+                //qnode_parent->connectNode(pnode);
+
+                break;
+
+            default:
+
+                std::cout << "I cannot move the node" << std::endl;
+                exit(EXIT_FAILURE);
+        }
+/*
         // If both nodes are in the pathway to the root
         if (pnode->isParent(qnode)) {
 
@@ -405,7 +494,7 @@ bool VirtualNode::swapNode(VirtualNode *targetNode) {
             }
 
 
-        }
+        }*/
 
         execstatus = true;
     }
@@ -512,9 +601,13 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *n, bool revertRotations) {
         curr_vn_left = n->getNodeLeft();
         curr_vn_right = n->getNodeRight();
 
-        n->setNodeUp(curr_vn_left);
-        n->setNodeLeft(curr_vn_right);
-        n->setNodeRight(curr_vn_up);
+        //n->setNodeUp(curr_vn_left);
+        //n->setNodeLeft(curr_vn_right);
+        //n->setNodeRight(curr_vn_up);
+
+        n->setNodeUp(curr_vn_right);
+        n->setNodeLeft(curr_vn_up);
+        n->setNodeRight(curr_vn_left);
 
         // Store the information about the rotation
         if (n->vnode_rotated != 0) {
@@ -575,9 +668,12 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *n, bool revertRotations) 
         curr_vn_right = n->getNodeRight();
 
         // Revert pointers
-        n->setNodeUp(curr_vn_right);
-        n->setNodeLeft(curr_vn_up);
-        n->setNodeRight(curr_vn_left);
+        //n->setNodeUp(curr_vn_right);
+        //n->setNodeLeft(curr_vn_up);
+        //n->setNodeRight(curr_vn_left);
+        n->setNodeUp(curr_vn_left);
+        n->setNodeLeft(curr_vn_right);
+        n->setNodeRight(curr_vn_up);
 
         // Store the information about the rotation
         if (n->vnode_rotated != 0) {

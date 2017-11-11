@@ -45,7 +45,6 @@
 #include <string>
 #include <vector>
 #include "Alignment.hpp"
-#include "Alphabet.h"
 
 
 Alignment::Alignment(bool compressed) {
@@ -117,13 +116,3 @@ long int Alignment::getAlignmentSize() {
     return length;
 }
 
-
-std::string create_col_MSA(std::vector<std::pair<std::string, std::string>> &MSA, int index) {
-    std::string colMSA;
-
-    for (unsigned int i = 0; i < MSA.size(); i++) {
-        colMSA.append(MSA.at(i).second, index, 1);
-    }
-
-    return colMSA;
-}

@@ -44,30 +44,19 @@
 #ifndef TSHLIB_TREEREARRANGEMENT_HPP
 #define TSHLIB_TREEREARRANGEMENT_HPP
 
-#include <map>
+
 #include "PhyTree.hpp"
 #include "Utree.hpp"
-
-struct move_info {
-    PhyTree *node1;
-    PhyTree *node2;
-    int ID;
-    double lk;
-};
+#include "Utilities.hpp"
 
 
-struct utree_move_info {
-    node *node1;
-    node *node2;
-    int ID;
-    double lk;
-};
+
+
 
 
 class Move {
 
 private:
-    std::map<int, std::string> move_classes;
 
 protected:
     VirtualNode *move_targetnode;       /* Pointer to the target node found during the node search */
@@ -75,10 +64,13 @@ protected:
 public:
     int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
     std::string move_name;          /* Move Name - Unused */
-    std::string move_desc;          /* Move Desc - Unused */
+    int move_radius;                /* Move Radius */
+    MoveDirections move_direction;             /* Move Direction for applying a rotation to the VirtualNode pointers */
     double move_lk;                 /* Likelihood of the move if applied */
     bool move_applied;              /* Indicator is set to true if the move is applied to the tree */
     std::string move_class;         /* Move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+    MoveType move_type;
+
 
     /*!
      * @brief Standard constructor
@@ -108,6 +100,10 @@ public:
     void setTargetNode(VirtualNode *target_node);
 
     void setMoveClass(int Value);
+
+    void setRadius(int radius);
+
+    void setDirection(MoveDirections direction);
 
 };
 
@@ -160,7 +156,7 @@ protected:
      * @param radius int Radius of the search (NNI = 1, SPR > 1)
      * @param includeSelf bool ?
      */
-    virtual void getNodesInRadius(VirtualNode *node_source, int radius, bool includeSelf);
+    virtual void getNodesInRadius(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf);
 
 
     /*!
@@ -182,16 +178,6 @@ protected:
 
 
 
-void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::vector<move_info> &list_nodes);
 
-void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int direction,std::vector<move_info> &list_nodes);
-
-void get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes_left, std::vector<move_info> &list_nodes_right,std::vector<move_info> &list_nodes_up);
-
-std::vector<PhyTree *> fill_with_nodes(PhyTree *n);
-
-std::vector<PhyTree *> get_unique(std::vector<PhyTree *> &list_nodes_n1, std::vector<PhyTree *> &list_nodes_n2);
-
-std::vector<PhyTree *> get_path_from_nodes(PhyTree *n1, PhyTree *n2);
 
 #endif //TSHLIB_TREEREARRANGEMENT_HPP

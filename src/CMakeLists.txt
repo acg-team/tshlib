@@ -105,7 +105,7 @@ SET(SOURCES
         Sequence.cpp
         Sequence.hpp
         Utree.cpp
-        Utree.hpp)
+        Utree.hpp Utilities.hpp)
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})

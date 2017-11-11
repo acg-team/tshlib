@@ -70,7 +70,7 @@ TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int min_radius, int
 }
 
 
-void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, bool includeSelf) {
+void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf) {
 
     VirtualNode *node = node_source;
 
@@ -81,6 +81,8 @@ void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, bo
 
     } else {
         if (radius == 0) {
+            moveInstance->setDirection(direction);
+            moveInstance->setRadius(this->mset_cur_radius);
             moveInstance->setTargetNode(node);
             moveInstance->setMoveClass(this->mset_cur_radius);
             this->addMove(moveInstance);
@@ -93,8 +95,9 @@ void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, bo
 
     if (!node->isTerminalNode()) {
         radius--;
-        this->getNodesInRadius(node->getNodeLeft(), radius, includeSelf);
-        this->getNodesInRadius(node->getNodeRight(), radius, includeSelf);
+        // Direction is required to know where to look at in the tree when the move is performed
+        this->getNodesInRadius(node->getNodeLeft(), radius, direction, includeSelf);
+        this->getNodesInRadius(node->getNodeRight(), radius, direction, includeSelf);
     }
 
 
@@ -103,7 +106,7 @@ void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, bo
 
 void TreeRearrangment::fillListMoves(bool includeSelf) {
 
-    // Flag the nodes ac
+    // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
 
     // Generate an array of integers representing the whole range of radius to use
     std::vector<int> x((unsigned long) (this->mset_max_radius - this->mset_min_radius) + 1);
@@ -113,8 +116,10 @@ void TreeRearrangment::fillListMoves(bool includeSelf) {
     // (WARN: this loop is recursive = first left, second right, then up )
     for (auto &radius : x) {
         this->mset_cur_radius = radius;
-        this->getNodesInRadius(this->mset_sourcenode, radius, includeSelf);
-
+        if (!this->mset_sourcenode->isTerminalNode()) {
+            this->getNodesInRadius(this->mset_sourcenode->getNodeLeft(), radius - 1, MoveDirections::left, includeSelf);
+            this->getNodesInRadius(this->mset_sourcenode->getNodeRight(), radius - 1, MoveDirections::right, includeSelf);
+        }
         if (nullptr != this->mset_sourcenode->getNodeUp()) {
             this->getNodesInRadiusUp(this->mset_sourcenode->getNodeUp(),
                                      radius - 1,
@@ -140,6 +145,7 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 
     //TODO: check binary tree condition!
     if (radius == 0) {
+        moveInstance->setDirection(MoveDirections::up);
         moveInstance->setTargetNode(vnode);
         moveInstance->setMoveClass(this->mset_cur_radius);
         this->addMove(moveInstance);
@@ -154,7 +160,7 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
                 this->getNodesInRadiusUp(vnode->getNodeUp(), radius, idx);
             }
 
-            this->getNodesInRadius(vnode->getNodeRight(), radius, true);
+            this->getNodesInRadius(vnode->getNodeRight(), radius, MoveDirections::up, true);
 
         } else if (direction == 1) {
             radius--;
@@ -164,14 +170,14 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
                 this->getNodesInRadiusUp(vnode->getNodeUp(), radius, idx);
             }
 
-            this->getNodesInRadius(vnode->getNodeLeft(), radius, true);
+            this->getNodesInRadius(vnode->getNodeLeft(), radius, MoveDirections::up, true);
 
         } else if (direction == 2) {
             // If the direction is 2, we are moving across the pseudoroot, therefore no need to decrease the radious
             if (vnode->getNodeUp() != nullptr) {
 
                 // Get the nodes in the radius from the node we reached after crossing the pseudoroot
-                this->getNodesInRadius(vnode, radius, false);
+                this->getNodesInRadius(vnode, radius, MoveDirections::up, false);
 
             }
 
@@ -199,17 +205,8 @@ unsigned long TreeRearrangment::getNumberOfMoves() {
 
 bool TreeRearrangment::applyMove(unsigned long moveID) {
     bool status = false;
-    try {
 
-
-        status = this->mset_sourcenode->swapNode(this->mset_moves.at(moveID)->getTargetNode());
-
-    } catch (const std::exception &e) {
-
-        std::cout << "a standard exception was caught, with message '"
-                  << e.what() << "'" << std::endl;
-
-    }
+    status = this->mset_sourcenode->swapNode(this->mset_moves.at(moveID)->getTargetNode(), this->mset_moves.at(moveID)->move_direction);
 
     return status;
 
@@ -218,17 +215,8 @@ bool TreeRearrangment::applyMove(unsigned long moveID) {
 
 bool TreeRearrangment::revertMove(unsigned long moveID) {
     bool status = false;
-    try {
 
-        status = this->mset_moves.at(moveID)->getTargetNode()->swapNode(this->mset_sourcenode);
-
-
-    } catch (const std::exception &e) {
-
-        std::cout << "a standard exception was caught, with message '"
-                  << e.what() << "'" << std::endl;
-
-    }
+    status = this->mset_moves.at(moveID)->getTargetNode()->swapNode(this->mset_sourcenode, MoveDirections::up);
 
     return status;
 }
@@ -251,16 +239,11 @@ Move::~Move() = default;
 
 Move::Move() {
 
-    this->move_classes[0] = "Undef";
-    this->move_classes[3] = "NNI";
-    this->move_classes[4] = "SPR";
-    this->move_classes[99] = "TBR";
-
-
     this->move_id = 0;
-    this->move_name = "undefined";
-    this->move_desc = "undefined";
-    this->move_class = "undefined";
+    this->move_name = "undef";
+    this->move_type = MoveType::undef;
+    this->move_class = "undef";
+    this->move_direction = MoveDirections::undef;
 
     this->move_lk = -INFINITY;
 
@@ -291,151 +274,29 @@ VirtualNode *Move::getTargetNode() {
 
 
 void Move::setMoveClass(int Value) {
-    std::string class_name;
+
     if (Value >= 4) {
-        class_name = this->move_classes[4];
+        this->move_type = MoveType::SPR;
+        this->move_class = "SPR";
+    } else if (Value == 3) {
+        this->move_type = MoveType::NNI;
+        this->move_class = "NNI";
     } else {
-        class_name = this->move_classes[Value];
-    }
+        this->move_type = MoveType::undef;
+        this->move_class = "undef";
 
-    this->move_class = class_name;
+    }
 }
 
+void Move::setRadius(int radius) {
 
+    this->move_radius = radius;
+}
 
+void Move::setDirection(MoveDirections direction) {
 
-
-void nodes_within_radius(PhyTree *start_node, PhyTree *node, int radius, std::vector<move_info> &list_nodes) {
-
-//    if (!save) {
-//          save = true;
-//    } else {
-    move_info m;
-    m.node1 = start_node;
-    m.node2 = node;
-    list_nodes.push_back(m);
-//    }
-
-    if (radius <= 0) {
-        return;
-    }
-
-    if (!node->isLeaf()) {
-        radius--;
-        nodes_within_radius(start_node, node->get_left_child(), radius, list_nodes);
-        nodes_within_radius(start_node, node->get_right_child(), radius, list_nodes);
-    }
+    this->move_direction = direction;
 
 }
 
-void nodes_within_radius_up(PhyTree *start_node, PhyTree *node, int radius, int direction,
-                            std::vector<move_info> &list_nodes) {
-    unsigned int idx;
-
-    //TODO: check binary tree condition!
-
-    move_info m;
-    m.node1 = start_node;
-    m.node2 = node;
-    list_nodes.push_back(m);
-
-    if (radius <= 0) {
-        return;
-    }
-
-    radius--;
-    if (direction == 0) {
-        if (node->getParent() != NULL) {
-            idx = node->indexOf();
-            nodes_within_radius_up(start_node, node->getParent(), radius, idx, list_nodes);
-        }
-        nodes_within_radius(start_node, node->get_right_child(), radius, list_nodes);
-    } else if (direction == 1) {
-        if (node->getParent() != NULL) {
-            idx = node->indexOf();
-            nodes_within_radius_up(start_node, node->getParent(), radius, idx, list_nodes);
-        }
-        nodes_within_radius(start_node, node->get_left_child(), radius, list_nodes);
-    }
-
-}
-
-void
-get_list_nodes_within_radius(PhyTree *node, int radius, std::vector<move_info> &list_nodes_left, std::vector<move_info> &list_nodes_right, std::vector<move_info> &list_nodes_up) {
-    //bool save;
-
-    //save = false;
-
-    //nodes_within_radius(node, node, radius, save, list_nodes_down);
-    //radius--;
-    nodes_within_radius(node, node->get_left_child(), radius, list_nodes_left);
-    nodes_within_radius(node, node->get_right_child(), radius, list_nodes_right);
-
-    if (node->getParent() != NULL) {
-        nodes_within_radius_up(node, node->getParent(), radius, node->indexOf(), list_nodes_up);
-    }
-
-}
-
-std::vector<PhyTree *> fill_with_nodes(PhyTree *n) {
-    std::vector<PhyTree *> list_nodes_n;
-
-    list_nodes_n.push_back(n);
-    while (n->getParent() != NULL) {
-        n = n->getParent();
-        list_nodes_n.push_back(n);
-    }
-
-    return list_nodes_n;
-}
-
-std::vector<PhyTree *> get_unique(std::vector<PhyTree *> &list_nodes_n1, std::vector<PhyTree *> &list_nodes_n2) {
-    std::vector<PhyTree *> list_nodes;
-    PhyTree *n1;
-    PhyTree *n2;
-
-    while (list_nodes_n1.size() > 0 && list_nodes_n2.size() > 0) {
-        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
-        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
-        if (n1 == n2) {
-            list_nodes.push_back(n1);
-            list_nodes_n1.pop_back();
-            list_nodes_n2.pop_back();
-        } else {
-            break;
-        }
-    }
-
-    while (list_nodes_n1.size() > 0) {
-        n2 = list_nodes_n1.at(list_nodes_n1.size() - 1);
-        list_nodes.push_back(n1);
-        list_nodes_n1.pop_back();
-    }
-
-    while (list_nodes_n2.size() > 0) {
-        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
-        list_nodes.push_back(n2);
-        list_nodes_n2.pop_back();
-    }
-
-    std::reverse(list_nodes.begin(), list_nodes.end());
-
-    return list_nodes;
-}
-
-std::vector<PhyTree *> get_path_from_nodes(PhyTree *n1, PhyTree *n2) {
-    std::vector<PhyTree *> list_nodes_n0;
-    std::vector<PhyTree *> list_nodes_n1;
-    std::vector<PhyTree *> list_nodes_n2;
-
-    // add nodes from n1 to root
-    list_nodes_n1 = fill_with_nodes(n1);
-
-    // add nodes from n2 to root
-    list_nodes_n2 = fill_with_nodes(n2);
-
-    list_nodes_n0 = get_unique(list_nodes_n1, list_nodes_n2);
-
-    return list_nodes_n0;
-}
 

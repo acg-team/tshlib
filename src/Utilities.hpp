@@ -5,7 +5,7 @@
  * Copyright (C) 2015-2017 by Lorenzo Gatti
  *******************************************************************************
  *
- * This file is part of tshlib
+ * This file is part of tshexe
  *
  * tshexe is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -22,15 +22,12 @@
  *******************************************************************************/
 
 /**
- * @file Alignment.hpp
+ * @file Utilites.h
  * @author Lorenzo Gatti
- * @author Massimo Maiolo
- * @date 18 10 2017
+ * @date 10 11 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
- * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
- * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -39,48 +36,16 @@
  * @bug
  * @warning
  *
- * @see For more information visit:
+ * @see For more information visit: http://www.lorenzogatti.me
  */
-#ifndef TSHLIB_ALIGNMENT_HPP
-#define TSHLIB_ALIGNMENT_HPP
+#ifndef TSHEXE_UTILITIES_H
+#define TSHEXE_UTILITIES_H
 
-#include <string>
-#include <vector>
-#include "Alphabet.h"
-#include "Sequence.hpp"
-
-
-class Alignment {
-
-private:
-
-public:
-
-    int align_alphabetsize;
-    bool align_compressed;
-    std::vector<Sequence *> align_dataset;
-    std::vector<unsigned int> align_weight;
-
-    Alignment();
-
-    Alignment(bool compressed);
-
-    void addSequence(std::string label, std::string data);
-
-    void addWeight(std::vector<unsigned int> column_weight);
-
-    long int getAlignmentSize();
-
-    std::string extractColumn(int index);
-
-    ~Alignment();
-
-protected:
-
-
+enum class MoveDirections {
+    left, right, up, undef
+};
+enum class MoveType {
+    NNI, SPR, TBR, undef
 };
 
-
-
-
-#endif //TSHLIB_ALIGNMENT_HPP
+#endif //TSHEXE_UTILITIES_H
