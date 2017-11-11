@@ -6,7 +6,6 @@
 #include <random>
 
 #include "Utree.hpp"
-#include "TreeRearrangment.hpp"
 
 
 void ::UtreeUtils::_traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source) {
@@ -68,31 +67,11 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
 
     }
 
-
     // Collapse multiforcating trees to star tree pointing to the same pseudoroot
     // Pick root node at random within the node-vector
 
     out_tree->startVNodes.at(0)->setNodeUp(out_tree->startVNodes.at(1));
     out_tree->startVNodes.at(1)->setNodeUp(out_tree->startVNodes.at(0));
-
-
-    /*std::default_random_engine generator;
-    std::uniform_int_distribution<unsigned long> distribution(0, out_tree->listVNodes.size() - 1);
-    unsigned long randomIndex = distribution(generator);
-
-
-    for (unsigned long i = 0; i < out_tree->listVNodes.size(); i++) {
-        if (i != randomIndex) {
-            out_tree->listVNodes.at(i)->setNodeUp(out_tree->listVNodes.at(randomIndex));
-        } else {
-            if (randomIndex == 0) {
-                randomIndex = randomIndex + 1;
-            } else {
-                randomIndex = randomIndex - 1;
-            }
-            out_tree->listVNodes.at(i)->setNodeUp(out_tree->listVNodes.at(randomIndex));
-        }
-    }*/
 
 }
 
@@ -108,12 +87,12 @@ VirtualNode::VirtualNode() {
 
 };
 
-void VirtualNode::connectNode(VirtualNode *inNode) {
+void VirtualNode::connectNode(VirtualNode *inVNode) {
 
     // Connect this node to the parent node
-    inNode->setNodeUp(this);
+    inVNode->setNodeUp(this);
     //inNode->_oneway_connectNode(this);
-    this->_oneway_connectNode(inNode);
+    this->_oneway_connectNode(inVNode);
 }
 
 bool VirtualNode::isTerminalNode() {
@@ -122,21 +101,21 @@ bool VirtualNode::isTerminalNode() {
 
 }
 
-void VirtualNode::setNodeRight(VirtualNode *inNode) {
+void VirtualNode::setNodeRight(VirtualNode *inVNode) {
 
-    this->vnode_right = inNode;
-
-}
-
-void VirtualNode::setNodeLeft(VirtualNode *inNode) {
-
-    this->vnode_left = inNode;
+    this->vnode_right = inVNode;
 
 }
 
-void VirtualNode::setNodeUp(VirtualNode *inNode) {
+void VirtualNode::setNodeLeft(VirtualNode *inVNode) {
 
-    this->vnode_up = inNode;
+    this->vnode_left = inVNode;
+
+}
+
+void VirtualNode::setNodeUp(VirtualNode *inVNode) {
+
+    this->vnode_up = inVNode;
 
 }
 
@@ -175,16 +154,16 @@ VirtualNode *VirtualNode::getNodeRight() {
     return this->vnode_right ?: nullptr;
 }
 
-void Utree::addMember(VirtualNode *iNode, bool isStartNode) {
+void Utree::addMember(VirtualNode *inVNode, bool isStartNode) {
 
-    this->listVNodes.push_back(iNode);
+    this->listVNodes.push_back(inVNode);
     if (isStartNode) {
-        this->startVNodes.push_back(iNode);
+        this->startVNodes.push_back(inVNode);
     }
 
 }
 
-std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *iNode) {
+std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *inVNode, bool fixPseudoRootOnNextSubtree) {
 
     // This method returns a vector which contains all the nodes in the path
     // from the start node to the pseudoroot
@@ -193,9 +172,9 @@ std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *iNode) {
     auto *CurrentNode = new VirtualNode;
 
     // Add the first element of the path to the root
-    path2root.push_back(iNode);
+    path2root.push_back(inVNode);
 
-    CurrentNode = iNode;
+    CurrentNode = inVNode;
 
     // Add all the other nodes traversing the tree in post-order
     do {
@@ -204,7 +183,7 @@ std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *iNode) {
 
     } while (CurrentNode != CurrentNode->getNodeUp()->getNodeUp());
 
-    if (this->fixPseudoRootOnNextSubtree) {
+    if (fixPseudoRootOnNextSubtree) {
 
         path2root.push_back(CurrentNode->getNodeUp());
 
@@ -231,56 +210,75 @@ std::string Utree::printTreeNewick(bool showInternalNodeNames) {
     return s;
 }
 
-std::string Utree::_recursiveFormatNewick(VirtualNode *n, bool showInternalNodeNames) {
+std::string Utree::_recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames) {
 
     std::stringstream newick;
 
-    if (n->isTerminalNode()) {
-        //std::stringstream newick;
-        newick << n->vnode_name << ":" << n->vnode_branchlength;
-        //return newick.str();
-    } else {
-        //std::stringstream newick;
-        newick << "(";
-        newick << _recursiveFormatNewick(n->getNodeLeft(), showInternalNodeNames);
-        newick << ",";
-        newick << _recursiveFormatNewick(n->getNodeRight(), showInternalNodeNames);
-        newick << ")";
-        if (showInternalNodeNames) {
-            newick << n->vnode_name;
-        }
-        newick << ":" << n->vnode_branchlength;
-        //return newick.str();
-    }
-    return newick.str();
+    if (vnode->isTerminalNode()) {
 
+        newick << vnode->vnode_name << ":" << vnode->vnode_branchlength;
+
+    } else {
+
+        newick << "(";
+        newick << _recursiveFormatNewick(vnode->getNodeLeft(), showInternalNodeNames);
+        newick << ",";
+        newick << _recursiveFormatNewick(vnode->getNodeRight(), showInternalNodeNames);
+        newick << ")";
+
+        if (showInternalNodeNames) {
+            newick << vnode->vnode_name;
+        }
+
+        newick << ":" << vnode->vnode_branchlength;
+    }
+
+    return newick.str();
 }
 
 Utree::~Utree() = default;
 
-Utree::Utree() {
-
-    this->fixPseudoRootOnNextSubtree = true;
-
-}
+Utree::Utree() = default;
 
 void Utree::_updateStartNodes() {
 
-    bool currValue = this->fixPseudoRootOnNextSubtree;
-    this->fixPseudoRootOnNextSubtree = true;
-    std::vector<VirtualNode *> sideA = this->findPseudoRoot(this->listVNodes.at(0));
+    // Find the pseudoroot node on the first side of the tree
+    bool fixPseudoRootOnNextSubtree = true;
+    std::vector<VirtualNode *> sideA = this->findPseudoRoot(this->listVNodes.at(0), fixPseudoRootOnNextSubtree);
     VirtualNode *sideA_node = sideA.back();
 
-    this->fixPseudoRootOnNextSubtree = false;
-    std::vector<VirtualNode *> sideB = this->findPseudoRoot(this->listVNodes.at(0));
+    // Find the pseudoroot node on the opposite side of the tree
+    fixPseudoRootOnNextSubtree = false;
+    std::vector<VirtualNode *> sideB = this->findPseudoRoot(this->listVNodes.at(0), fixPseudoRootOnNextSubtree);
     VirtualNode *sideB_node = sideB.back();
 
-    this->fixPseudoRootOnNextSubtree = currValue;
-
+    // Reset the original utree attribute
     this->startVNodes.clear();
 
+    // Update the utree attribute
     this->startVNodes.push_back(sideA_node);
     this->startVNodes.push_back(sideB_node);
+
+}
+
+void Utree::_testReachingPseudoRoot() {
+
+    std::string strpath;
+    std::vector<VirtualNode *> vnodes2root;
+
+    for (auto &i : this->listVNodes) {
+
+        vnodes2root = this->findPseudoRoot(i);
+
+        for (auto &tnode: vnodes2root) {
+            strpath += "->" + tnode->vnode_name;
+        }
+
+        std::cout << strpath << std::endl;
+        vnodes2root.clear();
+        strpath.clear();
+
+    }
 
 }
 
@@ -526,17 +524,17 @@ void VirtualNode::disconnectNode() {
     this->setNodeUp(nullptr);
 }
 
-void VirtualNode::_oneway_connectNode(VirtualNode *inNode) {
+void VirtualNode::_oneway_connectNode(VirtualNode *inVNode) {
 
     // Check which direction is still available (either left or right)
     if (!this->getNodeLeft()) {
-        this->setNodeLeft(inNode);
+        this->setNodeLeft(inVNode);
         return;
     } else if (!this->getNodeRight()) {
-        this->setNodeRight(inNode);
+        this->setNodeRight(inVNode);
         return;
     } else if (!this->getNodeUp()) {
-        this->setNodeUp(inNode);
+        this->setNodeUp(inVNode);
         return;
     } else {
         perror("No direction available in the VirtualNode to add a new child");
@@ -544,11 +542,11 @@ void VirtualNode::_oneway_connectNode(VirtualNode *inNode) {
 
 }
 
-bool VirtualNode::isParent(VirtualNode *inNode) {
+bool VirtualNode::isParent(VirtualNode *inVNode) {
 
     bool status = false;
 
-    VirtualNode *CurrentNode = inNode;
+    VirtualNode *CurrentNode = inVNode;
 
     do {
         CurrentNode = CurrentNode->getNodeUp();
@@ -578,61 +576,61 @@ void VirtualNode::ResetNodeDirections() {
 
 }
 
-void VirtualNode::_recursive_cw_rotation(VirtualNode *n, bool revertRotations) {
+void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotations) {
 
     bool continueTraverse = true;
-    if (n->getNodeUp() != nullptr) {
-        if (n->getNodeUp()->getNodeUp() == n) {
+    if (vnode->getNodeUp() != nullptr) {
+        if (vnode->getNodeUp()->getNodeUp() == vnode) {
             continueTraverse = false;
         }
     }
 
-    if (revertRotations and n->vnode_rotated == 0) { return; }
+    if (revertRotations and vnode->vnode_rotated == 0) { return; }
 
     // rotate the pointers only if the node is not a leaf
-    if (!n->isTerminalNode()) {
+    if (!vnode->isTerminalNode()) {
         auto curr_vn_up = new VirtualNode;
         auto curr_vn_left = new VirtualNode;
         auto curr_vn_right = new VirtualNode;
         auto n_left = new VirtualNode;
         auto n_right = new VirtualNode;
 
-        curr_vn_up = n->getNodeUp();
-        curr_vn_left = n->getNodeLeft();
-        curr_vn_right = n->getNodeRight();
+        curr_vn_up = vnode->getNodeUp();
+        curr_vn_left = vnode->getNodeLeft();
+        curr_vn_right = vnode->getNodeRight();
 
         //n->setNodeUp(curr_vn_left);
         //n->setNodeLeft(curr_vn_right);
         //n->setNodeRight(curr_vn_up);
 
-        n->setNodeUp(curr_vn_right);
-        n->setNodeLeft(curr_vn_up);
-        n->setNodeRight(curr_vn_left);
+        vnode->setNodeUp(curr_vn_right);
+        vnode->setNodeLeft(curr_vn_up);
+        vnode->setNodeRight(curr_vn_left);
 
         // Store the information about the rotation
-        if (n->vnode_rotated != 0) {
-            n->vnode_rotated = 0;
+        if (vnode->vnode_rotated != 0) {
+            vnode->vnode_rotated = 0;
         } else {
-            n->vnode_rotated = 1;
+            vnode->vnode_rotated = 1;
         }
 
         if (revertRotations) {
             n_left = curr_vn_left;
             n_right = curr_vn_right;
         } else {
-            n_left = n->getNodeLeft();
-            n_right = n->getNodeRight();
+            n_left = vnode->getNodeLeft();
+            n_right = vnode->getNodeRight();
         }
 
         if (continueTraverse) {
 
             // Move to the newly set left side
-            if (n->getNodeLeft() != nullptr) {
-                _recursive_cw_rotation(n->getNodeLeft(), revertRotations);
+            if (vnode->getNodeLeft() != nullptr) {
+                _recursive_cw_rotation(vnode->getNodeLeft(), revertRotations);
             }
             // Move to the newly set right side
-            if (n->getNodeRight() != nullptr) {
-                _recursive_cw_rotation(n->getNodeRight(), revertRotations);
+            if (vnode->getNodeRight() != nullptr) {
+                _recursive_cw_rotation(vnode->getNodeRight(), revertRotations);
             }
 
         } else {
@@ -644,18 +642,18 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *n, bool revertRotations) {
 
 }
 
-void VirtualNode::_recursive_ccw_rotation(VirtualNode *n, bool revertRotations) {
+void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations) {
     bool continueTraverse = true;
-    if (n->getNodeUp() != nullptr) {
-        if (n->getNodeUp()->getNodeUp() == n) {
+    if (vnode->getNodeUp() != nullptr) {
+        if (vnode->getNodeUp()->getNodeUp() == vnode) {
             continueTraverse = false;
         }
     }
 
-    if (revertRotations and n->vnode_rotated == 0) { return; }
+    if (revertRotations and vnode->vnode_rotated == 0) { return; }
 
     // rotate the pointers only if the node is not a leaf
-    if (!n->isTerminalNode()) {
+    if (!vnode->isTerminalNode()) {
 
         auto curr_vn_up = new VirtualNode;
         auto curr_vn_left = new VirtualNode;
@@ -663,31 +661,31 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *n, bool revertRotations) 
         auto n_left = new VirtualNode;
         auto n_right = new VirtualNode;
 
-        curr_vn_up = n->getNodeUp();
-        curr_vn_left = n->getNodeLeft();
-        curr_vn_right = n->getNodeRight();
+        curr_vn_up = vnode->getNodeUp();
+        curr_vn_left = vnode->getNodeLeft();
+        curr_vn_right = vnode->getNodeRight();
 
         // Revert pointers
         //n->setNodeUp(curr_vn_right);
         //n->setNodeLeft(curr_vn_up);
         //n->setNodeRight(curr_vn_left);
-        n->setNodeUp(curr_vn_left);
-        n->setNodeLeft(curr_vn_right);
-        n->setNodeRight(curr_vn_up);
+        vnode->setNodeUp(curr_vn_left);
+        vnode->setNodeLeft(curr_vn_right);
+        vnode->setNodeRight(curr_vn_up);
 
         // Store the information about the rotation
-        if (n->vnode_rotated != 0) {
-            n->vnode_rotated = 0;
+        if (vnode->vnode_rotated != 0) {
+            vnode->vnode_rotated = 0;
         } else {
-            n->vnode_rotated = 2;
+            vnode->vnode_rotated = 2;
         }
 
         if (revertRotations) {
             n_left = curr_vn_left;
             n_right = curr_vn_right;
         } else {
-            n_left = n->getNodeLeft();
-            n_right = n->getNodeRight();
+            n_left = vnode->getNodeLeft();
+            n_right = vnode->getNodeRight();
         }
 
         if (continueTraverse) {

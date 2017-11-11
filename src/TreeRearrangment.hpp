@@ -44,14 +44,9 @@
 #ifndef TSHLIB_TREEREARRANGEMENT_HPP
 #define TSHLIB_TREEREARRANGEMENT_HPP
 
-
 #include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Utilities.hpp"
-
-
-
-
 
 
 class Move {
@@ -68,8 +63,8 @@ public:
     MoveDirections move_direction;             /* Move Direction for applying a rotation to the VirtualNode pointers */
     double move_lk;                 /* Likelihood of the move if applied */
     bool move_applied;              /* Indicator is set to true if the move is applied to the tree */
-    std::string move_class;         /* Move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-    MoveType move_type;
+    std::string move_class;         /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+    MoveType move_type;             /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
 
 
     /*!

@@ -58,6 +58,7 @@ TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int radius, bool pr
 
 }
 
+
 TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
 
     this->mset_sourcenode = node_source;
@@ -130,6 +131,7 @@ void TreeRearrangment::defineMoves(bool includeSelf) {
 
 
 void TreeRearrangment::addMove(Move *move) {
+
     this->mset_moves.emplace_back(move);
 
 }
@@ -204,21 +206,28 @@ unsigned long TreeRearrangment::getNumberOfMoves() {
 
 
 bool TreeRearrangment::applyMove(unsigned long moveID) {
-    bool status = false;
 
-    status = this->mset_sourcenode->swapNode(this->mset_moves.at(moveID)->getTargetNode(), this->mset_moves.at(moveID)->move_direction);
+    VirtualNode *pnode = this->mset_sourcenode;
+    VirtualNode *qnode = this->mset_moves.at(moveID)->getTargetNode();
 
-    return status;
+    // Swap pnode with qnode according to the direction found during the move configuration
+    // If the swap is performed correctly then the function returns true otherwise false
+    return pnode->swapNode(qnode, this->mset_moves.at(moveID)->move_direction);
 
+    //status = this->mset_sourcenode->swapNode(this->mset_moves.at(moveID)->getTargetNode(), this->mset_moves.at(moveID)->move_direction);
 }
 
 
 bool TreeRearrangment::revertMove(unsigned long moveID) {
-    bool status = false;
 
-    status = this->mset_moves.at(moveID)->getTargetNode()->swapNode(this->mset_sourcenode, MoveDirections::up);
+    VirtualNode *pnode = this->mset_moves.at(moveID)->getTargetNode();
+    VirtualNode *qnode = this->mset_sourcenode;
 
-    return status;
+    // Swap pnode with qnode according to the direction found during the move configuration
+    // If the swap is performed correctly then the function returns true otherwise false
+    return pnode->swapNode(qnode, MoveDirections::up);
+
+    //return this->mset_moves.at(moveID)->getTargetNode()->swapNode(this->mset_sourcenode, MoveDirections::up);
 }
 
 
@@ -275,23 +284,27 @@ VirtualNode *Move::getTargetNode() {
 
 void Move::setMoveClass(int Value) {
 
-    if (Value >= 4) {
+    if (Value >= 4 and Value < 10) {
         this->move_type = MoveType::SPR;
         this->move_class = "SPR";
+    } else if (Value >= 10) {
+        this->move_type = MoveType::TBR;
+        this->move_class = "TBR";
     } else if (Value == 3) {
         this->move_type = MoveType::NNI;
         this->move_class = "NNI";
     } else {
         this->move_type = MoveType::undef;
         this->move_class = "undef";
-
     }
 }
+
 
 void Move::setRadius(int radius) {
 
     this->move_radius = radius;
 }
+
 
 void Move::setDirection(MoveDirections direction) {
 

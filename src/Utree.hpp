@@ -14,7 +14,6 @@
 
 #include "PhyTree.hpp"
 #include "Utilities.hpp"
-//#include "TreeRearrangment.hpp"
 
 
 /*
@@ -68,9 +67,9 @@ public:
 
     /*!
      * @brief This function connects the current node to another one. It automatically performs a bidirectional connection
-     * @param inNode Target node to apply the connection to
+     * @param inVNode Target node to apply the connection to
      */
-    virtual void connectNode(VirtualNode *inNode);
+    virtual void connectNode(VirtualNode *inVNode);
 
     /*!
      * @brief This function disconnect the current node from any other one above it. The function is bidirectional.
@@ -105,11 +104,11 @@ public:
     std::string printNeighbours();
 
 
-    virtual void setNodeRight(VirtualNode *inNode);
+    virtual void setNodeRight(VirtualNode *inVNode);
 
-    virtual void setNodeLeft(VirtualNode *inNode);
+    virtual void setNodeLeft(VirtualNode *inVNode);
 
-    virtual void setNodeUp(VirtualNode *inNode);
+    virtual void setNodeUp(VirtualNode *inVNode);
 
     VirtualNode *getNodeUp();
 
@@ -138,10 +137,10 @@ public:
 
     /*!
      * @brief The function checks if the current node is a parent of another node using a recursive structure
-     * @param inNode VirtualNode pointer
+     * @param inVNode VirtualNode pointer
      * @return False if the node passed is not parent of the current one, True otherwise
      */
-    bool isParent(VirtualNode *inNode);
+    bool isParent(VirtualNode *inVNode);
 
 
 
@@ -150,13 +149,11 @@ protected:
     VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
     VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
 
-    virtual void _oneway_connectNode(VirtualNode *inNode);
+    virtual void _oneway_connectNode(VirtualNode *inVNode);
 
-    virtual void _recursive_cw_rotation(VirtualNode *n, bool revertRotations);
+    virtual void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
 
-    virtual void _recursive_ccw_rotation(VirtualNode *n, bool revertRotations);
-
-
+    virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
 };
 
@@ -166,22 +163,26 @@ public:
 
     std::vector<VirtualNode *> listVNodes;
     std::vector<VirtualNode *> startVNodes;
-    bool fixPseudoRootOnNextSubtree;
 
     Utree();
 
     virtual ~Utree();
 
-    std::vector<VirtualNode *> findPseudoRoot(VirtualNode *iNode);
+    /*!
+     * @brief This function finds the pseudoroot traversing the tree from starting node until a bidirectional connection is found
+     * @param inVNode starting node
+     * @return std::vector of VirtualNode pointers from the starting point until the pseudoroot
+     */
+    std::vector<VirtualNode *> findPseudoRoot(VirtualNode *inVNode, bool fixPseudoRootOnNextSubtree = false);
 
-    void addMember(VirtualNode *iNode, bool isStartNode = false);
-
+    virtual void addMember(VirtualNode *inVNode, bool isStartNode = false);
 
     std::string printTreeNewick(bool showInternalNodeNames);
 
+    virtual void _testReachingPseudoRoot();
 
 protected:
-    std::string _recursiveFormatNewick(VirtualNode *n, bool showInternalNodeNames);
+    std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
     virtual void _updateStartNodes();
 
@@ -191,11 +192,10 @@ private:
 
 
 namespace UtreeUtils {
+
     void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
 
     void convertUtree(PhyTree *in_tree, Utree *out_tree);
-
 }
-
 
 #endif //TSHLIB_UTREE_HPP

@@ -118,19 +118,19 @@ int main(int argc, char **argv) {
      * DEBUG1  +2
      */
     loguru::init(argc, argv);
-
     LOG_S(DEBUG1) << "test";
+    //------------------------------------------------------------------------------------------------------------------
     std::string tree_file = argv[1];
     std::string msa_file = argv[2];
+    //------------------------------------------------------------------------------------------------------------------
     PhyTree *tree = nullptr;
     double mu;
     double lambda;
     double tau;
     double nu;
-
+    //------------------------------------------------------------------------------------------------------------------
     mu = 0.1;
     lambda = 0.2;
-
     //------------------------------------------------------------------------------------------------------------------
     // INIT TREE
 
@@ -236,24 +236,24 @@ int main(int argc, char **argv) {
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
-    auto real_utree = new Utree;
+    auto utree = new Utree;
 
     //std::vector<node *> utree;
     //node *utree_pseudo_root;
 
-    UtreeUtils::convertUtree(tree, real_utree);
-    LOG_S(DEBUG1) << "[Initial Utree listVNodes] " << real_utree->printTreeNewick(true);
+    UtreeUtils::convertUtree(tree, utree);
+    LOG_S(DEBUG1) << "[Initial Utree listVNodes] " << utree->printTreeNewick(true);
 
     //------------------------------------------------------------------------------------------------------------------
     // TEST Function findPseudoRoot either fixing the root on a subtree or on the middle node
 
     std::string strpath;
     std::vector<VirtualNode *> path2root;
-    //VirtualNode *startNode = real_utree->listVNodes.at(0)->getNodeLeft()->getNodeLeft();
-    VirtualNode *startNode = real_utree->listVNodes.at(0);
+    //VirtualNode *startNode = utree->listVNodes.at(0)->getNodeLeft()->getNodeLeft();
+    VirtualNode *startNode = utree->listVNodes.at(0);
     // ------------------------------------
-    real_utree->fixPseudoRootOnNextSubtree = false;
-    path2root = real_utree->findPseudoRoot(startNode);
+    bool fixPseudoRootOnNextSubtree = false;
+    path2root = utree->findPseudoRoot(startNode, fixPseudoRootOnNextSubtree);
 
     for (auto &node: path2root) {
         strpath += "->" + node->vnode_name;
@@ -264,8 +264,8 @@ int main(int argc, char **argv) {
     strpath.clear();
 
     // ------------------------------------
-    real_utree->fixPseudoRootOnNextSubtree = true;
-    path2root = real_utree->findPseudoRoot(startNode);
+    fixPseudoRootOnNextSubtree = true;
+    path2root = utree->findPseudoRoot(startNode, fixPseudoRootOnNextSubtree);
 
 
     for (auto &tnode: path2root) {
@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
     int max_radius = 6;
 
     // Print node description with neighbors
-    for (auto &vnode:real_utree->listVNodes) {
+    for (auto &vnode:utree->listVNodes) {
         LOG_S(DEBUG2) << "[utree neighbours] " << vnode->printNeighbours();
 
         // Initialise a new rearrangement list
@@ -308,8 +308,9 @@ int main(int argc, char **argv) {
             if (status) {
                 LOG_S(DEBUG2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")\t| "
-                              << real_utree->printTreeNewick(true);
+                              << utree->printTreeNewick(true);
             }
+            utree->_testReachingPseudoRoot();
 
             // Revert the move, and return to the original tree
             status = rearrangmentList.revertMove(i);
@@ -317,7 +318,7 @@ int main(int argc, char **argv) {
             if (status) {
                 LOG_S(DEBUG2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")\t| "
-                              << real_utree->printTreeNewick(true);
+                              << utree->printTreeNewick(true);
             }
         }
 
