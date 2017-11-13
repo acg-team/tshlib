@@ -368,12 +368,12 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
         pnode_parent = this->getNodeUp();
         qnode_parent = targetNode->getNodeUp();
 
-
+/*
         std::cout << pnode->printNeighbours() << std::endl;
         std::cout << qnode->printNeighbours() << std::endl;
         std::cout << pnode_parent->printNeighbours() << std::endl;
         std::cout << qnode_parent->printNeighbours() << std::endl;
-
+*/
         bool invertQParents = false;
         bool invertPParents = false;
 

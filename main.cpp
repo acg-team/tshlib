@@ -242,10 +242,10 @@ int main(int argc, char **argv) {
     //node *utree_pseudo_root;
 
     UtreeUtils::convertUtree(tree, utree);
-    std::cout << "[Initial Utree listVNodes] " << utree->printTreeNewick(true) << std::endl;
+    LOG_S(DEBUG1) << "[Initial utree] " << utree->printTreeNewick(true);
 
     // Save tree to file
-    utree->saveTreeOnFile("../data/test.txt");
+    //utree->saveTreeOnFile("../data/test.txt");
 
     //------------------------------------------------------------------------------------------------------------------
     // TEST Function findPseudoRoot either fixing the root on a subtree or on the middle node
@@ -296,16 +296,15 @@ int main(int argc, char **argv) {
         rearrangmentList.defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
-        rearrangmentList.printMoves();
+        //rearrangmentList.printMoves();
 
         LOG_S(DEBUG1) << "[tsh] Strategy " << rearrangmentList.mset_strategy;
-        LOG_S(DEBUG2) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
+        LOG_S(DEBUG1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
 
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
         for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
             bool status;
-            std::string vnodename;
 
             // Apply the move
             status = rearrangmentList.applyMove(i);
@@ -315,22 +314,18 @@ int main(int argc, char **argv) {
                 LOG_S(DEBUG2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")\t| "
                               << utree->printTreeNewick(true);
-                utree->_testReachingPseudoRoot();
+                //utree->_testReachingPseudoRoot();
             }
-
-            //utree->printTreeNewick(true);
 
             // Revert the move, and return to the original tree
             status = rearrangmentList.revertMove(i);
-            utree->saveTreeOnFile("../data/test.txt");
+            //utree->saveTreeOnFile("../data/test.txt");
             if (status) {
                 LOG_S(DEBUG2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")\t| "
                               << utree->printTreeNewick(true);
-                utree->_testReachingPseudoRoot();
+                //utree->_testReachingPseudoRoot();
             }
-            //utree->printTreeNewick(true);
-            //std::cout << "-----------------------------------------------" << std::endl;
 
         }
 
