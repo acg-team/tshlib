@@ -308,7 +308,8 @@ int main(int argc, char **argv) {
 
             if (status) {
                 LOG_S(DEBUG2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")\t| "
+                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true);
                 //utree->_testReachingPseudoRoot();
             }
@@ -318,7 +319,8 @@ int main(int argc, char **argv) {
             //utree->saveTreeOnFile("../data/test.txt");
             if (status) {
                 LOG_S(DEBUG2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")\t| "
+                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true);
                 //utree->_testReachingPseudoRoot();
             }
