@@ -151,10 +151,10 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 
         switch (direction) {
             case 0:
-                moving_direction = MoveDirections::left;
+                moving_direction = MoveDirections::up_left;
                 break;
             case 1:
-                moving_direction = MoveDirections::right;
+                moving_direction = MoveDirections::up_right;
                 break;
             case 2:
                 moving_direction = MoveDirections::up;
@@ -229,10 +229,10 @@ bool TreeRearrangment::applyMove(unsigned long moveID) {
 
     VirtualNode *pnode = this->mset_sourcenode;
     VirtualNode *qnode = this->mset_moves.at(moveID)->getTargetNode();
-
+    bool revertRotations = false;
     // Swap pnode with qnode according to the direction found during the move configuration
     // If the swap is performed correctly then the function returns true otherwise false
-    return pnode->swapNode(qnode, this->mset_moves.at(moveID)->move_direction);
+    return pnode->swapNode(qnode, this->mset_moves.at(moveID)->move_direction, revertRotations);
 
     //status = this->mset_sourcenode->swapNode(this->mset_moves.at(moveID)->getTargetNode(), this->mset_moves.at(moveID)->move_direction);
 }
@@ -242,10 +242,10 @@ bool TreeRearrangment::revertMove(unsigned long moveID) {
 
     VirtualNode *pnode = this->mset_moves.at(moveID)->getTargetNode();
     VirtualNode *qnode = this->mset_sourcenode;
-
+    bool revertRotations = true;
     // Swap pnode with qnode according to the direction found during the move configuration
     // If the swap is performed correctly then the function returns true otherwise false
-    return pnode->swapNode(qnode, MoveDirections::up);
+    return pnode->swapNode(qnode, MoveDirections::up, revertRotations);
 
     //return this->mset_moves.at(moveID)->getTargetNode()->swapNode(this->mset_sourcenode, MoveDirections::up);
 }

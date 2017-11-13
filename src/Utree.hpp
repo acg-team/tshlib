@@ -93,7 +93,7 @@ public:
     /*!
      * @brief This function resets any rotation previously performed on the node
      */
-    virtual void resetNodeDirections();
+    virtual void resetNodeDirections(bool revertRotations);
 
     //void getMemberNeighbors(int radius);
 
@@ -133,7 +133,7 @@ public:
      * @param targetNode
      * @return boolean value if the execution was performed correctly.
      */
-    bool swapNode(VirtualNode *targetNode, MoveDirections move_direction);
+    bool swapNode(VirtualNode *targetNode, MoveDirections move_direction, bool revertRotations);
 
     /*!
      * @brief The function checks if the current node is a parent of another node using a recursive structure

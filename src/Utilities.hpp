@@ -42,7 +42,7 @@
 #define TSHEXE_UTILITIES_H
 
 enum class MoveDirections {
-    left, right, up, undef
+    left, right, up, up_right, up_left, undef
 };
 enum class MoveType {
     NNI, SPR, TBR, undef
