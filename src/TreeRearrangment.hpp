@@ -158,9 +158,9 @@ protected:
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
      * @param node_source   PhyTree Pointer to the starting node
      * @param radius        int Radius of the search (NNI = 3, SPR > 3)
-     * @param direction     int ?
+     * @param traverse_direction     int ?
      */
-    void getNodesInRadiusUp(VirtualNode *node_source, int radius, int direction);
+    void getNodesInRadiusUp(VirtualNode *node_source, int radius, NodePosition traverse_direction);
 
     /*!
      * @brief Append candidate move to the mset_moves vector

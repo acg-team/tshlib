@@ -323,17 +323,26 @@ std::string VirtualNode::printNeighbours() {
     return description.str();
 }
 
-int VirtualNode::indexOf() {
-
+NodePosition VirtualNode::indexOf() {
+    NodePosition node_position;
     VirtualNode *parent = this->getNodeUp();
     if (parent->getNodeLeft() == this) {
-        return 0;
+
+        node_position = NodePosition::left;
+
     } else if (parent->getNodeRight() == this) {
-        return 1;
+
+        node_position = NodePosition::right;
+
+    } else if (parent->getNodeUp() == this) {
+
+        node_position = NodePosition::up;
+
     } else {
         //perror("The pointer index of the current node is unknown");
-        return 2;
+        node_position = NodePosition::undef;
     }
+    return node_position;
 }
 
 bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_direction, bool revertRotations) {
@@ -360,10 +369,10 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
         qnode_parent = targetNode->getNodeUp();
 
 
-/*        std::cout << pnode->printNeighbours() << std::endl;
-        std::cout <<qnode->printNeighbours() << std::endl;
-        std::cout <<pnode_parent->printNeighbours() << std::endl;
-        std::cout <<qnode_parent->printNeighbours() << std::endl;*/
+        std::cout << pnode->printNeighbours() << std::endl;
+        std::cout << qnode->printNeighbours() << std::endl;
+        std::cout << pnode_parent->printNeighbours() << std::endl;
+        std::cout << qnode_parent->printNeighbours() << std::endl;
 
         bool invertQParents = false;
         bool invertPParents = false;
@@ -550,15 +559,15 @@ void VirtualNode::disconnectNode() {
 
     // 1. Get the location where this node is connected on the parent node and disconnect
     switch (this->indexOf()) {
-        case 0:
+        case NodePosition::left:
             // The node is connected on the left side
             this->getNodeUp()->setNodeLeft(nullptr);
             break;
-        case 1:
+        case NodePosition::right:
             // The node is connected on the right side
             this->getNodeUp()->setNodeRight(nullptr);
             break;
-        case 2:
+        case NodePosition::up:
             // The node is connect on the up side (pseudoroot)
             this->getNodeUp()->setNodeUp(nullptr);
             break;
@@ -625,17 +634,22 @@ void VirtualNode::resetNodeDirections(bool revertRotations) {
 void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotations) {
 
     bool continueTraverse = true;
+    NodePosition curr_node_position = NodePosition::undef;
 
     if (revertRotations and vnode->vnode_rotated == 0) { return; }
 
     if (revertRotations) {
+
+
         continueTraverse = true;
+
     } else {
         if (vnode->getNodeUp() != nullptr) {
             if (vnode->getNodeUp()->getNodeUp() == vnode) {
                 continueTraverse = false;
             }
         }
+        curr_node_position = vnode->indexOf();
     }
 
     // rotate the pointers only if the node is not a leaf
@@ -644,6 +658,7 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
         auto curr_vn_left = new VirtualNode;
         auto curr_vn_right = new VirtualNode;
         auto n_up = new VirtualNode;
+
 
         curr_vn_up = vnode->getNodeUp();
         curr_vn_left = vnode->getNodeLeft();
@@ -666,24 +681,49 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
 
         if (revertRotations) {
             n_up = vnode->getNodeUp();
+
+            switch (n_up->vnode_rotated) {
+                case 1:
+                    curr_node_position = NodePosition::left;
+                    break;
+                case 2:
+                    curr_node_position = NodePosition::right;
+                    break;
+                default:
+                    curr_node_position = NodePosition::undef;
+            }
+
         } else {
             n_up = curr_vn_up;
         }
 
         if (continueTraverse) {
-
             if (n_up != nullptr) {
-                _recursive_cw_rotation(n_up, revertRotations);
+                switch (curr_node_position) {
+                    case NodePosition::left:
+                        _recursive_ccw_rotation(n_up, revertRotations);
+                        break;
+                    case NodePosition::right:
+                        _recursive_cw_rotation(n_up, revertRotations);
+                        break;
+                    case NodePosition::up:
+                        _recursive_cw_rotation(n_up, revertRotations);
+                    default:
+                        return;
+                }
             }
+            //if (n_up != nullptr) {
+            //    _recursive_cw_rotation(n_up, revertRotations);
+            //}
 
             // Move to the newly set left side
-            if (vnode->getNodeLeft() != nullptr) {
+            //if (vnode->getNodeLeft() != nullptr) {
                 //    _recursive_cw_rotation(n_left, revertRotations);
-            }
+            //}
             // Move to the newly set right side
-            if (vnode->getNodeRight() != nullptr) {
+            //if (vnode->getNodeRight() != nullptr) {
                 //    _recursive_cw_rotation(n_right, revertRotations);
-            }
+            //}
 
         } else {
 
@@ -695,19 +735,27 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
 }
 
 void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations) {
+
     bool continueTraverse = true;
+    NodePosition curr_node_position = NodePosition::undef;
 
     if (revertRotations and vnode->vnode_rotated == 0) { return; }
 
     if (revertRotations) {
+
+
         continueTraverse = true;
+
     } else {
         if (vnode->getNodeUp() != nullptr) {
             if (vnode->getNodeUp()->getNodeUp() == vnode) {
+
                 continueTraverse = false;
             }
         }
+        curr_node_position = vnode->indexOf();
     }
+
 
     // rotate the pointers only if the node is not a leaf
     if (!vnode->isTerminalNode()) {
@@ -748,11 +796,24 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
         */
         if (revertRotations) {
             n_up = vnode->getNodeUp();
+
+            switch (n_up->vnode_rotated) {
+                case 1: //clockwise
+                    curr_node_position = NodePosition::left; // force to rotate counterclockwise
+                    break;
+                case 2: //counterclockwise
+                    curr_node_position = NodePosition::right; // force to rotate clockwise
+                    break;
+                default:
+                    curr_node_position = NodePosition::undef;
+            }
+
         } else {
             n_up = curr_vn_up;
         }
 
 
+        /*
         if (continueTraverse) {
 
             // Move up one node
@@ -768,8 +829,42 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
             if (n_right != nullptr) {
                 _recursive_ccw_rotation(n_right, revertRotations);
             }
-             */
 
+
+        } else {
+
+            //std::cout << "This node is the pseudoroot" << std::endl;
+
+        }
+        */
+
+        if (continueTraverse) {
+            if (n_up != nullptr) {
+                switch (curr_node_position) {
+                    case NodePosition::left:
+                        _recursive_ccw_rotation(n_up, revertRotations);
+                        break;
+                    case NodePosition::right:
+                        _recursive_cw_rotation(n_up, revertRotations);
+                        break;
+                    case NodePosition::up:
+                        _recursive_ccw_rotation(n_up, revertRotations);
+                    default:
+                        return;
+                }
+            }
+            //if (n_up != nullptr) {
+            //    _recursive_cw_rotation(n_up, revertRotations);
+            //}
+
+            // Move to the newly set left side
+            //if (vnode->getNodeLeft() != nullptr) {
+            //    _recursive_cw_rotation(n_left, revertRotations);
+            //}
+            // Move to the newly set right side
+            //if (vnode->getNodeRight() != nullptr) {
+            //    _recursive_cw_rotation(n_right, revertRotations);
+            //}
 
         } else {
 

@@ -41,6 +41,14 @@
 #ifndef TSHEXE_UTILITIES_H
 #define TSHEXE_UTILITIES_H
 
+enum class NodeRotation {
+    clockwise, counterclockwise, undef
+};
+
+enum class NodePosition {
+    left, right, up, undef
+};
+
 enum class MoveDirections {
     left, right, up, up_right, up_left, undef
 };

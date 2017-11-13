@@ -126,7 +126,7 @@ public:
      * @brief This function return the index of node as seen from the parent immediate above it.
      * @return
      */
-    int indexOf();
+    NodePosition indexOf();
 
     /*!
      * @brief This function swaps the current node and another one passed in the argument. The swap takes in consideration the topology of the tree.

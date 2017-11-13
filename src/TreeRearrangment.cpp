@@ -137,11 +137,11 @@ void TreeRearrangment::addMove(Move *move) {
 }
 
 
-void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, int direction) {
+void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, NodePosition traverse_direction) {
 
     auto vnode = new VirtualNode;
     auto moveInstance = new Move;
-    unsigned int idx;
+    NodePosition idx;
     MoveDirections moving_direction;
 
     vnode = node_source;
@@ -149,14 +149,14 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
     //TODO: check binary tree condition!
     if (radius == 0) {
 
-        switch (direction) {
-            case 0:
+        switch (traverse_direction) {
+            case NodePosition::left:
                 moving_direction = MoveDirections::up_left;
                 break;
-            case 1:
+            case NodePosition::right:
                 moving_direction = MoveDirections::up_right;
                 break;
-            case 2:
+            case NodePosition::up:
                 moving_direction = MoveDirections::up;
                 break;
             default:
@@ -171,7 +171,7 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
     }
 
     if (radius > 0) {
-        if (direction == 0) {
+        if (traverse_direction == NodePosition::left) {
             radius--;
             if (vnode->getNodeUp() != nullptr) {
 
@@ -181,7 +181,7 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 
             this->getNodesInRadiusDown(vnode->getNodeRight(), radius, MoveDirections::up, true);
 
-        } else if (direction == 1) {
+        } else if (traverse_direction == NodePosition::right) {
             radius--;
             if (vnode->getNodeUp() != nullptr) {
 
@@ -191,8 +191,8 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 
             this->getNodesInRadiusDown(vnode->getNodeLeft(), radius, MoveDirections::up, true);
 
-        } else if (direction == 2) {
-            // If the direction is 2, we are moving across the pseudoroot, therefore no need to decrease the radious
+        } else if (traverse_direction == NodePosition::up) {
+            // If the traverse_direction is 2, we are moving across the pseudoroot, therefore no need to decrease the radious
             if (vnode->getNodeUp() != nullptr) {
 
                 // Get the nodes in the radius from the node we reached after crossing the pseudoroot
