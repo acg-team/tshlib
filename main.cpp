@@ -237,10 +237,6 @@ int main(int argc, char **argv) {
     // BUILD UNROOTED TREE
 
     auto utree = new Utree;
-
-    //std::vector<node *> utree;
-    //node *utree_pseudo_root;
-
     UtreeUtils::convertUtree(tree, utree);
     LOG_S(DEBUG1) << "[Initial utree] " << utree->printTreeNewick(true);
 
@@ -248,41 +244,41 @@ int main(int argc, char **argv) {
     //utree->saveTreeOnFile("../data/test.txt");
 
     //------------------------------------------------------------------------------------------------------------------
-    // TEST Function findPseudoRoot either fixing the root on a subtree or on the middle node
+    // TEST
+    // findPseudoRoot either fixing the root on a subtree or on the middle node
 
     std::string strpath;
     std::vector<VirtualNode *> path2root;
-    //VirtualNode *startNode = utree->listVNodes.at(0)->getNodeLeft()->getNodeLeft();
+
     VirtualNode *startNode = utree->listVNodes.at(0);
     // ------------------------------------
+    // Retrieve the root (on the middle root node) starting from a "random" point on the tree
     bool fixPseudoRootOnNextSubtree = false;
     path2root = utree->findPseudoRoot(startNode, fixPseudoRootOnNextSubtree);
 
-    for (auto &node: path2root) {
-        strpath += "->" + node->vnode_name;
-    }
+    for (auto &node: path2root) strpath += "->" + node->vnode_name;
 
     LOG_S(DEBUG2) << "[Path back to root] (Root on middle node) " << strpath;
     path2root.clear();
     strpath.clear();
 
     // ------------------------------------
+    // Retrieve the root (on the subtree immediately after the pseudo root ndoe) starting from a "random" point on the tree
     fixPseudoRootOnNextSubtree = true;
     path2root = utree->findPseudoRoot(startNode, fixPseudoRootOnNextSubtree);
 
+    for (auto &tnode: path2root) strpath += "->" + tnode->vnode_name;
 
-    for (auto &tnode: path2root) {
-        strpath += "->" + tnode->vnode_name;
-    }
     LOG_S(DEBUG2) << "[Path back to root] (Root on next subtree) " << strpath;
     path2root.clear();
     strpath.clear();
 
     //------------------------------------------------------------------------------------------------------------------
-    // Get all the nodes between the radius boundaries
+    // DEFINE, APPLY & REVERT TREE REARRANGEMENTS
+    // Get all the nodes between the radius boundaries and for each of them build the move list
 
     int min_radius = 3;
-    int max_radius = 6;
+    int max_radius = 99;
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
