@@ -151,7 +151,7 @@ protected:
      * @param radius int Radius of the search (NNI = 1, SPR > 1)
      * @param includeSelf bool ?
      */
-    virtual void getNodesInRadius(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf);
+    virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf);
 
 
     /*!

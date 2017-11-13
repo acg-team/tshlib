@@ -71,7 +71,7 @@ TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int min_radius, int
 }
 
 
-void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf) {
+void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf) {
 
     VirtualNode *node = node_source;
 
@@ -97,8 +97,8 @@ void TreeRearrangment::getNodesInRadius(VirtualNode *node_source, int radius, Mo
     if (!node->isTerminalNode()) {
         radius--;
         // Direction is required to know where to look at in the tree when the move is performed
-        this->getNodesInRadius(node->getNodeLeft(), radius, direction, includeSelf);
-        this->getNodesInRadius(node->getNodeRight(), radius, direction, includeSelf);
+        this->getNodesInRadiusDown(node->getNodeLeft(), radius, direction, includeSelf);
+        this->getNodesInRadiusDown(node->getNodeRight(), radius, direction, includeSelf);
     }
 
 
@@ -118,8 +118,8 @@ void TreeRearrangment::defineMoves(bool includeSelf) {
     for (auto &radius : x) {
         this->mset_cur_radius = radius;
         if (!this->mset_sourcenode->isTerminalNode()) {
-            this->getNodesInRadius(this->mset_sourcenode->getNodeLeft(), radius - 1, MoveDirections::left, includeSelf);
-            this->getNodesInRadius(this->mset_sourcenode->getNodeRight(), radius - 1, MoveDirections::right, includeSelf);
+            this->getNodesInRadiusDown(this->mset_sourcenode->getNodeLeft(), radius - 1, MoveDirections::left, includeSelf);
+            this->getNodesInRadiusDown(this->mset_sourcenode->getNodeRight(), radius - 1, MoveDirections::right, includeSelf);
         }
         if (nullptr != this->mset_sourcenode->getNodeUp()) {
             this->getNodesInRadiusUp(this->mset_sourcenode->getNodeUp(),
@@ -142,12 +142,29 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
     auto vnode = new VirtualNode;
     auto moveInstance = new Move;
     unsigned int idx;
+    MoveDirections moving_direction;
 
     vnode = node_source;
 
     //TODO: check binary tree condition!
     if (radius == 0) {
-        moveInstance->setDirection(MoveDirections::up);
+
+        switch (direction) {
+            case 0:
+                moving_direction = MoveDirections::left;
+                break;
+            case 1:
+                moving_direction = MoveDirections::right;
+                break;
+            case 2:
+                moving_direction = MoveDirections::up;
+                break;
+            default:
+                moving_direction = MoveDirections::undef;
+
+        }
+        moveInstance->setDirection(moving_direction);
+        moveInstance->setRadius(this->mset_cur_radius);
         moveInstance->setTargetNode(vnode);
         moveInstance->setMoveClass(this->mset_cur_radius);
         this->addMove(moveInstance);
@@ -162,7 +179,7 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
                 this->getNodesInRadiusUp(vnode->getNodeUp(), radius, idx);
             }
 
-            this->getNodesInRadius(vnode->getNodeRight(), radius, MoveDirections::up, true);
+            this->getNodesInRadiusDown(vnode->getNodeRight(), radius, MoveDirections::up, true);
 
         } else if (direction == 1) {
             radius--;
@@ -172,14 +189,14 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
                 this->getNodesInRadiusUp(vnode->getNodeUp(), radius, idx);
             }
 
-            this->getNodesInRadius(vnode->getNodeLeft(), radius, MoveDirections::up, true);
+            this->getNodesInRadiusDown(vnode->getNodeLeft(), radius, MoveDirections::up, true);
 
         } else if (direction == 2) {
             // If the direction is 2, we are moving across the pseudoroot, therefore no need to decrease the radious
             if (vnode->getNodeUp() != nullptr) {
 
                 // Get the nodes in the radius from the node we reached after crossing the pseudoroot
-                this->getNodesInRadius(vnode, radius, MoveDirections::up, false);
+                this->getNodesInRadiusDown(vnode, radius, MoveDirections::up, false);
 
             }
 
@@ -193,7 +210,10 @@ void TreeRearrangment::printMoves() {
     std::cout << "[set " << this->mset_id << "] " << this->mset_strategy << " strategy" << std::endl;
     std::cout << "[class]\t(P\t; Q)" << std::endl;
     for (auto &nmove: this->mset_moves) {
-        std::cout << "[" << nmove->move_class << "]\t(" << this->mset_sourcenode->vnode_name << "\t; " << nmove->getTargetNode()->vnode_name << ")" << std::endl;
+        std::cout << "[" << nmove->move_class << "]\t" << nmove->move_radius
+                  << "\t(" << this->mset_sourcenode->vnode_name << "\t; "
+                  << nmove->getTargetNode()->vnode_name << ")\t"
+                  << static_cast<int>(nmove->move_direction) << std::endl;
     }
 
 }

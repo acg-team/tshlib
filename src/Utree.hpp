@@ -79,21 +79,21 @@ public:
     /*!
      * @brief This function perfomrms a one-step clockwise rotation of the virtualnode pointers
      */
-    virtual void RotateClockwise();
+    virtual void rotateClockwise();
 
-    virtual void RotateClockwise(bool revertRotations);
+    virtual void rotateClockwise(bool revertRotations);
 
     /*!
      * @brief This function perfomrms a one-step counter-clockwise rotation of the virtualnode pointers
      */
-    virtual void RotateCounterClockwise();
+    virtual void rotateCounterClockwise();
 
-    virtual void RotateCounterClockwise(bool revertRotations);
+    virtual void rotateCounterClockwise(bool revertRotations);
 
     /*!
      * @brief This function resets any rotation previously performed on the node
      */
-    virtual void ResetNodeDirections();
+    virtual void resetNodeDirections();
 
     //void getMemberNeighbors(int radius);
 
@@ -178,6 +178,8 @@ public:
     virtual void addMember(VirtualNode *inVNode, bool isStartNode = false);
 
     std::string printTreeNewick(bool showInternalNodeNames);
+
+    virtual void saveTreeOnFile(std::string outfilepath);
 
     virtual void _testReachingPseudoRoot();
 

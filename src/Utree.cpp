@@ -4,6 +4,7 @@
 
 #include <string>
 #include <random>
+#include <fstream>
 
 #include "Utree.hpp"
 
@@ -124,24 +125,24 @@ VirtualNode *VirtualNode::getNodeUp() {
     return this->vnode_up ?: nullptr;
 }
 
-void VirtualNode::RotateClockwise() {
+void VirtualNode::rotateClockwise() {
 
     _recursive_cw_rotation(this, false);
 
 }
 
-void VirtualNode::RotateClockwise(bool revertRotations) {
+void VirtualNode::rotateClockwise(bool revertRotations) {
 
     _recursive_cw_rotation(this, revertRotations);
 
 }
 
-void VirtualNode::RotateCounterClockwise() {
+void VirtualNode::rotateCounterClockwise() {
 
     _recursive_ccw_rotation(this, false);
 }
 
-void VirtualNode::RotateCounterClockwise(bool revertRotations) {
+void VirtualNode::rotateCounterClockwise(bool revertRotations) {
 
     _recursive_ccw_rotation(this, revertRotations);
 }
@@ -268,17 +269,38 @@ void Utree::_testReachingPseudoRoot() {
 
     for (auto &i : this->listVNodes) {
 
-        vnodes2root = this->findPseudoRoot(i);
+        vnodes2root = this->findPseudoRoot(i, true);
 
         for (auto &tnode: vnodes2root) {
-            strpath += "->" + tnode->vnode_name;
+            strpath += tnode->vnode_name;
+
+            if (tnode->vnode_rotated > 0) {
+
+                strpath += "\033[1;34m(" + std::to_string(tnode->vnode_rotated) + ")\033[0m";
+
+            } else {
+
+                strpath += "(" + std::to_string(tnode->vnode_rotated) + ")";
+            }
+
+            strpath += ">";
         }
+        strpath.pop_back();
 
         std::cout << strpath << std::endl;
         vnodes2root.clear();
         strpath.clear();
 
     }
+
+}
+
+void Utree::saveTreeOnFile(std::string outfilepath) {
+
+    std::ofstream outfile;
+
+    outfile.open(outfilepath, std::ios_base::app);
+    outfile << this->printTreeNewick(true) << std::endl;
 
 }
 
@@ -349,7 +371,7 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
         switch (move_direction) {
 
             case MoveDirections::left:
-                pnode->RotateCounterClockwise();
+                pnode->rotateCounterClockwise();
                 pnode_parent = pnode->getNodeUp();
 
                 pnode->disconnectNode();
@@ -362,7 +384,7 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
 
             case MoveDirections::right:
 
-                pnode->RotateClockwise();
+                pnode->rotateClockwise();
                 pnode_parent = pnode->getNodeUp();
 
                 pnode->disconnectNode();
@@ -391,8 +413,8 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
                 }
 
                 // Reset rotation
-                pnode->ResetNodeDirections();
-                qnode->ResetNodeDirections();
+                pnode->resetNodeDirections();
+                qnode->resetNodeDirections();
 
                 // Regraft nodes
                 if (invertQParents) {
@@ -428,7 +450,7 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
         // If both nodes are in the pathway to the root
         if (pnode->isParent(qnode)) {
 
-            pnode->RotateClockwise();
+            pnode->rotateClockwise();
             pnode_parent = pnode->getNodeUp();
 
             pnode->disconnectNode();
@@ -439,8 +461,8 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
 
         } else if (qnode->isParent(this)) {
 
-            qnode->RotateClockwise();
-            //qnode->RotateCounterClockwise();
+            qnode->rotateClockwise();
+            //qnode->rotateCounterClockwise();
             qnode_parent = qnode->getNodeUp();
 
             qnode->disconnectNode();
@@ -469,7 +491,7 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
 
             // Reset rotation
             pnode->ResetNodeDirections();
-            qnode->ResetNodeDirections();
+            qnode->resetNodeDirections();
 
             // Regraft nodes
             if (invertQParents) {
@@ -559,15 +581,15 @@ bool VirtualNode::isParent(VirtualNode *inVNode) {
     return status;
 }
 
-void VirtualNode::ResetNodeDirections() {
+void VirtualNode::resetNodeDirections() {
 
     if (this->vnode_rotated != 0) {
         switch (this->vnode_rotated) {
             case 1:
-                this->RotateCounterClockwise(true);
+                this->rotateCounterClockwise(true);
                 break;
             case 2:
-                this->RotateClockwise(true);
+                this->rotateClockwise(true);
                 break;
             default:
                 break;
@@ -626,11 +648,11 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
 
             // Move to the newly set left side
             if (vnode->getNodeLeft() != nullptr) {
-                _recursive_cw_rotation(vnode->getNodeLeft(), revertRotations);
+                _recursive_cw_rotation(n_left, revertRotations);
             }
             // Move to the newly set right side
             if (vnode->getNodeRight() != nullptr) {
-                _recursive_cw_rotation(vnode->getNodeRight(), revertRotations);
+                _recursive_cw_rotation(n_right, revertRotations);
             }
 
         } else {
