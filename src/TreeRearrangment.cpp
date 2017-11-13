@@ -233,8 +233,6 @@ bool TreeRearrangment::applyMove(unsigned long moveID) {
     // Swap pnode with qnode according to the direction found during the move configuration
     // If the swap is performed correctly then the function returns true otherwise false
     return pnode->swapNode(qnode, this->mset_moves.at(moveID)->move_direction, revertRotations);
-
-    //status = this->mset_sourcenode->swapNode(this->mset_moves.at(moveID)->getTargetNode(), this->mset_moves.at(moveID)->move_direction);
 }
 
 
@@ -247,7 +245,6 @@ bool TreeRearrangment::revertMove(unsigned long moveID) {
     // If the swap is performed correctly then the function returns true otherwise false
     return pnode->swapNode(qnode, MoveDirections::up, revertRotations);
 
-    //return this->mset_moves.at(moveID)->getTargetNode()->swapNode(this->mset_sourcenode, MoveDirections::up);
 }
 
 

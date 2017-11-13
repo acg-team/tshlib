@@ -469,8 +469,6 @@ bool VirtualNode::swapNode(VirtualNode *targetNode, MoveDirections move_directio
 
                 }
 
-                //pnode_parent->connectNode(qnode);
-                //qnode_parent->connectNode(pnode);
 
                 break;
 
@@ -640,7 +638,6 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
 
     if (revertRotations) {
 
-
         continueTraverse = true;
 
     } else {
@@ -663,10 +660,6 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
         curr_vn_up = vnode->getNodeUp();
         curr_vn_left = vnode->getNodeLeft();
         curr_vn_right = vnode->getNodeRight();
-
-        //n->setNodeUp(curr_vn_left);
-        //n->setNodeLeft(curr_vn_right);
-        //n->setNodeRight(curr_vn_up);
 
         vnode->setNodeUp(curr_vn_right);
         vnode->setNodeLeft(curr_vn_up);
@@ -712,18 +705,7 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
                         return;
                 }
             }
-            //if (n_up != nullptr) {
-            //    _recursive_cw_rotation(n_up, revertRotations);
-            //}
 
-            // Move to the newly set left side
-            //if (vnode->getNodeLeft() != nullptr) {
-                //    _recursive_cw_rotation(n_left, revertRotations);
-            //}
-            // Move to the newly set right side
-            //if (vnode->getNodeRight() != nullptr) {
-                //    _recursive_cw_rotation(n_right, revertRotations);
-            //}
 
         } else {
 
@@ -742,7 +724,6 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
     if (revertRotations and vnode->vnode_rotated == 0) { return; }
 
     if (revertRotations) {
-
 
         continueTraverse = true;
 
@@ -772,9 +753,6 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
         curr_vn_right = vnode->getNodeRight();
 
         // Revert pointers
-        //n->setNodeUp(curr_vn_right);
-        //n->setNodeLeft(curr_vn_up);
-        //n->setNodeRight(curr_vn_left);
         vnode->setNodeUp(curr_vn_left);
         vnode->setNodeLeft(curr_vn_right);
         vnode->setNodeRight(curr_vn_up);
@@ -812,32 +790,6 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
             n_up = curr_vn_up;
         }
 
-
-        /*
-        if (continueTraverse) {
-
-            // Move up one node
-            if (n_up != nullptr) {
-                _recursive_ccw_rotation(n_up, revertRotations);
-            }
-            /*
-            // Move to the newly set left side
-            if (n_left != nullptr) {
-                _recursive_ccw_rotation(n_left, revertRotations);
-            }
-            // Move to the newly set right side
-            if (n_right != nullptr) {
-                _recursive_ccw_rotation(n_right, revertRotations);
-            }
-
-
-        } else {
-
-            //std::cout << "This node is the pseudoroot" << std::endl;
-
-        }
-        */
-
         if (continueTraverse) {
             if (n_up != nullptr) {
                 switch (curr_node_position) {
@@ -853,18 +805,6 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
                         return;
                 }
             }
-            //if (n_up != nullptr) {
-            //    _recursive_cw_rotation(n_up, revertRotations);
-            //}
-
-            // Move to the newly set left side
-            //if (vnode->getNodeLeft() != nullptr) {
-            //    _recursive_cw_rotation(n_left, revertRotations);
-            //}
-            // Move to the newly set right side
-            //if (vnode->getNodeRight() != nullptr) {
-            //    _recursive_cw_rotation(n_right, revertRotations);
-            //}
 
         } else {
 

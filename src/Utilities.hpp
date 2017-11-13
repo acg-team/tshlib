@@ -42,7 +42,7 @@
 #define TSHEXE_UTILITIES_H
 
 enum class NodeRotation {
-    clockwise, counterclockwise, undef
+    undef=0, clockwise=1, counterclockwise=2
 };
 
 enum class NodePosition {
