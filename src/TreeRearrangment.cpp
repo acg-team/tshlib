@@ -259,6 +259,10 @@ VirtualNode *TreeRearrangment::getSourceNode() {
     return this->mset_sourcenode ?: nullptr;
 }
 
+void TreeRearrangment::selectBestMove(unsigned long moveID) {
+
+}
+
 
 Move::~Move() = default;
 

@@ -46,11 +46,11 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <chrono>
+//#define LOGURU_IMPLEMENTATION 1
+//#define LOGURU_WITH_STREAMS 1
 
-#define LOGURU_IMPLEMENTATION 1
-#define LOGURU_WITH_STREAMS 1
-
-#include <loguru.hpp>
+//#include <loguru.hpp>
 #include <Utree.hpp>
 #include <TreeRearrangment.hpp>
 #include <Alignment.hpp>
@@ -72,7 +72,7 @@ namespace fasta_parser {
             }
             if (line.find('>') != std::string::npos) {
 
-                LOG_S(DEBUG2) << "Found header: " << line;
+                //std::cout << "Found header: " << line;
 
                 // parse next line since it must be the sequence
                 std::getline(in_fasta, line2);
@@ -117,8 +117,8 @@ int main(int argc, char **argv) {
      * DEBUG1  +1
      * DEBUG1  +2
      */
-    loguru::init(argc, argv);
-    LOG_S(DEBUG1) << "test";
+    //loguru::init(argc, argv);
+    std::cout << "test" << std::endl;
     //------------------------------------------------------------------------------------------------------------------
     std::string tree_file = argv[1];
     std::string msa_file = argv[2];
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     tree->set_beta(tau, mu);
 
     // print newick tree
-    LOG_S(DEBUG1) << "[Initial Tree Topology] " << tree->formatNewick();
+    std::cout << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
     //------------------------------------------------------------------------------------------------------------------
     // LOAD MSA FROM FILE
 
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 
 
     num_leaves = alignment->align_dataset.size();
-    LOG_S(DEBUG1) << "[Sequences in MSA] Leaves: " << num_leaves;
+    std::cout << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
 
     // 1:DNA, 2:AA, 3:Codon
     is_DNA_AA_Codon = 1;
@@ -199,6 +199,7 @@ int main(int argc, char **argv) {
     MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
 
     //------------------------------------------------------------------------------------------------------------------
+    //TODO: @MAX Porting likelihood function for utree
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
     // compute log_col_lk
@@ -206,7 +207,7 @@ int main(int argc, char **argv) {
 
         // extract MSA column
         std::string s = alignment->extractColumn(i);
-        LOG_S(DEBUG1) << "[Extracted column] (" << i << ") = " << s;
+        std::cout << "[Extracted column] (" << i << ") = " << s << std::endl;
 
         // assign char at the leaves
         tree->set_leaf_state(s);
@@ -221,24 +222,26 @@ int main(int argc, char **argv) {
         //TODO: Add weight per column
         log_col_lk = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
 
-        LOG_S(DEBUG1) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
+        std::cout << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
 
         logLK += log_col_lk;
     }
 
+
     // compute empty column likelihood
     p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    LOG_S(DEBUG1) << "[Initial LK] p0 = " << p0;
+    std::cout << "[Initial LK] p0 = " << p0 << std::endl;
 
     logLK += LKFunc::phi(MSA_len, nu, p0);
-    LOG_S(DEBUG1) << "[Initial LK] LK = " << logLK;
-
+    std::cout << "[Initial LK] LK = " << logLK << std::endl;
+    //
+    // @MAX
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
     auto utree = new Utree;
     UtreeUtils::convertUtree(tree, utree);
-    LOG_S(DEBUG1) << "[Initial utree] " << utree->printTreeNewick(true);
+    std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
 
     // Save tree to file
     //utree->saveTreeOnFile("../data/test.txt");
@@ -258,7 +261,7 @@ int main(int argc, char **argv) {
 
     for (auto &node: path2root) strpath += "->" + node->vnode_name;
 
-    LOG_S(DEBUG2) << "[Path back to root] (Root on middle node) " << strpath;
+    std::cout << "[Path back to root] (Root on middle node) " << strpath << std::endl;
     path2root.clear();
     strpath.clear();
 
@@ -269,7 +272,7 @@ int main(int argc, char **argv) {
 
     for (auto &tnode: path2root) strpath += "->" + tnode->vnode_name;
 
-    LOG_S(DEBUG2) << "[Path back to root] (Root on next subtree) " << strpath;
+    std::cout << "[Path back to root] (Root on next subtree) " << strpath << std::endl;
     path2root.clear();
     strpath.clear();
 
@@ -284,7 +287,7 @@ int main(int argc, char **argv) {
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
-        LOG_S(DEBUG2) << "[utree neighbours] " << vnode->printNeighbours();
+        std::cout << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
 
         // Initialise a new rearrangement list
         auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
@@ -294,10 +297,10 @@ int main(int argc, char **argv) {
         rearrangmentList.defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
-        //rearrangmentList.printMoves();
+        rearrangmentList.printMoves();
 
-        LOG_S(DEBUG1) << "[tsh] Strategy " << rearrangmentList.mset_strategy;
-        LOG_S(DEBUG1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name;
+        std::cout << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
+        std::cout << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
@@ -310,10 +313,10 @@ int main(int argc, char **argv) {
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {
-                LOG_S(DEBUG2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                std::cout << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
                               << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
-                              << utree->printTreeNewick(true);
+                              << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
 
@@ -321,10 +324,10 @@ int main(int argc, char **argv) {
             status = rearrangmentList.revertMove(i);
             //utree->saveTreeOnFile("../data/test.txt");
             if (status) {
-                LOG_S(DEBUG2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                std::cout << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
                               << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
-                              << utree->printTreeNewick(true);
+                              << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
             total_exec_moves += rearrangmentList.getNumberOfMoves();
@@ -335,9 +338,9 @@ int main(int argc, char **argv) {
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
-    LOG_S(INFO) << "Moves applied and reverted: " << total_exec_moves;
-    LOG_S(INFO) << "Elapsed time: " << duration << " microseconds";
-    LOG_S(INFO) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** ";
+    std::cout << "Moves applied and reverted: " << total_exec_moves << std::endl;
+    std::cout << "Elapsed time: " << duration << " microseconds" << std::endl;
+    std::cout << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
 
     exit(0);
 }

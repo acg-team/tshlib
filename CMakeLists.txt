@@ -18,11 +18,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif ()
 
 if (UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -lstdc++  -ldl -pthread ")
     #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -ldl")
+    #find_package(Threads)
+    #message("FOUND threads at  ${CMAKE_THREAD_LIBS_INIT}")
 endif (UNIX)
 
 add_definitions(-DVERBOSE=0)
+
 
 
 find_package("Eigen3")
@@ -41,7 +44,7 @@ add_subdirectory("src")
 include_directories("src")
 
 #add_subdirectory("lib/loguru")
-include_directories("lib/loguru")
+#include_directories("lib/loguru")
 
 set(SOURCES
         main.cpp
