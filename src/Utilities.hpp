@@ -1,18 +1,18 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti
+ * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti
+ * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
  *******************************************************************************
  *
- * This file is part of tshexe
+ * This file is part of tshlib
  *
- * tshexe is a free software: you can redistribute it and/or modify it
+ * tshlib is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshexe is distributed in the hope that it will be useful,
+ * tshlib is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
@@ -22,12 +22,15 @@
  *******************************************************************************/
 
 /**
- * @file Utilites.h
+ * @file Utilities.hpp
  * @author Lorenzo Gatti
+ * @author Massimo Maiolo
  * @date 10 11 2017
  * @version 1.0
  * @maintainer Lorenzo Gatti
+ * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
+ * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -36,10 +39,10 @@
  * @bug
  * @warning
  *
- * @see For more information visit: http://www.lorenzogatti.me
  */
-#ifndef TSHEXE_UTILITIES_H
-#define TSHEXE_UTILITIES_H
+
+#ifndef TSHLIB_UTILITIES_H
+#define TSHLIB_UTILITIES_H
 
 enum class NodeRotation {
     undef=0, clockwise=1, counterclockwise=2
@@ -56,4 +59,4 @@ enum class MoveType {
     NNI, SPR, TBR, undef
 };
 
-#endif //TSHEXE_UTILITIES_H
+#endif //TSHLIB_UTILITIES_H
