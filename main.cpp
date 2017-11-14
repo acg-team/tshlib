@@ -306,6 +306,7 @@ int main(int argc, char **argv) {
 
             // Apply the move
             status = rearrangmentList.applyMove(i);
+
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {

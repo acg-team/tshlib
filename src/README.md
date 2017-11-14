@@ -8,7 +8,11 @@ The Tree-Search-Library (TSH-LIB) is a new implementation of binary tree topolog
 
 ## Integrating into an existing project
 
-## Suggested workflow
+## Workflow
+
+Given an utree as input, the algorithm performs the following steps:
+
+1. Per each node in the tree (either internal or terminal), find 
 
 ## Algorithms
 

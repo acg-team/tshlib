@@ -100,6 +100,8 @@ public:
 
     void setDirection(MoveDirections direction);
 
+    void recomputeLikelihood();
+
 };
 
 
@@ -142,6 +144,8 @@ public:
     virtual void printMoves();
 
     unsigned long getNumberOfMoves();
+
+    virtual void selectBestMove(unsigned long moveID);
 
 protected:
 
