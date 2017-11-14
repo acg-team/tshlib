@@ -546,7 +546,6 @@ int main(int argc, char **argv) {
                   << (utree_nni_spr_stack_up.at(i)).node2->data->getName() << ")\n";
     }
 
-    exit(1);
     //------------------------------------------------------------------------------------------------------------------
     // PERFORM SPR MOVES and RECOMPUTE logLK
 
