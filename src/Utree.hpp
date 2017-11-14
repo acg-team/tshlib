@@ -53,7 +53,7 @@ public:
     int vnode_depth;                                /* Depth level of the node in the tree */
     bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
     int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
-    int vnode_rotated;                              /* Flag: if node was rotaded during a tree rearrangement move */
+    NodeRotation vnode_rotated;                              /* Flag: if node was rotaded during a tree rearrangement move */
 
     /*!
      *  Standard constructor
