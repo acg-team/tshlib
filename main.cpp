@@ -276,9 +276,11 @@ int main(int argc, char **argv) {
     //------------------------------------------------------------------------------------------------------------------
     // DEFINE, APPLY & REVERT TREE REARRANGEMENTS
     // Get all the nodes between the radius boundaries and for each of them build the move list
-
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     int min_radius = 3;
     int max_radius = 99;
+
+    unsigned long total_exec_moves = 0;
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
@@ -324,10 +326,17 @@ int main(int argc, char **argv) {
                               << utree->printTreeNewick(true);
                 //utree->_testReachingPseudoRoot();
             }
-
+            total_exec_moves += rearrangmentList.getNumberOfMoves();
         }
 
     }
+
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+
+    LOG_S(INFO) << "Moves applied and reverted: " << total_exec_moves;
+    LOG_S(INFO) << "Elapsed time: " << duration << " microseconds";
+    LOG_S(INFO) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** ";
 
     exit(0);
 }
