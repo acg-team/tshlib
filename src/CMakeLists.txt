@@ -73,8 +73,6 @@ if (UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
 endif (UNIX)
 
-add_definitions(-DVERBOSE=0)
-
 ################################################################################
 #                                       ___     _                       _       
 #  ___  ___  _   _ _ __ ___ ___  ___   ( _ )   | |_ __ _ _ __ __ _  ___| |_ ___ 

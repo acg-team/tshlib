@@ -189,11 +189,12 @@ int main(int argc, char **argv) {
 
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
-    pi[0] = 0.25;
-    pi[1] = 0.25;
-    pi[2] = 0.25;
-    pi[3] = 0.25;
-    pi[4] = 0.0;
+    pi << 0.25,0.25,0.25,0.25,0.25;
+//    pi[0] = 0.25;
+//    pi[1] = 0.25;
+//    pi[2] = 0.25;
+//    pi[3] = 0.25;
+//    pi[4] = 0.0;
 
     // get MSA length
     MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
