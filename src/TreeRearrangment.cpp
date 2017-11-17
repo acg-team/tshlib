@@ -333,4 +333,8 @@ void Move::setDirection(MoveDirections direction) {
 
 }
 
+void Move::recomputeLikelihood() {
+
+}
+
 

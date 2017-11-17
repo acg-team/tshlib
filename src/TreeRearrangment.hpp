@@ -60,7 +60,7 @@ public:
     int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
     std::string move_name;          /* Move Name - Unused */
     int move_radius;                /* Move Radius */
-    MoveDirections move_direction;             /* Move Direction for applying a rotation to the VirtualNode pointers */
+    MoveDirections move_direction;  /* Move Direction for applying a rotation to the VirtualNode pointers */
     double move_lk;                 /* Likelihood of the move if applied */
     bool move_applied;              /* Indicator is set to true if the move is applied to the tree */
     std::string move_class;         /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
