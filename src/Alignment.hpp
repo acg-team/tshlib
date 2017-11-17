@@ -71,6 +71,8 @@ public:
 
     long int getAlignmentSize();
 
+
+
     std::string extractColumn(int index);
 
     ~Alignment();
@@ -80,7 +82,11 @@ protected:
 
 };
 
+namespace AlignUtils {
+    int countNumGapsInMSAColumn(const std::string MSA_col);
 
+
+}
 
 
 #endif //TSHLIB_ALIGNMENT_HPP

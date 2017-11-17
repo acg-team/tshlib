@@ -149,6 +149,22 @@ public:
 
     virtual void setNodeUp(VirtualNode *inVNode);
 
+    virtual void setLeafCharacter(char ch);
+
+    void setMSAFv(Eigen::VectorXd &fv);
+
+    virtual void setSetA(bool b);
+
+    bool getSetA();
+
+    double getIota();
+
+    double getBeta();
+
+    char getLeafCharacter();
+
+    const Eigen::MatrixXd &getPr();
+
     VirtualNode *getNodeUp();
 
     VirtualNode *getNodeLeft();
@@ -160,6 +176,12 @@ public:
      * @return boolean value (true or false)
      */
     bool isTerminalNode();
+
+    /*!
+     * @brief This function returns true if the node is root
+     * @return boolean value (true or false)
+     */
+    bool isRootNode();
 
     /*!
      * @brief This function return the index of node as seen from the parent immediate above it.
@@ -222,10 +244,23 @@ public:
 
     virtual void _testReachingPseudoRoot();
 
+    double computeTotalTreeLength();
+    void setIota(double tau, double mu);
+    void setBeta(double tau, double mu);
+    void setPr(int extended_alphabet_size);
+    void setLeafState(std::string s);
+    void setAncestralFlag(std::string MSA_col);
+    void clearFv();
+
+    void _printUtree();
+
 protected:
     std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
     virtual void _updateStartNodes();
+
+    void _recursiveSetLeafState(VirtualNode *vnode,std::string MSA_col,int idx);
+    void _recursiveSetDescCount(VirtualNode *vnode);
 
 private:
 
@@ -237,6 +272,7 @@ namespace UtreeUtils {
     void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
 
     void convertUtree(PhyTree *in_tree, Utree *out_tree);
+
 }
 
 #endif //TSHLIB_UTREE_HPP

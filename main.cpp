@@ -128,7 +128,28 @@ int main(int argc, char **argv) {
     double lambda;
     double tau;
     double nu;
-    //------------------------------------------------------------------------------------------------------------------
+    int is_DNA_AA_Codon;
+    int extended_alphabet_size;
+    unsigned long num_leaves;
+    unsigned long MSA_len;
+    double log_col_lk;
+    double logLK;
+    Eigen::VectorXd pi;
+    double p0;
+
+
+    // LOAD MSA FROM FILE
+    Alignment *alignment = fasta_parser::createAlignment(msa_file);
+
+    num_leaves = alignment->align_dataset.size();
+    std::cout << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
+
+    // 1:DNA, 2:AA, 3:Codon
+    is_DNA_AA_Codon = 1;
+
+    // DNA alphabet
+    extended_alphabet_size = 5;
+
     mu = 0.1;
     lambda = 0.2;
     //------------------------------------------------------------------------------------------------------------------
@@ -143,50 +164,38 @@ int main(int argc, char **argv) {
     // set name of internal nodes
     tree->set_missing_node_name("V");
 
+    //------------------------------------------------------------------------------------------------------------------
+    // BUILD UNROOTED TREE
+
+    auto utree = new Utree;
+    UtreeUtils::convertUtree(tree, utree);
+    std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
+
     // compute total tree length
     tau = tree->computeLength();
+    std::cout << "[PhyTree length] " << tau << std::endl;
+    tau=utree->computeTotalTreeLength();
+    std::cout << "[Utree length] " << tau << std::endl;
 
     // compute the normalizing Poisson intensity
     nu = LKFunc::compute_nu(tau, lambda, mu);
 
     // set insertion probability to each node
     tree->set_iota(tau, mu);
+    utree->setIota(tau,mu);
 
     // set survival probability to each node
     tree->set_beta(tau, mu);
-
-    // print newick tree
-    std::cout << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
-    //------------------------------------------------------------------------------------------------------------------
-    // LOAD MSA FROM FILE
-
-    Alignment *alignment = fasta_parser::createAlignment(msa_file);
-
-    //----------------------------------------------------------
-    // INITIAL LIKELIHOOD COMPUTATION
-
-    int is_DNA_AA_Codon;
-    int extended_alphabet_size;
-    unsigned long num_leaves;
-    unsigned long MSA_len;
-    double log_col_lk;
-    double logLK;
-    Eigen::VectorXd pi;
-    double p0;
-
-
-    num_leaves = alignment->align_dataset.size();
-    std::cout << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
-
-    // 1:DNA, 2:AA, 3:Codon
-    is_DNA_AA_Codon = 1;
-
-    // DNA alphabet
-    extended_alphabet_size = 5;
+    utree->setBeta(tau,mu);
 
     // set "pseudo" probability matrix
     tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
+    utree->setPr(extended_alphabet_size);
 
+    // print newick tree
+    utree->_printUtree();
+    std::cout << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
+    //------------------------------------------------------------------------------------------------------------------
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
     pi[0] = 0.25;
@@ -198,8 +207,6 @@ int main(int argc, char **argv) {
     // get MSA length
     MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
 
-    //------------------------------------------------------------------------------------------------------------------
-    //TODO: @MAX Porting likelihood function for utree
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
     // compute log_col_lk
@@ -211,16 +218,21 @@ int main(int argc, char **argv) {
 
         // assign char at the leaves
         tree->set_leaf_state(s);
+        utree->setLeafState(s);
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
+        utree->setAncestralFlag(s);
+
 
         // Initialise FV matrices at each node
         tree->clear_fv();
+        utree->clearFv();
 
         // Compute column likelihood
         //TODO: Add weight per column
         log_col_lk = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+        log_col_lk = LKFunc::compute_col_lk(*utree, pi, is_DNA_AA_Codon, extended_alphabet_size);
 
         std::cout << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
 
@@ -232,16 +244,16 @@ int main(int argc, char **argv) {
     p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
     std::cout << "[Initial LK] p0 = " << p0 << std::endl;
 
+    p0 = LKFunc::compute_log_lk_empty_col(*utree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    std::cout << "[Initial LK] p0 = " << p0 << std::endl;
+
     logLK += LKFunc::phi(MSA_len, nu, p0);
     std::cout << "[Initial LK] LK = " << logLK << std::endl;
     //
     // @MAX
-    //------------------------------------------------------------------------------------------------------------------
-    // BUILD UNROOTED TREE
 
-    auto utree = new Utree;
-    UtreeUtils::convertUtree(tree, utree);
-    std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
+
+    //exit(EXIT_SUCCESS);
 
     // Save tree to file
     //utree->saveTreeOnFile("../data/test.txt");
