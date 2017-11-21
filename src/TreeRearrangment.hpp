@@ -48,6 +48,7 @@
 #include "Utree.hpp"
 #include "Utilities.hpp"
 
+enum class TreeSearchHeuristics{classic_NNI, classic_SPR, classic_Mixed, particle_swarm};
 
 class Move {
 
@@ -174,6 +175,11 @@ protected:
 
 };
 
+namespace treesearchheuristics{
+
+    void testTSH(Utree *input_tree, TreeSearchHeuristics tsh_strategy);
+
+}
 
 
 
