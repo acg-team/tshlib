@@ -85,6 +85,10 @@ endif (UNIX)
 include_directories(${EIGEN3_INCLUDE_DIR})
 #INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
+find_package (glog 0.3.5 REQUIRED)
+find_package(gflags REQUIRED)
+
+
 SET(SOURCES
         newick.cpp
         newick.hpp
@@ -107,6 +111,9 @@ SET(SOURCES
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
+target_link_libraries(tshlib glog::glog)
+target_link_libraries(tshlib gflags)
+
 
 #ADD_EXECUTABLE(tshlib ${SOURCES})
 

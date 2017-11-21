@@ -26,6 +26,9 @@ if (EIGEN3_FOUND)
 endif (EIGEN3_FOUND)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+find_package (glog 0.3.5 REQUIRED)
+find_package(gflags REQUIRED)
+
 add_subdirectory("test")
 add_subdirectory("src")
 include_directories("src")
@@ -39,3 +42,7 @@ set(SOURCES
 
 add_executable(tshexe ${SOURCES})
 target_link_libraries(tshexe tshlib)
+target_link_libraries(tshexe glog::glog)
+target_link_libraries(tshexe gflags)
+
+
