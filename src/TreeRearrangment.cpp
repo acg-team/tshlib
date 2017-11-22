@@ -378,7 +378,7 @@ void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {
-                VLOG(2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                VLOG(2) << "[apply  move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                         << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
                         << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
                         << input_tree->printTreeNewick(true) << std::endl;

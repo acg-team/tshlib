@@ -286,71 +286,71 @@ int main(int argc, char **argv) {
     // DEFINE, APPLY & REVERT TREE REARRANGEMENTS
     // Get all the nodes between the radius boundaries and for each of them build the move list
 
-    treesearchheuristics::testTSH(utree, TreeSearchHeuristics::classic_Mixed);
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    int min_radius = 3;
+    int max_radius = 99;
+
+    unsigned long total_exec_moves = 0;
+
+    // Print node description with neighbors
+    for (auto &vnode:utree->listVNodes) {
+        VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
+
+        // Initialise a new rearrangement list
+        auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
+
+        // Get all the target nodes with distance == radius from the source node
+        // excluding the starting node.
+        rearrangmentList.defineMoves(false);
+
+        // Print the list of moves for the current P node (source node)
+        //rearrangmentList.printMoves();
+
+        VLOG(1) << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
+        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
 
-//    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-//    int min_radius = 3;
-//    int max_radius = 99;
-//
-//    unsigned long total_exec_moves = 0;
-//
-//    // Print node description with neighbors
-//    for (auto &vnode:utree->listVNodes) {
-//        VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
-//
-//        // Initialise a new rearrangement list
-//        auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
-//
-//        // Get all the target nodes with distance == radius from the source node
-//        // excluding the starting node.
-//        rearrangmentList.defineMoves(false);
-//
-//        // Print the list of moves for the current P node (source node)
-//        //rearrangmentList.printMoves();
-//
-//        VLOG(1) << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
-//        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
-//
-//
-//        // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
-//        for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
-//            bool status;
-//
-//            // Apply the move
-//            status = rearrangmentList.applyMove(i);
-//
-//            //utree->saveTreeOnFile("../data/test.txt");
-//
-//            if (status) {
-//                VLOG(2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-//                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
-//                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
-//                              << utree->printTreeNewick(true) << std::endl;
-//                //utree->_testReachingPseudoRoot();
-//            }
-//
-//            // Revert the move, and return to the original tree
-//            status = rearrangmentList.revertMove(i);
-//            //utree->saveTreeOnFile("../data/test.txt");
-//            if (status) {
-//                VLOG(2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-//                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
-//                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
-//                              << utree->printTreeNewick(true) << std::endl;
-//                //utree->_testReachingPseudoRoot();
-//            }
-//            total_exec_moves += rearrangmentList.getNumberOfMoves();
-//        }
-//
-//    }
-//
-//    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-//    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-//
-//    VLOG(1) << "Moves applied and reverted: " << total_exec_moves << std::endl;
-//    VLOG(1) << "Elapsed time: " << duration << " microseconds" << std::endl;
-//    VLOG(1) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+        // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
+        for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
+            bool status;
+
+            // Apply the move
+            status = rearrangmentList.applyMove(i);
+
+            //utree->saveTreeOnFile("../data/test.txt");
+
+            if (status) {
+                VLOG(2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                              << utree->printTreeNewick(true) << std::endl;
+                //utree->_testReachingPseudoRoot();
+            }
+
+            // Revert the move, and return to the original tree
+            status = rearrangmentList.revertMove(i);
+            //utree->saveTreeOnFile("../data/test.txt");
+            if (status) {
+                VLOG(2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                              << utree->printTreeNewick(true) << std::endl;
+                //utree->_testReachingPseudoRoot();
+            }
+            total_exec_moves += rearrangmentList.getNumberOfMoves();
+        }
+
+    }
+
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+
+    VLOG(1) << "Moves applied and reverted: " << total_exec_moves << std::endl;
+    VLOG(1) << "Elapsed time: " << duration << " microseconds" << std::endl;
+    VLOG(1) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+
+    //treesearchheuristics::testTSH(utree, TreeSearchHeuristics::classic_Mixed);
+
 
     exit(0);
 }
