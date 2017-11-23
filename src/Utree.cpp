@@ -343,6 +343,23 @@ void Utree::saveTreeOnFile(std::string outfilepath) {
 
 }
 
+int Utree::getMaxNodeDistance() {
+
+    long int max_distance = 0;
+
+    for(auto &vnode:this->listVNodes){
+
+        if (vnode->isTerminalNode()){
+
+            if (max_distance < this->findPseudoRoot(vnode).size()){
+                max_distance = this->findPseudoRoot(vnode).size();
+            };
+
+        }
+    }
+    return max_distance*2;
+}
+
 std::string VirtualNode::printNeighbours() {
 
     std::stringstream description;

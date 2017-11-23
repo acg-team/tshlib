@@ -218,6 +218,8 @@ public:
 
     std::string printTreeNewick(bool showInternalNodeNames);
 
+    int getMaxNodeDistance();
+
     virtual void saveTreeOnFile(std::string outfilepath);
 
     virtual void _testReachingPseudoRoot();

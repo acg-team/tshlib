@@ -211,10 +211,10 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 
 void TreeRearrangment::printMoves() {
 
-    std::cout << "[set " << this->mset_id << "] " << this->mset_strategy << " strategy" << std::endl;
-    std::cout << "[class]\t(P\t; Q)" << std::endl;
+    VLOG(2) << "[set " << this->mset_id << "] " << this->mset_strategy << " strategy" << std::endl;
+    VLOG(2) << "[class]\t(P\t; Q)" << std::endl;
     for (auto &nmove: this->mset_moves) {
-        std::cout << "[" << nmove->move_class << "]\t" << nmove->move_radius
+        VLOG(2) << "[" << nmove->move_class << "]\t" << nmove->move_radius
                   << "\t(" << this->mset_sourcenode->vnode_name << "\t; "
                   << nmove->getTargetNode()->vnode_name << ")\t"
                   << static_cast<int>(nmove->move_direction) << std::endl;
@@ -345,8 +345,8 @@ void Move::recomputeLikelihood() {
 void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh_strategy) {
 
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    int min_radius = 3;
-    int max_radius = 99;
+    int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
+    int max_radius = input_tree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
 
     unsigned long total_exec_moves = 0;
 
@@ -362,7 +362,7 @@ void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh
         rearrangmentList.defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
-        //rearrangmentList.printMoves();
+        rearrangmentList.printMoves();
 
         VLOG(1) << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
         VLOG(1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
