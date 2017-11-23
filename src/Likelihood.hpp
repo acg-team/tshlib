@@ -127,7 +127,7 @@ namespace LKFunc {
 
     double compute_log_lk_empty_col(PhyTree &node, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
-    double compute_log_lk_empty_col(Utree &utree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
 
     Eigen::VectorXd
@@ -138,7 +138,7 @@ namespace LKFunc {
 
 
     double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size);
-    double compute_col_lk(Utree &utree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size);
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size,double tau,double mu);
 
     double compute_nu(double tau, double lambda, double mu);
 

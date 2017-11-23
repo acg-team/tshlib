@@ -142,6 +142,7 @@ public:
      */
     std::string printNeighbours();
 
+    void setNodeName(const std::string s);
 
     virtual void setNodeRight(VirtualNode *inVNode);
 
@@ -159,9 +160,15 @@ public:
 
     double getIota();
 
+    void setIota(double iota);
+
     double getBeta();
 
+    void setBeta(double beta);
+
     char getLeafCharacter();
+
+    void setChild(VirtualNode *vn);
 
     const Eigen::MatrixXd &getPr();
 
@@ -170,6 +177,10 @@ public:
     VirtualNode *getNodeLeft();
 
     VirtualNode *getNodeRight();
+
+    void _traverseVirtualNodeTree();
+
+    void setNodeParent(VirtualNode *vn);
 
     /*!
      * @brief This function returns true if the node is terminal
@@ -204,6 +215,8 @@ public:
     bool isParent(VirtualNode *inVNode);
 
 
+    void setLeafState(std::string s);
+    void setAncestralFlag(std::string MSA_col);
 
 protected:
     VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
@@ -215,6 +228,10 @@ protected:
     virtual void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
 
     virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
+
+    void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps);
+    void _recursiveSetLeafState(std::string MSA_col,int &idx);
+    void _recursiveSetDescCount();
 
 };
 
@@ -248,8 +265,6 @@ public:
     void setIota(double tau, double mu);
     void setBeta(double tau, double mu);
     void setPr(int extended_alphabet_size);
-    void setLeafState(std::string s);
-    void setAncestralFlag(std::string MSA_col);
     void clearFv();
 
     void _printUtree();
@@ -258,9 +273,6 @@ protected:
     std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
     virtual void _updateStartNodes();
-
-    void _recursiveSetLeafState(VirtualNode *vnode,std::string MSA_col,int idx);
-    void _recursiveSetDescCount(VirtualNode *vnode);
 
 private:
 

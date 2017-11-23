@@ -105,17 +105,17 @@ namespace LKFunc {
         return log(p0);
     }
 
-    double compute_log_lk_empty_col(Utree &utree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
-        VirtualNode *pseudo_root;
+    double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+ //       VirtualNode *pseudo_root;
         double p0;
 
-        pseudo_root=utree.startVNodes.at(0);
+   //     pseudo_root=utree.startVNodes.at(0);
 
-        compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+        compute_lk_empty_col(root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
-        pseudo_root=utree.startVNodes.at(1);
+//        pseudo_root=utree.startVNodes.at(1);
 
-        compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+  //      compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
         return log(p0);
     }
@@ -225,18 +225,11 @@ namespace LKFunc {
         return log(lk);
     }
 
-    double compute_col_lk(Utree &utree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size,double tau,double mu) {
 
-        VirtualNode *pseudo_root;
         double lk;
 
-        pseudo_root=utree.startVNodes.at(0);
-
-        compute_lk_recursive(pseudo_root, lk, pi, is_DNA_AA_Codon, alphabet_size);
-
-        pseudo_root=utree.startVNodes.at(1);
-
-        compute_lk_recursive(pseudo_root, lk, pi, is_DNA_AA_Codon, alphabet_size);
+        compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size);
 
         return log(lk);
     }

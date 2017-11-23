@@ -558,6 +558,10 @@ public:
 
         std::cout << "----------------------\n";
         std::cout << "Name: " << this->name << "\n";
+        if(this->n_children()==2){
+            std::cout << "L. child name: " << this->get_left_child()->getName() << "\n";
+            std::cout << "R. child name: " << this->get_right_child()->getName() << "\n";
+        }
         std::cout << "tau: " << this->tau << "\n";
         std::cout << "nu: " << this->nu << "\n";
         std::cout << "iota: " << this->iota << "\n";

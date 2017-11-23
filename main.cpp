@@ -162,8 +162,7 @@ int main(int argc, char **argv) {
     tree = newick_parser::parse_newick(&tree_str);
 
     // set name of internal nodes
-    tree->set_missing_node_name("V");
-
+    tree->set_missing_node_name("V"); //TODO: check whether V is unique
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
@@ -180,20 +179,28 @@ int main(int argc, char **argv) {
     // compute the normalizing Poisson intensity
     nu = LKFunc::compute_nu(tau, lambda, mu);
 
+
+    //TODO: none of the node takes iota=(1/mu)/(tau + 1/mu)
     // set insertion probability to each node
     tree->set_iota(tau, mu);
     utree->setIota(tau,mu);
 
+
+    //TODO: none of the node takes beta=1
     // set survival probability to each node
     tree->set_beta(tau, mu);
     utree->setBeta(tau,mu);
+
+    //tree->print_local_var();
+    //std::cout<<std::endl;
+    //utree->_printUtree();
 
     // set "pseudo" probability matrix
     tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
     utree->setPr(extended_alphabet_size);
 
     // print newick tree
-    utree->_printUtree();
+    //utree->_printUtree();
     std::cout << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
     //------------------------------------------------------------------------------------------------------------------
     // set Pi, steady state frequencies
@@ -203,6 +210,24 @@ int main(int argc, char **argv) {
     pi[2] = 0.25;
     pi[3] = 0.25;
     pi[4] = 0.0;
+
+
+    //---------------------------------------------------------
+    // Add the root
+    VirtualNode *root = new VirtualNode;
+
+    double T = tau + 1 / mu;
+    double iota = (1/mu)/T;
+    double beta = 1.0;
+
+    root->setNodeName("Root");
+    root->setIota(iota);
+    root->setBeta(beta);
+    root->setChild(utree->startVNodes.at(0));
+    root->setChild(utree->startVNodes.at(1));
+
+    root->_traverseVirtualNodeTree();
+    //---------------------------------------------------------
 
     // get MSA length
     MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
@@ -216,14 +241,17 @@ int main(int argc, char **argv) {
         std::string s = alignment->extractColumn(i);
         std::cout << "[Extracted column] (" << i << ") = " << s << std::endl;
 
+        //TODO: the order of traversal is not the same as in the fasta file
         // assign char at the leaves
         tree->set_leaf_state(s);
-        utree->setLeafState(s);
+        root->setLeafState(s);
 
+        //TODO: chack all combinations
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
-        utree->setAncestralFlag(s);
+        root->setAncestralFlag(s);
 
+        //utree->_printUtree();
 
         // Initialise FV matrices at each node
         tree->clear_fv();
@@ -232,28 +260,40 @@ int main(int argc, char **argv) {
         // Compute column likelihood
         //TODO: Add weight per column
         log_col_lk = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-        log_col_lk = LKFunc::compute_col_lk(*utree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+        log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size,tau,mu);
 
         std::cout << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
 
         logLK += log_col_lk;
+
     }
+
 
 
     // compute empty column likelihood
     p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
     std::cout << "[Initial LK] p0 = " << p0 << std::endl;
 
-    p0 = LKFunc::compute_log_lk_empty_col(*utree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
     std::cout << "[Initial LK] p0 = " << p0 << std::endl;
 
     logLK += LKFunc::phi(MSA_len, nu, p0);
     std::cout << "[Initial LK] LK = " << logLK << std::endl;
-    //
-    // @MAX
 
 
-    //exit(EXIT_SUCCESS);
+    //----------------------------------------------
+    // Remove the root
+    VirtualNode *vnL;
+    VirtualNode *vnR;
+    vnL=root->getNodeLeft();
+    vnR=root->getNodeRight();
+    vnL->setNodeParent(vnR);
+    vnR->setNodeParent(vnL);
+    delete root;
+    //----------------------------------------------
+
+
+    exit(EXIT_SUCCESS);
 
     // Save tree to file
     //utree->saveTreeOnFile("../data/test.txt");
