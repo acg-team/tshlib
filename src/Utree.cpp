@@ -115,6 +115,97 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
 
 }
 
+std::vector<VirtualNode *> UtreeUtils::fill_with_nodes(VirtualNode *n) {
+    std::vector<VirtualNode *> list_nodes_n;
+
+    list_nodes_n.push_back(n);
+    while (!n->isRootNode()) {
+        n = n->getNodeUp();
+        list_nodes_n.push_back(n);
+    }
+
+    return list_nodes_n;
+}
+
+std::vector<VirtualNode *> UtreeUtils::get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2) {
+    std::vector<VirtualNode *> list_nodes;
+    VirtualNode *n1;
+    VirtualNode *n2;
+
+    while (list_nodes_n1.size() > 0 && list_nodes_n2.size() > 0) {
+        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
+        if (n1 == n2) {
+            list_nodes.push_back(n1);
+            list_nodes_n1.pop_back();
+            list_nodes_n2.pop_back();
+        } else {
+            break;
+        }
+    }
+
+    while (list_nodes_n1.size() > 0) {
+        n2 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+        list_nodes.push_back(n1);
+        list_nodes_n1.pop_back();
+    }
+
+    while (list_nodes_n2.size() > 0) {
+        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
+        list_nodes.push_back(n2);
+        list_nodes_n2.pop_back();
+    }
+
+    std::reverse(list_nodes.begin(), list_nodes.end());
+
+    return list_nodes;
+}
+
+std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2) {
+    std::vector<VirtualNode *> list_nodes_n0;
+    std::vector<VirtualNode *> list_nodes_n1;
+    std::vector<VirtualNode *> list_nodes_n2;
+
+    // add nodes from n1 to root
+    list_nodes_n1 = fill_with_nodes(vn1);
+
+    // add nodes from n2 to root
+    list_nodes_n2 = fill_with_nodes(vn2);
+
+    list_nodes_n0 = get_unique(list_nodes_n1, list_nodes_n2);
+
+    return list_nodes_n0;
+}
+
+void UtreeUtils::recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root){
+    VirtualNode *vn;
+
+    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
+        vn=list_vnode_to_root.at(k);
+        vn->recombineFv();
+    }
+
+}
+
+void UtreeUtils::revertAllFv(std::vector<VirtualNode *> list_vnode_to_root){
+    VirtualNode *vn;
+
+    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
+        vn=list_vnode_to_root.at(k);
+        vn->revertFv();
+    }
+
+}
+
+void UtreeUtils::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
+    VirtualNode *vn;
+
+    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
+        vn=list_vnode_to_root.at(k);
+        vn->keepFv();
+    }
+
+}
 
 VirtualNode::VirtualNode() {
     // Initialise a new VirtualNode completely disconnected from the tree
@@ -266,23 +357,39 @@ VirtualNode *VirtualNode::getNodeRight() {
 
 void VirtualNode::_traverseVirtualNodeTree(){
 
-    if(this->isTerminalNode()){
-        std::cout<<"[Name] "<<this->vnode_name<<std::endl;
+    std::cout<<"[Name] "<<this->vnode_name<<std::endl;
+    /*
+    if(this->vnode_up!=NULL){
         std::cout<<"[Up name] "<<this->getNodeUp()->vnode_name<<std::endl;
+    }else{
+        std::cout<<"[Up name] "<<" ' ' "<<std::endl;
+    }
+
+    std::cout<<"[Node branch length] "<<this->vnode_branchlength<<std::endl;
+    std::cout<<"[Node iota] "<<this->vnode_iota<<std::endl;
+    std::cout<<"[Node beta] "<<this->vnode_beta<<std::endl;
+    std::cout<<"[Node Pr] "<<this->vnode_Pr.rows() << " x " << this->vnode_Pr.cols()<<std::endl;
+    */
+    if(this->vnode_character!=NULL){
+        std::cout<<"[Node char] "<<this->vnode_character<<std::endl;
+    } else{
+        std::cout<<"[Node char] '' "<<std::endl;
+    }
+
+    std::cout<<"[Node setA_flag] "<<this->vnode_setA<<std::endl;
+
+    if(this->isTerminalNode()){
         std::cout<<std::endl;
     }else{
 
+        //std::cout<<"[Left name] "<<this->getNodeLeft()->vnode_name<<std::endl;
+        //std::cout<<"[Right name] "<<this->getNodeRight()->vnode_name<<std::endl;
+        std::cout<<std::endl;
+
         this->getNodeLeft()->_traverseVirtualNodeTree();
         this->getNodeRight()->_traverseVirtualNodeTree();
-
-        std::cout<<"[Name] "<<this->vnode_name<<std::endl;
-        std::cout<<"[Left name] "<<this->getNodeLeft()->vnode_name<<std::endl;
-        std::cout<<"[Right name] "<<this->getNodeRight()->vnode_name<<std::endl;
-        if(this->vnode_up!=NULL){
-            std::cout<<"[Up name] "<<this->getNodeUp()->vnode_name<<std::endl;
-        }
-        std::cout<<std::endl;
     }
+
 
 }
 
@@ -292,6 +399,98 @@ void VirtualNode::setNodeParent(VirtualNode *vn){
     //}else{
         this->vnode_up=vn;
     //}
+}
+
+double VirtualNode::computeTotalTreeLength() {
+
+    if (this->isTerminalNode()) {
+        return this->vnode_branchlength;
+    } else {
+        return this->vnode_branchlength+
+               this->getNodeLeft()->computeTotalTreeLength()+
+               this->getNodeRight()->computeTotalTreeLength();
+    }
+}
+
+void VirtualNode::setAllIotas(double tau, double mu){
+    double T;
+
+    if (fabs(mu) < 1e-8) {
+        perror("ERROR in set_iota: mu too small");
+    }
+
+    T = tau + 1 / mu;
+
+    if (fabs(T) < 1e-8) {
+        perror("ERROR in set_iota: T too small");
+    }
+
+    if (this->vnode_up==NULL) {
+            this->vnode_iota=(1/mu)/T;
+    } else {
+        this->getNodeLeft()->setAllIotas(tau,mu);
+        this->getNodeRight()->setAllIotas(tau,mu);
+        this->vnode_iota = this->vnode_branchlength / T;
+    }
+
+}
+
+void VirtualNode::setAllBetas(double mu){
+
+    if (fabs(mu) < 1e-8) {
+        perror("ERROR in set_iota: mu too small");
+    }
+
+    if (this->vnode_up==NULL) {
+        this->vnode_beta=1.0;
+    } else {
+        this->getNodeLeft()->setAllBetas(mu);
+        this->getNodeRight()->setAllBetas(mu);
+        if (fabs(this->vnode_branchlength) < 1e-8) {
+            perror("ERROR : branch_length too small");
+        }
+        this->vnode_beta= (1.0 - exp(-mu * this->vnode_branchlength)) / (mu * this->vnode_branchlength);
+    }
+
+}
+
+void VirtualNode::recombineFv(){
+    unsigned int lL,lR;
+
+    if(this->isTerminalNode()){
+        return;
+    }
+
+    lL=this->getNodeLeft()->vnode_Fv.size();
+    lR=this->getNodeRight()->vnode_Fv.size();
+
+    if(lL!=lR){
+        perror("ERROR: left fv size different from right fv size");
+        exit(EXIT_FAILURE);
+    }
+
+    this->vnode_Fv_temp.clear();
+    for(unsigned int k=0;k<lL;k++){
+        Eigen::VectorXd &fvL=this->getNodeLeft()->vnode_Fv.at(k);
+        Eigen::VectorXd &fvR=this->getNodeRight()->vnode_Fv.at(k);
+        Eigen::VectorXd fv0=fvL.cwiseProduct(fvR);
+        this->vnode_Fv_temp.push_back(fv0);
+    }
+
+}
+
+void VirtualNode::revertFv(){
+
+    this->vnode_Fv_temp.clear();
+
+}
+
+void VirtualNode::keepFv(){
+
+    this->vnode_Fv.clear();
+    this->vnode_Fv=this->vnode_Fv_temp;
+    //this->vnode_Fv_temp=NULL;
+
 }
 
 void Utree::addMember(VirtualNode *inVNode, bool isStartNode) {
@@ -445,6 +644,8 @@ void Utree::_printUtree(){
         vn=this->listVNodes.at(i);
 
         std::cout<<"[Node name] "<<vn->vnode_name<<std::endl;
+
+        std::cout << "[Up child node name] " << vn->getNodeUp()->vnode_name<< std::endl;
 
         if(!vn->isTerminalNode()) {
             std::cout << "[L. child node name] " << vn->getNodeLeft()->vnode_name<< std::endl;

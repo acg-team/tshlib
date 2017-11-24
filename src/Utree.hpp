@@ -86,6 +86,7 @@ public:
     double vnode_tau;                               /* Tau value up to this node */
     double vnode_nu;                                /* Nu value associated to this node */
     std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
+    std::vector<Eigen::VectorXd> vnode_Fv_temp;          /* Fv matrix computed recursively */
     bool vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
     int vnode_descCount;                            /*  ? */
     char vnode_character;                           /* Character associated to this node (only if terminal node) */
@@ -181,6 +182,16 @@ public:
     void _traverseVirtualNodeTree();
 
     void setNodeParent(VirtualNode *vn);
+
+    double computeTotalTreeLength();
+
+    void setAllIotas(double tau, double mu);
+
+    void setAllBetas(double mu);
+
+    void recombineFv();
+    void revertFv();
+    void keepFv();
 
     /*!
      * @brief This function returns true if the node is terminal
@@ -285,6 +296,12 @@ namespace UtreeUtils {
 
     void convertUtree(PhyTree *in_tree, Utree *out_tree);
 
+    std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+    std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
+    std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
+    void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+    void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+    void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 }
 
 #endif //TSHLIB_UTREE_HPP

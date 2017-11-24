@@ -144,6 +144,7 @@ namespace LKFunc {
             fv[idx] = 1.0;
 
             if (node.get_InsertionHistories()) {
+                //std::cout<<"SETA1 "<<node.getName()<<std::endl;
                 lk += node.get_iota() * node.get_beta() * (fv.dot(pi));
             }
 
@@ -157,6 +158,7 @@ namespace LKFunc {
             fv = (node.get_left_child()->get_Pr() * fvL).cwiseProduct(node.get_right_child()->get_Pr() * fvR);
 
             if (node.get_InsertionHistories()) {
+                //std::cout<<"SETA2 "<<node.getName()<<std::endl;
                 lk += node.get_iota() * node.get_beta() * (fv.dot(pi));
             }
 
@@ -192,6 +194,7 @@ namespace LKFunc {
             fv[idx] = 1.0;
 
             if (vnode->getSetA()) {
+                //std::cout<<"SETA1* "<<vnode->vnode_name<<std::endl;
                 lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
             }
 
@@ -205,6 +208,7 @@ namespace LKFunc {
             fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
 
             if (vnode->getSetA()) {
+                //std::cout<<"SETA2* "<<vnode->vnode_name<<std::endl;
                 lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
             }
 
@@ -218,16 +222,16 @@ namespace LKFunc {
 
     double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
 
-        double lk;
+        double lk=0.0;
 
         compute_lk_recursive(tree, lk, pi, is_DNA_AA_Codon, alphabet_size);
 
         return log(lk);
     }
 
-    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size,double tau,double mu) {
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
 
-        double lk;
+        double lk=0.0;
 
         compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size);
 

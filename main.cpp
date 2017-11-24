@@ -105,7 +105,6 @@ namespace fasta_parser {
 
 }
 
-
 int main(int argc, char **argv) {
 
     /* LOGURU LOGGING ENGINE
@@ -136,7 +135,6 @@ int main(int argc, char **argv) {
     double logLK;
     Eigen::VectorXd pi;
     double p0;
-
 
     // LOAD MSA FROM FILE
     Alignment *alignment = fasta_parser::createAlignment(msa_file);
@@ -169,12 +167,34 @@ int main(int argc, char **argv) {
     auto utree = new Utree;
     UtreeUtils::convertUtree(tree, utree);
     std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
+    std::cout << std::endl;
+
+    //---------------------------------------------------------
+    // Add the root
+    VirtualNode *root = new VirtualNode;
+
+    double T = tau + 1 / mu;
+    double iota = (1/mu)/T;
+    double beta = 1.0;
+
+    root->setNodeName("Root");
+    //root->setIota(iota);
+    //root->setBeta(beta);
+    root->setChild(utree->startVNodes.at(0));
+    root->setChild(utree->startVNodes.at(1));
+
+    //root->_traverseVirtualNodeTree();
+    //---------------------------------------------------------
+
 
     // compute total tree length
     tau = tree->computeLength();
     std::cout << "[PhyTree length] " << tau << std::endl;
     tau=utree->computeTotalTreeLength();
     std::cout << "[Utree length] " << tau << std::endl;
+    tau=root->computeTotalTreeLength();
+    std::cout << "[Tree length (from root)] " << tau << std::endl;
+    std::cout << std::endl;
 
     // compute the normalizing Poisson intensity
     nu = LKFunc::compute_nu(tau, lambda, mu);
@@ -184,12 +204,14 @@ int main(int argc, char **argv) {
     // set insertion probability to each node
     tree->set_iota(tau, mu);
     utree->setIota(tau,mu);
-
+    root->setAllIotas(tau,mu);
 
     //TODO: none of the node takes beta=1
     // set survival probability to each node
     tree->set_beta(tau, mu);
     utree->setBeta(tau,mu);
+    root->setAllBetas(mu);
+
 
     //tree->print_local_var();
     //std::cout<<std::endl;
@@ -198,6 +220,8 @@ int main(int argc, char **argv) {
     // set "pseudo" probability matrix
     tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
     utree->setPr(extended_alphabet_size);
+
+    //root->_traverseVirtualNodeTree();
 
     // print newick tree
     //utree->_printUtree();
@@ -211,29 +235,14 @@ int main(int argc, char **argv) {
     pi[3] = 0.25;
     pi[4] = 0.0;
 
-
-    //---------------------------------------------------------
-    // Add the root
-    VirtualNode *root = new VirtualNode;
-
-    double T = tau + 1 / mu;
-    double iota = (1/mu)/T;
-    double beta = 1.0;
-
-    root->setNodeName("Root");
-    root->setIota(iota);
-    root->setBeta(beta);
-    root->setChild(utree->startVNodes.at(0));
-    root->setChild(utree->startVNodes.at(1));
-
-    root->_traverseVirtualNodeTree();
-    //---------------------------------------------------------
-
     // get MSA length
     MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
+
+    double log_col_lk0;
+
     // compute log_col_lk
     for (int i = 0; i < MSA_len; i++) {
 
@@ -251,7 +260,7 @@ int main(int argc, char **argv) {
         tree->set_ancestral_flag(s);
         root->setAncestralFlag(s);
 
-        //utree->_printUtree();
+        //root->_traverseVirtualNodeTree();
 
         // Initialise FV matrices at each node
         tree->clear_fv();
@@ -259,16 +268,16 @@ int main(int argc, char **argv) {
 
         // Compute column likelihood
         //TODO: Add weight per column
-        log_col_lk = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-        log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size,tau,mu);
+        log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+        log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
 
         std::cout << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
+
+        std::cout << "[diff lk] " << abs(log_col_lk0-log_col_lk) << std::endl;
 
         logLK += log_col_lk;
 
     }
-
-
 
     // compute empty column likelihood
     p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
@@ -279,7 +288,7 @@ int main(int argc, char **argv) {
 
     logLK += LKFunc::phi(MSA_len, nu, p0);
     std::cout << "[Initial LK] LK = " << logLK << std::endl;
-
+    std::cout << std::endl;
 
     //----------------------------------------------
     // Remove the root
@@ -290,10 +299,8 @@ int main(int argc, char **argv) {
     vnL->setNodeParent(vnR);
     vnR->setNodeParent(vnL);
     delete root;
+    //utree->_printUtree();
     //----------------------------------------------
-
-
-    exit(EXIT_SUCCESS);
 
     // Save tree to file
     //utree->saveTreeOnFile("../data/test.txt");
@@ -337,6 +344,10 @@ int main(int argc, char **argv) {
 
     unsigned long total_exec_moves = 0;
 
+    std::vector<VirtualNode *> list_vnode_to_root;
+
+    bool is_the_best_move;
+
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
         std::cout << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
@@ -364,6 +375,31 @@ int main(int argc, char **argv) {
 
             //utree->saveTreeOnFile("../data/test.txt");
 
+            if(status){
+                VirtualNode *source;
+                VirtualNode *target;
+                list_vnode_to_root.clear();
+                source=rearrangmentList.getSourceNode();
+                target=rearrangmentList.getMove(i)->getTargetNode();
+                list_vnode_to_root=UtreeUtils::get_path_from_nodes(source,target);
+
+                /*
+                std::cout<<"source "<<source->vnode_name<<std::endl;
+                std::cout<<"target "<<target->vnode_name<<std::endl;
+                //TODO: root considered twice...!
+                for(unsigned int k=0;k<list_vnode_to_root.size();k++){
+                    std::cout<<"LISTA:"<<list_vnode_to_root.at(k)->vnode_name<<std::endl;
+                }
+                */
+
+                UtreeUtils::recombineAllFv(list_vnode_to_root);
+
+                //TODO: here goes the smart lk recomputation
+                is_the_best_move=false;
+
+            }
+
+
             if (status) {
                 std::cout << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
@@ -375,6 +411,18 @@ int main(int argc, char **argv) {
             // Revert the move, and return to the original tree
             status = rearrangmentList.revertMove(i);
             //utree->saveTreeOnFile("../data/test.txt");
+
+            if(status){
+
+                if(!is_the_best_move){
+                    UtreeUtils::revertAllFv(list_vnode_to_root);
+                }else{
+                    UtreeUtils::keepAllFv(list_vnode_to_root);
+                }
+
+            }
+
+
             if (status) {
                 std::cout << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
