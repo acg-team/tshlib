@@ -76,7 +76,7 @@ public:
     /*!
     * @brief Standard deconstructor
     */
-    virtual ~Move();
+    ~Move();
 
     /*!
      * @brief Reset the protected move_targetnode field
@@ -103,6 +103,7 @@ public:
 
     void recomputeLikelihood();
 
+    void initMove();
 };
 
 
@@ -121,10 +122,11 @@ private:
 public:
     std::string mset_strategy;          /* Description of the node search strategy */
 
+    TreeRearrangment();
 
-    TreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
+    virtual void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
-    TreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths);
+    virtual void initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths);
 
     virtual ~TreeRearrangment();
 

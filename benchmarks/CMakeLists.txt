@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(tshexe)
+project(tshlib_benchmarks)
 
 SET(CMAKE_BUILD_TYPE DEBUG)
 
@@ -39,22 +39,18 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 find_package (glog 0.3.5 REQUIRED)
 find_package(gflags REQUIRED)
 
-add_subdirectory("test")
-add_subdirectory("src")
-add_subdirectory("benchmarks")
+#add_subdirectory("test")
+#add_subdirectory("../src")
+include_directories("../src")
 
-include_directories("src")
-
-#add_subdirectory("lib/loguru")
-#include_directories("lib/loguru")
 
 set(SOURCES
         main.cpp
         main.hpp)
 
-add_executable(tshexe ${SOURCES})
-target_link_libraries(tshexe tshlib)
-target_link_libraries(tshexe glog::glog)
-target_link_libraries(tshexe gflags)
+add_executable(tshlib_benchmarks ${SOURCES})
+target_link_libraries(tshlib_benchmarks tshlib)
+target_link_libraries(tshlib_benchmarks glog::glog)
+target_link_libraries(tshlib_benchmarks gflags)
 
 

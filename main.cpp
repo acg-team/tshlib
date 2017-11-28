@@ -345,9 +345,9 @@ int main(int argc, char **argv) {
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
-    VLOG(1) << "Moves applied and reverted: " << total_exec_moves << std::endl;
-    VLOG(1) << "Elapsed time: " << duration << " microseconds" << std::endl;
-    VLOG(1) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+    VLOG(0) << "Moves applied and reverted: " << total_exec_moves << std::endl;
+    VLOG(0) << "Elapsed time: " << duration << " microseconds" << std::endl;
+    VLOG(0) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
 
     //treesearchheuristics::testTSH(utree, TreeSearchHeuristics::classic_Mixed);
 

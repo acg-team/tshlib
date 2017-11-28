@@ -47,11 +47,27 @@
 #include <gflags/gflags.h>
 #include "TreeRearrangment.hpp"
 
+#ifdef TSHLIB_BENCHMARK
+#include <iostream>
+#include <fstream>
+#endif
 
-TreeRearrangment::~TreeRearrangment() = default;
+TreeRearrangment::TreeRearrangment() = default;
+
+TreeRearrangment::~TreeRearrangment(){
+
+    for(std::vector<Move *>::reverse_iterator i=this->mset_moves.rbegin();i<this->mset_moves.rend();i++){
+        Move *move = *i;
+        delete move;
+    }
+    std::vector<Move*>().swap(this->mset_moves);
 
 
-TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths) {
+
+};
+
+
+void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths) {
 
     this->mset_sourcenode = node_source;
     this->mset_id = node_source->vnode_name + ":" + std::to_string(radius);
@@ -59,11 +75,11 @@ TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int radius, bool pr
     this->mset_max_radius = radius;
     this->mset_preserve_blenghts = preserve_blengths;
     this->mset_strategy = "undefined";
+    //this->mset_moves = new std::vector<Move *>;
 
 }
 
-
-TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
+void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
 
     this->mset_sourcenode = node_source;
     this->mset_id = node_source->vnode_name + ":" + std::to_string(min_radius) + "-" + std::to_string(max_radius);
@@ -79,13 +95,16 @@ void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius
 
     VirtualNode *node = node_source;
 
-    auto moveInstance = new Move;
+
 
     if (!includeSelf) {
         includeSelf = true;
 
     } else {
         if (radius == 0) {
+            auto moveInstance = new Move;
+            moveInstance->initMove();
+
             moveInstance->setDirection(direction);
             moveInstance->setRadius(this->mset_cur_radius);
             moveInstance->setTargetNode(node);
@@ -136,17 +155,18 @@ void TreeRearrangment::defineMoves(bool includeSelf) {
 
 void TreeRearrangment::addMove(Move *move) {
 
-    this->mset_moves.emplace_back(move);
+    this->mset_moves.push_back(move);
 
 }
 
 
 void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, NodePosition traverse_direction) {
 
-    auto vnode = new VirtualNode;
-    auto moveInstance = new Move;
+    VirtualNode *vnode;
+
     NodePosition idx;
     MoveDirections moving_direction;
+
 
     vnode = node_source;
 
@@ -167,6 +187,9 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
                 moving_direction = MoveDirections::undef;
 
         }
+        auto moveInstance = new Move;
+        moveInstance->initMove();
+
         moveInstance->setDirection(moving_direction);
         moveInstance->setRadius(this->mset_cur_radius);
         moveInstance->setTargetNode(vnode);
@@ -270,19 +293,18 @@ void TreeRearrangment::selectBestMove(unsigned long moveID) {
 
 Move::~Move() = default;
 
+Move::Move() = default;
 
-Move::Move() {
+void Move::initMove() {
+    move_id = 0;
+    move_name = "undef";
+    move_type = MoveType::undef;
+    move_class = "undef";
+    move_direction = MoveDirections::undef;
 
-    this->move_id = 0;
-    this->move_name = "undef";
-    this->move_type = MoveType::undef;
-    this->move_class = "undef";
-    this->move_direction = MoveDirections::undef;
+    move_lk = -INFINITY;
 
-    this->move_lk = -INFINITY;
-
-    this->move_applied = false;
-
+    move_applied = false;
 }
 
 
@@ -352,60 +374,73 @@ void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh
 
     // Print node description with neighbors
     for (auto &vnode:input_tree->listVNodes) {
+    //    VirtualNode *vnode = input_tree->listVNodes.at(200);
+
         VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
 
         // Initialise a new rearrangement list
-        auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
+        auto rearrangmentList = new TreeRearrangment;
+
+        rearrangmentList->initTreeRearrangment(vnode, min_radius, max_radius, true);
 
         // Get all the target nodes with distance == radius from the source node
         // excluding the starting node.
-        rearrangmentList.defineMoves(false);
+        rearrangmentList->defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
-        rearrangmentList.printMoves();
+        rearrangmentList->printMoves();
 
-        VLOG(1) << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
-        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
+        VLOG(1) << "[tsh] Strategy " << rearrangmentList->mset_strategy << std::endl;
+        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
+        //
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
-        for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
+        for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
             bool status;
 
             // Apply the move
-            status = rearrangmentList.applyMove(i);
+            status = rearrangmentList->applyMove(i);
 
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {
-                VLOG(2) << "[apply  move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                        << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
-                        << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                        << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                         << input_tree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
 
             // Revert the move, and return to the original tree
-            status = rearrangmentList.revertMove(i);
+            status = rearrangmentList->revertMove(i);
             //utree->saveTreeOnFile("../data/test.txt");
             if (status) {
-                VLOG(2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                        << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
-                        << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                        << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
+                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                         << input_tree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
-            total_exec_moves += rearrangmentList.getNumberOfMoves();
+            total_exec_moves += rearrangmentList->getNumberOfMoves();
         }
 
+        delete rearrangmentList;
     }
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
-    VLOG(1) << "Moves applied and reverted: " << total_exec_moves << std::endl;
-    VLOG(1) << "Elapsed time: " << duration << " microseconds" << std::endl;
-    VLOG(1) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+    VLOG(2) << "Moves applied and reverted: " << total_exec_moves << std::endl;
+    VLOG(2) << "Elapsed time: " << duration << " microseconds" << std::endl;
+    VLOG(2) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
 
+
+#ifdef TSHLIB_BENCHMARK
+    std::ofstream myfile;
+    myfile.open ("tshlib_statistics.csv", std::ios_base::app);
+    myfile << input_tree->listVNodes.size()<< "," <<total_exec_moves << "," << duration << "," << (double) duration/total_exec_moves << std::endl;
+    myfile.close();
+#endif
 
 }
