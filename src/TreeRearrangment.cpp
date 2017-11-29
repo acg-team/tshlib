@@ -54,6 +54,7 @@
 
 TreeRearrangment::TreeRearrangment() = default;
 
+
 TreeRearrangment::~TreeRearrangment(){
 
     for(std::vector<Move *>::reverse_iterator i=this->mset_moves.rbegin();i<this->mset_moves.rend();i++){
@@ -78,6 +79,7 @@ void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int radius
     //this->mset_moves = new std::vector<Move *>;
 
 }
+
 
 void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
 
@@ -286,6 +288,7 @@ VirtualNode *TreeRearrangment::getSourceNode() {
     return this->mset_sourcenode ?: nullptr;
 }
 
+
 void TreeRearrangment::selectBestMove(unsigned long moveID) {
 
 }
@@ -294,6 +297,7 @@ void TreeRearrangment::selectBestMove(unsigned long moveID) {
 Move::~Move() = default;
 
 Move::Move() = default;
+
 
 void Move::initMove() {
     move_id = 0;
@@ -358,6 +362,7 @@ void Move::setDirection(MoveDirections direction) {
     this->move_direction = direction;
 
 }
+
 
 void Move::recomputeLikelihood() {
 

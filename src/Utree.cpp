@@ -282,8 +282,6 @@ Utree::~Utree(){
         VirtualNode *vnode = *i;
         delete vnode;
     }
-    //this->listVNodes.clear();
-    //this->startVNodes.clear();
 
 }
 

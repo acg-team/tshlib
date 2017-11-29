@@ -297,47 +297,50 @@ int main(int argc, char **argv) {
         VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
 
         // Initialise a new rearrangement list
-        auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
+        // Initialise a new rearrangement list
+        auto rearrangmentList = new TreeRearrangment;
+
+        rearrangmentList->initTreeRearrangment(vnode, min_radius, max_radius, true);
 
         // Get all the target nodes with distance == radius from the source node
         // excluding the starting node.
-        rearrangmentList.defineMoves(false);
+        rearrangmentList->defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
         //rearrangmentList.printMoves();
 
-        VLOG(1) << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
-        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
+        VLOG(1) << "[tsh] Strategy " << rearrangmentList->mset_strategy << std::endl;
+        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
-        for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
+        for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
             bool status;
 
             // Apply the move
-            status = rearrangmentList.applyMove(i);
+            status = rearrangmentList->applyMove(i);
 
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {
-                VLOG(2) << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
-                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                VLOG(2) << "[apply move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
 
             // Revert the move, and return to the original tree
-            status = rearrangmentList.revertMove(i);
+            status = rearrangmentList->revertMove(i);
             //utree->saveTreeOnFile("../data/test.txt");
             if (status) {
-                VLOG(2) << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
-                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
-            total_exec_moves += rearrangmentList.getNumberOfMoves();
+            total_exec_moves += rearrangmentList->getNumberOfMoves();
         }
 
     }
