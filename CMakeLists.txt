@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(tshexe)
 
-SET(CMAKE_BUILD_TYPE DEBUG)
-
 set(CMAKE_CXX_STANDARD 11)
 
 SET(CMAKE_CXX_FLAGS_DEBUG  "-Wall -Wshadow -Weffc++ -O0 -g")
@@ -39,14 +37,12 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 find_package (glog 0.3.5 REQUIRED)
 find_package(gflags REQUIRED)
 
-add_subdirectory("test")
+#add_subdirectory("test")
 add_subdirectory("src")
 add_subdirectory("benchmarks")
 
 include_directories("src")
 
-#add_subdirectory("lib/loguru")
-#include_directories("lib/loguru")
 
 set(SOURCES
         main.cpp

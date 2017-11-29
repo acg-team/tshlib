@@ -23,7 +23,7 @@
 cmake_minimum_required(VERSION 3.9.3)
 project(tshlib)
 
-SET(CMAKE_BUILD_TYPE DEBUG)
+add_definitions(-DTSHLIB_BENCHMARK)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -35,8 +35,6 @@ SET(CMAKE_C_FLAGS_RELEASE "-O3")
 
 SET(CMAKE_CXX_FLAGS_INTEL  "-O3")
 SET(CMAKE_C_FLAGS_INTEL "-O3")
-
-add_definitions(-DTSHLIB_BENCHMARK)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WINDOWS TRUE)
