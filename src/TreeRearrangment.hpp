@@ -154,20 +154,22 @@ protected:
 
     /*!
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
-     * @param node_source VirtualNode pointer to the starting node
-     * @param radius int Radius of the search (NNI = 1, SPR > 1)
+     * @param node_source   VirtualNode pointer to the starting node
+     * @param radius_min    int Radius of the search (NNI = 1, SPR > 1)
+     * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
      * @param includeSelf bool ?
      */
-    virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf);
+    virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction);
 
 
     /*!
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
      * @param node_source   PhyTree Pointer to the starting node
-     * @param radius        int Radius of the search (NNI = 3, SPR > 3)
-     * @param traverse_direction     int ?
+     * @param radius_min    int Radius of the search (NNI = 3, SPR > 3)
+     * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
+     * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
      */
-    void getNodesInRadiusUp(VirtualNode *node_source, int radius, NodePosition traverse_direction);
+    void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction);
 
     /*!
      * @brief Append candidate move to the mset_moves vector
