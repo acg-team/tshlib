@@ -56,25 +56,13 @@
 
 #include "main.hpp"
 
-
-std::string SplitFilename (const std::string& str)
-{
-    std::size_t found = str.find_last_of("/\\");
-//    std::cout << " path: " << str.substr(0,found) << '\n';
-//    std::cout << " file: " << str.substr(found+1) << '\n';
-
-    std::string file = str.substr(found+1);
-    std::size_t found2 = file.find_last_of('.');
-    return file.substr(0,found2);
-}
-
 int main(int argc, char **argv) {
 
 
-// Initialize Google's logging library.
+    // Initialize Google's logging library.
     FLAGS_alsologtostderr = true;
     google::InitGoogleLogging("THSLIB Main File");
-    LOG(INFO) << "TSHLIB Initialising" << std::endl;
+
     //------------------------------------------------------------------------------------------------------------------
     std::string tree_file = argv[1];
     PhyTree *tree = nullptr;
@@ -82,42 +70,34 @@ int main(int argc, char **argv) {
 
     // tree filename
     std::ifstream tree_str(tree_file.c_str());
+    LOG(INFO) << "TSHLIB: " << tree_file << std::endl;
 
     // read newick file
     tree = newick_parser::parse_newick(&tree_str);
 
     // set name of internal nodes
     tree->set_missing_node_name("V");
-    LOG(INFO) << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
+    VLOG(1) << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
 
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
     auto utree = new Utree;
     UtreeUtils::convertUtree(tree, utree);
-    LOG(INFO) << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
+    delete tree;
 
-    std::string file_out = SplitFilename(tree_file)+"_stats.csv";
+    VLOG(1) << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Execute tree rearrangements
 
     treesearchheuristics::testTSH(utree, TreeSearchHeuristics::classic_Mixed);
 
-    //std::vector<Move *> testMoves;
-
-    //for(int i=0; i<101; i++){
-    //    auto cmove = new Move;
-    //    testMoves.push_back(cmove);
-    //}
-
-    //testMoves.clear();
-
-    //for(std::vector<Move *>::reverse_iterator i=testMoves.rbegin();i<testMoves.rend();i++){
-    //    Move *move = *i;
-    //    delete move;
-    //}
+    //------------------------------------------------------------------------------------------------------------------
+    // Clear up
 
 
-
-    delete tree;
     delete utree;
+
     exit(0);
 }
