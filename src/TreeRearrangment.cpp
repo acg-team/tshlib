@@ -89,6 +89,7 @@ void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int min_ra
     this->mset_max_radius = max_radius;
     this->mset_preserve_blenghts = preserve_blengths;
     this->mset_strategy = "mixed (NNI+SPR+TBR)";
+    //this->mset_moves.reserve(100000);
 
 }
 
@@ -427,9 +428,10 @@ void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh
                         << input_tree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
-            total_exec_moves += rearrangmentList->getNumberOfMoves();
+
         }
 
+        total_exec_moves += rearrangmentList->getNumberOfMoves()*2;
         delete rearrangmentList;
     }
 
