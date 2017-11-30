@@ -442,8 +442,8 @@ int main(int argc, char **argv) {
                 VirtualNode *source;
                 VirtualNode *target;
                 list_vnode_to_root.clear();
-                source = rearrangmentList.getSourceNode();
-                target = rearrangmentList.getMove(i)->getTargetNode();
+                source = rearrangmentList->getSourceNode();
+                target = rearrangmentList->getMove(i)->getTargetNode();
 
                 //std::cout<<"source "<<source->vnode_name<<std::endl;
                 //std::cout<<"target "<<target->vnode_name<<std::endl;

@@ -21,6 +21,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
     message(STATUS "Compilation will be performed under Apple MacOS")
+    find_package (glog 0.3.5 REQUIRED)
+    find_package(gflags REQUIRED)
+
 endif ()
 
 if (UNIX)
@@ -34,8 +37,6 @@ if (EIGEN3_FOUND)
 endif (EIGEN3_FOUND)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package (glog 0.3.5 REQUIRED)
-find_package(gflags REQUIRED)
 
 include_directories("../src")
 
@@ -45,7 +46,7 @@ set(SOURCES
 
 add_executable(tshlib_benchmarks ${SOURCES})
 target_link_libraries(tshlib_benchmarks tshlib)
-target_link_libraries(tshlib_benchmarks glog::glog)
+target_link_libraries(tshlib_benchmarks glog)
 target_link_libraries(tshlib_benchmarks gflags)
 
 

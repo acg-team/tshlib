@@ -770,8 +770,6 @@ void Utree::clearFv() {
 }
 
 
-Utree::~Utree() = default;
-
 Utree::Utree() = default;
 
 void Utree::_updateStartNodes() {

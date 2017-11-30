@@ -20,7 +20,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 
-cmake_minimum_required(VERSION 3.9.3)
+cmake_minimum_required(VERSION 3.8.2)
 project(tshlib)
 
 add_definitions(-DTSHLIB_BENCHMARK)
@@ -46,6 +46,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
     message(STATUS "Compilation will be performed under Apple MacOS")
+    find_package(Boost 1.65.1 REQUIRED COMPONENTS date_time filesystem iostreams)
+    find_package (glog 0.3.5 REQUIRED)
+    find_package(gflags REQUIRED)
 endif ()
 
 find_package("Eigen3")
@@ -54,9 +57,7 @@ if (EIGEN3_FOUND)
     include_directories(${EIGEN3_INCLUDE_DIR})
 endif (EIGEN3_FOUND)
 
-find_package(Boost 1.65.1 REQUIRED COMPONENTS date_time filesystem iostreams)
-find_package (glog 0.3.5 REQUIRED)
-find_package(gflags REQUIRED)
+
 
 SET(SOURCES
         newick.cpp
@@ -80,7 +81,7 @@ SET(SOURCES
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
-target_link_libraries(tshlib glog::glog)
+target_link_libraries(tshlib glog)
 target_link_libraries(tshlib gflags)
 
 
