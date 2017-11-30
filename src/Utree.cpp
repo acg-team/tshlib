@@ -568,7 +568,7 @@ std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *inVNode, bool fixP
     // from the start node to the pseudoroot
     std::vector<VirtualNode *> path2root;
 
-    auto *CurrentNode = new VirtualNode;
+    VirtualNode *CurrentNode;
 
     // Add the first element of the path to the root
     path2root.push_back(inVNode);
@@ -635,6 +635,14 @@ std::string Utree::_recursiveFormatNewick(VirtualNode *vnode, bool showInternalN
     return newick.str();
 }
 
+Utree::~Utree(){
+
+    for(std::vector<VirtualNode *>::reverse_iterator i=this->listVNodes.rbegin();i<this->listVNodes.rend();i++){
+        VirtualNode *vnode = *i;
+        delete vnode;
+    }
+
+}
 
 double Utree::computeTotalTreeLength() {
     double t_length;
@@ -827,6 +835,23 @@ void Utree::saveTreeOnFile(std::string outfilepath) {
     outfile.open(outfilepath, std::ios_base::app);
     outfile << this->printTreeNewick(true) << std::endl;
 
+}
+
+int Utree::getMaxNodeDistance() {
+
+    long int max_distance = 0;
+
+    for(auto &vnode:this->listVNodes){
+
+        if (vnode->isTerminalNode()){
+
+            if (max_distance < this->findPseudoRoot(vnode).size()){
+                max_distance = this->findPseudoRoot(vnode).size();
+            };
+
+        }
+    }
+    return max_distance*2;
 }
 
 std::string VirtualNode::printNeighbours() {
@@ -1166,10 +1191,10 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
 
     // rotate the pointers only if the node is not a leaf
     if (!vnode->isTerminalNode()) {
-        auto curr_vn_up = new VirtualNode;
-        auto curr_vn_left = new VirtualNode;
-        auto curr_vn_right = new VirtualNode;
-        auto n_up = new VirtualNode;
+        VirtualNode *curr_vn_up;
+        VirtualNode *curr_vn_left;
+        VirtualNode *curr_vn_right;
+        VirtualNode *n_up;
 
 
         curr_vn_up = vnode->getNodeUp();
@@ -1256,11 +1281,11 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
     // rotate the pointers only if the node is not a leaf
     if (!vnode->isTerminalNode()) {
 
-        auto curr_vn_up = new VirtualNode;
-        auto curr_vn_left = new VirtualNode;
-        auto curr_vn_right = new VirtualNode;
+        VirtualNode *curr_vn_up;
+        VirtualNode *curr_vn_left;
+        VirtualNode *curr_vn_right;
 
-        auto n_up = new VirtualNode;
+        VirtualNode *n_up;
 
         curr_vn_up = vnode->getNodeUp();
         curr_vn_left = vnode->getNodeLeft();

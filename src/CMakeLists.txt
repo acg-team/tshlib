@@ -20,13 +20,21 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9.3)
 project(tshlib)
 
+add_definitions(-DTSHLIB_BENCHMARK)
+
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-Wall -Wshadow -Weffc++")
 
+SET(CMAKE_CXX_FLAGS_DEBUG  "-Wall -Wshadow -Weffc++ -O0 -g")
+SET(CMAKE_C_FLAGS_DEBUG "-Wall -Wshadow -O0 -g")
 
+SET(CMAKE_CXX_FLAGS_RELEASE  "-O3")
+SET(CMAKE_C_FLAGS_RELEASE "-O3")
+
+SET(CMAKE_CXX_FLAGS_INTEL  "-O3")
+SET(CMAKE_C_FLAGS_INTEL "-O3")
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WINDOWS TRUE)
@@ -34,17 +42,48 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(LINUX TRUE)
     message(STATUS "Compilation will be performed under Linux")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
     message(STATUS "Compilation will be performed under Apple MacOS")
 endif ()
 
-
-#SET(EIGEN_INCLUDE_DIR "/usr/include/eigen3" CACHE STRING "path to libEigen3 headers")
 find_package("Eigen3")
 if (EIGEN3_FOUND)
     message("Found Eigen3 in: ${EIGEN3_INCLUDE_DIR}")
+    include_directories(${EIGEN3_INCLUDE_DIR})
 endif (EIGEN3_FOUND)
+
+find_package(Boost 1.65.1 REQUIRED COMPONENTS date_time filesystem iostreams)
+find_package (glog 0.3.5 REQUIRED)
+find_package(gflags REQUIRED)
+
+SET(SOURCES
+        newick.cpp
+        newick.hpp
+        PhyTree.cpp
+        PhyTree.hpp
+        TreeSearch.cpp
+        TreeSearch.hpp
+        TreeRearrangment.cpp
+        TreeRearrangment.hpp
+        Likelihood.cpp
+        Likelihood.hpp
+        Alignment.cpp
+        Alignment.hpp
+        Alphabet.cpp
+        Alphabet.h
+        Sequence.cpp
+        Sequence.hpp
+        Utree.cpp
+        Utree.hpp Utilities.hpp)
+
+add_library(tshlib STATIC ${SOURCES})
+target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
+target_link_libraries(tshlib glog::glog)
+target_link_libraries(tshlib gflags)
+
+
 ################################################################################
 #                 _                        _   _                 
 #   ___ __ _  ___| |__   ___    ___  _ __ | |_(_) ___  _ __  ___ 
@@ -69,12 +108,6 @@ endif (EIGEN3_FOUND)
 #SET(BUILD_SHARED_LIBRARIES OFF)
 #SET(CMAKE_EXE_LINKER_FLAGS "-static")
 
-if (UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
-endif (UNIX)
-
-add_definitions(-DVERBOSE=0)
-
 ################################################################################
 #                                       ___     _                       _       
 #  ___  ___  _   _ _ __ ___ ___  ___   ( _ )   | |_ __ _ _ __ __ _  ___| |_ ___ 
@@ -83,32 +116,6 @@ add_definitions(-DVERBOSE=0)
 # |___/\___/ \__,_|_|  \___\___||___/  \___/\/  \__\__,_|_|  \__, |\___|\__|___/
 #                                                            |___/              
 ################################################################################
-
-include_directories(${EIGEN3_INCLUDE_DIR})
-#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
-SET(SOURCES
-        newick.cpp
-        newick.hpp
-        PhyTree.cpp
-        PhyTree.hpp
-        TreeSearch.cpp
-        TreeSearch.hpp
-        TreeRearrangment.cpp
-        TreeRearrangment.hpp
-        Likelihood.cpp
-        Likelihood.hpp
-        Alignment.cpp
-        Alignment.hpp
-        Alphabet.cpp
-        Alphabet.h
-        Sequence.cpp
-        Sequence.hpp
-        Utree.cpp
-        Utree.hpp Utilities.hpp)
-
-add_library(tshlib STATIC ${SOURCES})
-target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
 
 #ADD_EXECUTABLE(tshlib ${SOURCES})
 

@@ -47,6 +47,8 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
+#include <glog/logging.h>
+#include <gflags/gflags.h>
 //#define LOGURU_IMPLEMENTATION 1
 //#define LOGURU_WITH_STREAMS 1
 
@@ -57,6 +59,7 @@
 #include <Likelihood.hpp>
 #include <newick.hpp>
 
+#include "main.hpp"
 
 namespace fasta_parser {
 
@@ -116,8 +119,10 @@ int main(int argc, char **argv) {
      * DEBUG1  +1
      * DEBUG1  +2
      */
-    //loguru::init(argc, argv);
-    std::cout << "test" << std::endl;
+    // Initialize Google's logging library.
+    FLAGS_alsologtostderr = true;
+    google::InitGoogleLogging("THSLIB Main File");
+    LOG(INFO) << "TSHLIB Initialising" << std::endl;
     //------------------------------------------------------------------------------------------------------------------
     std::string tree_file = argv[1];
     std::string msa_file = argv[2];
@@ -242,19 +247,37 @@ int main(int argc, char **argv) {
     //root->_traverseVirtualNodeTree();
 
     // print newick tree
-    //utree->_printUtree();
-    std::cout << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
+    LOG(INFO) << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
     //------------------------------------------------------------------------------------------------------------------
+    // LOAD MSA FROM FILE
+
+    //----------------------------------------------------------
+    // INITIAL LIKELIHOOD COMPUTATION
+
+
+    num_leaves = alignment->align_dataset.size();
+    LOG(INFO) << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
+
+    // 1:DNA, 2:AA, 3:Codon
+    is_DNA_AA_Codon = 1;
+
+    // DNA alphabet
+    extended_alphabet_size = 5;
+
+    // set "pseudo" probability matrix
+    tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
+
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
-    pi[0] = 0.25;
-    pi[1] = 0.25;
-    pi[2] = 0.25;
-    pi[3] = 0.25;
-    pi[4] = 0.0;
+    pi << 0.25,0.25,0.25,0.25,0.25;
+//    pi[0] = 0.25;
+//    pi[1] = 0.25;
+//    pi[2] = 0.25;
+//    pi[3] = 0.25;
+//    pi[4] = 0.0;
 
     // get MSA length
-    MSA_len = static_cast<unsigned long>(alignment->getAlignmentSize());
+    MSA_len = static_cast<int>(alignment->getAlignmentSize());
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
@@ -266,7 +289,7 @@ int main(int argc, char **argv) {
 
         // extract MSA column
         std::string s = alignment->extractColumn(i);
-        std::cout << "[Extracted column] (" << i << ") = " << s << std::endl;
+        VLOG(2) << "[Extracted column] (" << i << ") = " << s << std::endl;
 
         //TODO: the order of traversal is not the same as in the fasta file
         // assign char at the leaves
@@ -289,7 +312,7 @@ int main(int argc, char **argv) {
         log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
         log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
 
-        std::cout << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
+        VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
 
         std::cout << "[diff lk] " << abs(log_col_lk0-log_col_lk) << std::endl;
 
@@ -299,15 +322,16 @@ int main(int argc, char **argv) {
 
     // compute empty column likelihood
     p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    std::cout << "[Initial LK] p0 = " << p0 << std::endl;
+    VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
     std::cout << "[Initial LK] p0 = " << p0 << std::endl;
 
     logLK += LKFunc::phi(MSA_len, nu, p0);
-    std::cout << "[Initial LK] LK = " << logLK << std::endl;
-    std::cout << std::endl;
-
+    VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
+    //
+    // @MAX
+    //------------------------------------------------------------------------------------------------------------------
     //----------------------------------------------
     // Remove the root
     VirtualNode *vnL;
@@ -338,7 +362,7 @@ int main(int argc, char **argv) {
 
     for (auto &node: path2root) strpath += "->" + node->vnode_name;
 
-    std::cout << "[Path back to root] (Root on middle node) " << strpath << std::endl;
+    VLOG(2) << "[Path back to root] (Root on middle node) " << strpath << std::endl;
     path2root.clear();
     strpath.clear();
 
@@ -349,13 +373,14 @@ int main(int argc, char **argv) {
 
     for (auto &tnode: path2root) strpath += "->" + tnode->vnode_name;
 
-    std::cout << "[Path back to root] (Root on next subtree) " << strpath << std::endl;
+    VLOG(2) << "[Path back to root] (Root on next subtree) " << strpath << std::endl;
     path2root.clear();
     strpath.clear();
 
     //------------------------------------------------------------------------------------------------------------------
     // DEFINE, APPLY & REVERT TREE REARRANGEMENTS
     // Get all the nodes between the radius boundaries and for each of them build the move list
+
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     int min_radius = 3;
     int max_radius = 99;
@@ -372,30 +397,33 @@ int main(int argc, char **argv) {
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
-        std::cout << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
+        VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
 
         // Initialise a new rearrangement list
-        auto rearrangmentList = TreeRearrangment(vnode, min_radius, max_radius, true);
+        // Initialise a new rearrangement list
+        auto rearrangmentList = new TreeRearrangment;
+
+        rearrangmentList->initTreeRearrangment(vnode, min_radius, max_radius, true);
 
         // Get all the target nodes with distance == radius from the source node
         // excluding the starting node.
-        rearrangmentList.defineMoves(false);
+        rearrangmentList->defineMoves(false);
 
         // Print the list of moves for the current P node (source node)
-        rearrangmentList.printMoves();
+        //rearrangmentList.printMoves();
 
-        std::cout << "[tsh] Strategy " << rearrangmentList.mset_strategy << std::endl;
-        std::cout << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
+        VLOG(1) << "[tsh] Strategy " << rearrangmentList->mset_strategy << std::endl;
+        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
 
 
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
-        for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
+        for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
             bool status;
 
             // Apply the move
-            status = rearrangmentList.applyMove(i);
+            status = rearrangmentList->applyMove(i);
 
             //utree->saveTreeOnFile("../data/test.txt");
 
@@ -455,15 +483,15 @@ int main(int argc, char **argv) {
 
 
             if (status) {
-                std::cout << "[apply move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList.getSourceNode()->vnode_name << "->" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << ")"
-                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                VLOG(2) << "[apply move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
 
             // Revert the move, and return to the original tree
-            status = rearrangmentList.revertMove(i);
+            status = rearrangmentList->revertMove(i);
             //utree->saveTreeOnFile("../data/test.txt");
 
             if(status){
@@ -478,13 +506,13 @@ int main(int argc, char **argv) {
 
 
             if (status) {
-                std::cout << "[revert move]\t" << rearrangmentList.getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList.getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList.getSourceNode()->vnode_name << ")"
-                              << "\t[" << rearrangmentList.getMove(i)->move_radius << "] | "
+                VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                              << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
+                              << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
-            total_exec_moves += rearrangmentList.getNumberOfMoves();
+            total_exec_moves += rearrangmentList->getNumberOfMoves();
         }
 
     }
@@ -494,9 +522,12 @@ int main(int argc, char **argv) {
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
-    std::cout << "Moves applied and reverted: " << total_exec_moves << std::endl;
-    std::cout << "Elapsed time: " << duration << " microseconds" << std::endl;
-    std::cout << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+    VLOG(0) << "Moves applied and reverted: " << total_exec_moves << std::endl;
+    VLOG(0) << "Elapsed time: " << duration << " microseconds" << std::endl;
+    VLOG(0) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+
+    //treesearchheuristics::testTSH(utree, TreeSearchHeuristics::classic_Mixed);
+
 
     exit(0);
 }

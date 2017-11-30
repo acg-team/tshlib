@@ -59,7 +59,7 @@ public:
     int align_alphabetsize;
     bool align_compressed;
     std::vector<Sequence *> align_dataset;
-    std::vector<unsigned int> align_weight;
+    std::vector<int> align_weight;
 
     Alignment();
 
@@ -67,7 +67,7 @@ public:
 
     void addSequence(std::string label, std::string data);
 
-    void addWeight(std::vector<unsigned int> column_weight);
+    void addWeight(std::vector<int> column_weight);
 
     long int getAlignmentSize();
 

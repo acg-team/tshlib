@@ -48,13 +48,14 @@
 #include "Utree.hpp"
 #include "Utilities.hpp"
 
+enum class TreeSearchHeuristics{classic_NNI, classic_SPR, classic_Mixed, particle_swarm};
 
 class Move {
 
 private:
 
 protected:
-    VirtualNode *move_targetnode;       /* Pointer to the target node found during the node search */
+    VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
 
 public:
     int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
@@ -75,7 +76,7 @@ public:
     /*!
     * @brief Standard deconstructor
     */
-    virtual ~Move();
+    ~Move();
 
     /*!
      * @brief Reset the protected move_targetnode field
@@ -102,6 +103,7 @@ public:
 
     void recomputeLikelihood();
 
+    void initMove();
 };
 
 
@@ -109,7 +111,6 @@ class TreeRearrangment {
 private:
 
     std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-    int mset_cur_radius;                /* Temporary radius */
     int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
     int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
     bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
@@ -120,10 +121,11 @@ private:
 public:
     std::string mset_strategy;          /* Description of the node search strategy */
 
+    TreeRearrangment();
 
-    TreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
+    virtual void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
-    TreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths);
+    virtual void initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths);
 
     virtual ~TreeRearrangment();
 
@@ -151,20 +153,22 @@ protected:
 
     /*!
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
-     * @param node_source VirtualNode pointer to the starting node
-     * @param radius int Radius of the search (NNI = 1, SPR > 1)
+     * @param node_source   VirtualNode pointer to the starting node
+     * @param radius_min    int Radius of the search (NNI = 1, SPR > 1)
+     * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
      * @param includeSelf bool ?
      */
-    virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf);
+    virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction);
 
 
     /*!
      * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
      * @param node_source   PhyTree Pointer to the starting node
-     * @param radius        int Radius of the search (NNI = 3, SPR > 3)
-     * @param traverse_direction     int ?
+     * @param radius_min    int Radius of the search (NNI = 3, SPR > 3)
+     * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
+     * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
      */
-    void getNodesInRadiusUp(VirtualNode *node_source, int radius, NodePosition traverse_direction);
+    void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction);
 
     /*!
      * @brief Append candidate move to the mset_moves vector
@@ -174,6 +178,11 @@ protected:
 
 };
 
+namespace treesearchheuristics{
+
+    void testTSH(Utree *input_tree, TreeSearchHeuristics tsh_strategy);
+
+}
 
 
 

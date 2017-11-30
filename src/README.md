@@ -36,3 +36,7 @@ Variables are named with a self explaining indication of the variable contents.
 ### Data structures
 
 ### Extending the library
+
+### Benchmark
+
+The library can be benchmarked using the utility tshlib-benchmark included in the directory ./benchmarks.

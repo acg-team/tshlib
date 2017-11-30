@@ -1,6 +1,7 @@
 //
 // Created by Lorenzo Gatti on 08.10.17.
 //
+#include <string>
 #include <TreeSearch.hpp>
 #include <gtest/gtest.h>
 
@@ -102,9 +103,9 @@ namespace {
 
     TEST_F(TSHLIB_MiddleLevel, test_stringnotnull) {
 
+        std::string test = "TestString";
+        EXPECT_TRUE(test.size()>0);
 
-    TreeSearchHL ts((std::string) "Test1");
-        EXPECT_TRUE(ts.getLength() > 0);
 
     }
 
