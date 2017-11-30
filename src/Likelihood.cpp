@@ -71,6 +71,32 @@ namespace LKFunc {
     }
 
 
+    Eigen::VectorXd
+    compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+        Eigen::VectorXd fv;
+        Eigen::VectorXd fvL;
+        Eigen::VectorXd fvR;
+
+        if (vnode->isTerminalNode()) {
+            fv = Eigen::VectorXd::Zero(dim_extended_alphabet);
+
+            fv[dim_extended_alphabet - 1] = 1.0;
+
+            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
+
+        } else {
+
+            fvL = compute_lk_empty_col(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+            fvR = compute_lk_empty_col(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+
+            fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
+
+            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
+
+        }
+        return fv;
+    }
+
     double compute_log_lk_empty_col(PhyTree &node, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
         double p0;
 
@@ -79,6 +105,20 @@ namespace LKFunc {
         return log(p0);
     }
 
+    double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+ //       VirtualNode *pseudo_root;
+        double p0;
+
+   //     pseudo_root=utree.startVNodes.at(0);
+
+        compute_lk_empty_col(root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+
+//        pseudo_root=utree.startVNodes.at(1);
+
+  //      compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+
+        return log(p0);
+    }
 
     Eigen::VectorXd
     compute_lk_recursive(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
@@ -104,6 +144,7 @@ namespace LKFunc {
             fv[idx] = 1.0;
 
             if (node.get_InsertionHistories()) {
+                //std::cout<<"SETA1 "<<node.getName()<<std::endl;
                 lk += node.get_iota() * node.get_beta() * (fv.dot(pi));
             }
 
@@ -117,6 +158,7 @@ namespace LKFunc {
             fv = (node.get_left_child()->get_Pr() * fvL).cwiseProduct(node.get_right_child()->get_Pr() * fvR);
 
             if (node.get_InsertionHistories()) {
+                //std::cout<<"SETA2 "<<node.getName()<<std::endl;
                 lk += node.get_iota() * node.get_beta() * (fv.dot(pi));
             }
 
@@ -128,16 +170,73 @@ namespace LKFunc {
         return fv;
     }
 
+    Eigen::VectorXd
+    compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+        Eigen::VectorXd fv;
+        Eigen::VectorXd fvL;
+        Eigen::VectorXd fvR;
+
+        if (vnode->isTerminalNode()) {
+            fv = Eigen::VectorXd::Zero(dim_extended_alphabet);
+
+            int idx;
+            // TODO: Maybe this can be antoher function independt.
+            if (is_DNA_AA_Codon == 1) {
+                idx = mytable[(int) vnode->getLeafCharacter()];
+            } else if (is_DNA_AA_Codon == 2) {
+                idx = mytableAA[(int) vnode->getLeafCharacter()];
+            } else {
+                perror("not implemented for codon model yet\n");
+                exit(EXIT_FAILURE);
+            }
+
+            idx = idx < 0 ? dim_extended_alphabet - 1 : idx;  //TODO: check the alphabet size and the gap index.
+            fv[idx] = 1.0;
+
+            if (vnode->getSetA()) {
+                //std::cout<<"SETA1* "<<vnode->vnode_name<<std::endl;
+                lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
+            }
+
+            vnode->setMSAFv(fv);
+
+        } else {
+
+            fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+            fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+
+            fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
+
+            if (vnode->getSetA()) {
+                //std::cout<<"SETA2* "<<vnode->vnode_name<<std::endl;
+                lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
+            }
+
+
+            vnode->setMSAFv(fv);
+
+
+        }
+        return fv;
+    }
 
     double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
 
-        double lk;
+        double lk=0.0;
 
         compute_lk_recursive(tree, lk, pi, is_DNA_AA_Codon, alphabet_size);
 
         return log(lk);
     }
 
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
+
+        double lk=0.0;
+
+        compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size);
+
+        return log(lk);
+    }
 
     double compute_nu(double tau, double lambda, double mu) {
 

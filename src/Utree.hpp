@@ -86,6 +86,7 @@ public:
     double vnode_tau;                               /* Tau value up to this node */
     double vnode_nu;                                /* Nu value associated to this node */
     std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
+    std::vector<Eigen::VectorXd> vnode_Fv_temp;          /* Fv matrix computed recursively */
     bool vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
     int vnode_descCount;                            /*  ? */
     char vnode_character;                           /* Character associated to this node (only if terminal node) */
@@ -142,6 +143,7 @@ public:
      */
     std::string printNeighbours();
 
+    void setNodeName(const std::string s);
 
     virtual void setNodeRight(VirtualNode *inVNode);
 
@@ -149,17 +151,59 @@ public:
 
     virtual void setNodeUp(VirtualNode *inVNode);
 
+    virtual void setLeafCharacter(char ch);
+
+    void setMSAFv(Eigen::VectorXd &fv);
+
+    virtual void setSetA(bool b);
+
+    bool getSetA();
+
+    double getIota();
+
+    void setIota(double iota);
+
+    double getBeta();
+
+    void setBeta(double beta);
+
+    char getLeafCharacter();
+
+    void setChild(VirtualNode *vn);
+
+    const Eigen::MatrixXd &getPr();
+
     VirtualNode *getNodeUp();
 
     VirtualNode *getNodeLeft();
 
     VirtualNode *getNodeRight();
 
+    void _traverseVirtualNodeTree();
+
+    void setNodeParent(VirtualNode *vn);
+
+    double computeTotalTreeLength();
+
+    void setAllIotas(double tau, double mu);
+
+    void setAllBetas(double mu);
+
+    void recombineFv();
+    void revertFv();
+    void keepFv();
+
     /*!
      * @brief This function returns true if the node is terminal
      * @return boolean value (true or false)
      */
     bool isTerminalNode();
+
+    /*!
+     * @brief This function returns true if the node is root
+     * @return boolean value (true or false)
+     */
+    bool isRootNode();
 
     /*!
      * @brief This function return the index of node as seen from the parent immediate above it.
@@ -182,6 +226,8 @@ public:
     bool isParent(VirtualNode *inVNode);
 
 
+    void setLeafState(std::string s);
+    void setAncestralFlag(std::string MSA_col);
 
 protected:
     VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
@@ -193,6 +239,10 @@ protected:
     virtual void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
 
     virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
+
+    void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps);
+    void _recursiveSetLeafState(std::string MSA_col,int &idx);
+    void _recursiveSetDescCount();
 
 };
 
@@ -222,6 +272,14 @@ public:
 
     virtual void _testReachingPseudoRoot();
 
+    double computeTotalTreeLength();
+    void setIota(double tau, double mu);
+    void setBeta(double tau, double mu);
+    void setPr(int extended_alphabet_size);
+    void clearFv();
+
+    void _printUtree();
+
 protected:
     std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
@@ -237,6 +295,13 @@ namespace UtreeUtils {
     void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
 
     void convertUtree(PhyTree *in_tree, Utree *out_tree);
+
+    std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+    std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
+    std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
+    void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+    void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+    void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 }
 
 #endif //TSHLIB_UTREE_HPP

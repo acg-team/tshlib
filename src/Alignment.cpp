@@ -116,3 +116,15 @@ long int Alignment::getAlignmentSize() {
     return length;
 }
 
+int AlignUtils::countNumGapsInMSAColumn(const std::string MSA_col){
+    int num_gaps;
+
+    num_gaps=0;
+    for (int i = 0; i < MSA_col.size(); i++) {
+        num_gaps += (MSA_col[i] != '-');
+    }
+
+    return num_gaps;
+}
+
+
