@@ -38,6 +38,7 @@ if (EIGEN3_FOUND)
 endif (EIGEN3_FOUND)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# test per git
 
 
 #add_subdirectory("test")
