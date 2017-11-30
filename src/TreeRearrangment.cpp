@@ -76,7 +76,6 @@ void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int radius
     this->mset_max_radius = radius;
     this->mset_preserve_blenghts = preserve_blengths;
     this->mset_strategy = "undefined";
-    //this->mset_moves = new std::vector<Move *>;
 
 }
 
@@ -89,7 +88,6 @@ void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int min_ra
     this->mset_max_radius = max_radius;
     this->mset_preserve_blenghts = preserve_blengths;
     this->mset_strategy = "mixed (NNI+SPR+TBR)";
-    //this->mset_moves.reserve(100000);
 
 }
 
@@ -131,29 +129,21 @@ void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius
 
 
 void TreeRearrangment::defineMoves(bool includeSelf) {
-
     // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
-
-    // Generate an array of integers representing the whole range of radius to use
-    std::vector<int> x((unsigned long) (this->mset_max_radius - this->mset_min_radius) + 1);
-    std::iota(std::begin(x), std::end(x), this->mset_min_radius);
-
-    // For each radius in the array perform a search in the node space
-    // (WARN: this loop is recursive = first left, second right, then up )
-    //for (auto &radius : x) {
-    //    this->mset_cur_radius = radius;
-
+    // For each node within the radius extremities, define a move and add it to TreeRearrangment.
+    // Start from the children of the current starting node (if any)
     if (!this->mset_sourcenode->isTerminalNode()) {
         this->getNodesInRadiusDown(this->mset_sourcenode->getNodeLeft(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius , includeSelf,
                                    MoveDirections::left);
 
-        this->getNodesInRadiusDown(this->mset_sourcenode->getNodeRight(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius, includeSelf, MoveDirections::right);
+        this->getNodesInRadiusDown(this->mset_sourcenode->getNodeRight(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius, includeSelf,
+                                   MoveDirections::right);
     }
     // If the node is a leaf, then go up
     if (nullptr != this->mset_sourcenode->getNodeUp()) {
         this->getNodesInRadiusUp(this->mset_sourcenode->getNodeUp(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius, this->mset_sourcenode->indexOf());
     }
-    //}
+
 }
 
 

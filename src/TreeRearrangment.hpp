@@ -55,7 +55,7 @@ class Move {
 private:
 
 protected:
-    VirtualNode *move_targetnode;       /* Pointer to the target node found during the node search */
+    VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
 
 public:
     int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
@@ -111,7 +111,6 @@ class TreeRearrangment {
 private:
 
     std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-    int mset_cur_radius;                /* Temporary radius */
     int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
     int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
     bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
