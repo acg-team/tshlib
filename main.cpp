@@ -393,7 +393,7 @@ int main(int argc, char **argv) {
     int ID_best_move;
 
     FILE *fid_ancestral_flag;
-    fid_ancestral_flag=fopen("/home/max/CLionProjects/tshlib/data/ancestral_flag","w");
+    fid_ancestral_flag=fopen("../data/ancestral_flag","w");
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
