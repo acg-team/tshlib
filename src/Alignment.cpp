@@ -63,7 +63,7 @@ Alignment::Alignment() {
 Alignment::~Alignment() = default;
 
 
-void Alignment::addWeight(std::vector<unsigned int> column_weight) {
+void Alignment::addWeight(std::vector<int> column_weight) {
     if (this->align_compressed) {
         this->align_weight = column_weight;
         this->align_compressed = true;

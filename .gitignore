@@ -14,6 +14,10 @@ benchmarks/.Rproj.user/9B6BF2FF/sdb/prop/INDEX
 benchmarks/.Rproj.user/9B6BF2FF/viewer-cache/3CDC3457.Rdata
 benchmarks/.Rproj.user/9B6BF2FF/viewer-cache/AC7C83F7.Rdata
 benchmarks/.Rproj.user/shared/notebooks/paths
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
 benchmarks/pll/tree_15_pll.csv
 benchmarks/pll/tree_25_pll.csv
 benchmarks/pll/tree_35_pll.csv

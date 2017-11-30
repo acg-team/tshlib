@@ -41,13 +41,34 @@
  *
  */
 #include <numeric>
+#include <iomanip>
+#include <chrono>
+#include <glog/logging.h>
+#include <gflags/gflags.h>
 #include "TreeRearrangment.hpp"
 
+#ifdef TSHLIB_BENCHMARK
+#include <iostream>
+#include <fstream>
+#endif
 
-TreeRearrangment::~TreeRearrangment() = default;
+TreeRearrangment::TreeRearrangment() = default;
 
 
-TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths) {
+TreeRearrangment::~TreeRearrangment(){
+
+    for(std::vector<Move *>::reverse_iterator i=this->mset_moves.rbegin();i<this->mset_moves.rend();i++){
+        Move *move = *i;
+        delete move;
+    }
+    std::vector<Move*>().swap(this->mset_moves);
+
+
+
+};
+
+
+void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths) {
 
     this->mset_sourcenode = node_source;
     this->mset_id = node_source->vnode_name + ":" + std::to_string(radius);
@@ -59,7 +80,7 @@ TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int radius, bool pr
 }
 
 
-TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
+void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
 
     this->mset_sourcenode = node_source;
     this->mset_id = node_source->vnode_name + ":" + std::to_string(min_radius) + "-" + std::to_string(max_radius);
@@ -71,34 +92,36 @@ TreeRearrangment::TreeRearrangment(VirtualNode *node_source, int min_radius, int
 }
 
 
-void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius, MoveDirections direction, bool includeSelf) {
+void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction) {
 
     VirtualNode *node = node_source;
-
-    auto moveInstance = new Move;
 
     if (!includeSelf) {
         includeSelf = true;
 
     } else {
-        if (radius == 0) {
+        //if (radius_max == 0 ) {
+        if (radius_curr <= (radius_max - radius_min)) {
+            auto moveInstance = new Move;
+            moveInstance->initMove();
+
             moveInstance->setDirection(direction);
-            moveInstance->setRadius(this->mset_cur_radius);
+            moveInstance->setRadius(radius_max - radius_curr);
             moveInstance->setTargetNode(node);
-            moveInstance->setMoveClass(this->mset_cur_radius);
+            moveInstance->setMoveClass(radius_max - radius_curr);
             this->addMove(moveInstance);
         }
     }
 
-    if (radius < 0) {
+    if (radius_curr < 0) {
         return;
     }
 
     if (!node->isTerminalNode()) {
-        radius--;
+        radius_curr--;
         // Direction is required to know where to look at in the tree when the move is performed
-        this->getNodesInRadiusDown(node->getNodeLeft(), radius, direction, includeSelf);
-        this->getNodesInRadiusDown(node->getNodeRight(), radius, direction, includeSelf);
+        this->getNodesInRadiusDown(node->getNodeLeft(), radius_min, radius_curr, radius_max, includeSelf, direction);
+        this->getNodesInRadiusDown(node->getNodeRight(), radius_min, radius_curr, radius_max, includeSelf, direction);
     }
 
 
@@ -106,48 +129,43 @@ void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius
 
 
 void TreeRearrangment::defineMoves(bool includeSelf) {
-
     // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
+    // For each node within the radius extremities, define a move and add it to TreeRearrangment.
+    // Start from the children of the current starting node (if any)
+    if (!this->mset_sourcenode->isTerminalNode()) {
+        this->getNodesInRadiusDown(this->mset_sourcenode->getNodeLeft(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius , includeSelf,
+                                   MoveDirections::left);
 
-    // Generate an array of integers representing the whole range of radius to use
-    std::vector<int> x((unsigned long) (this->mset_max_radius - this->mset_min_radius) + 1);
-    std::iota(std::begin(x), std::end(x), this->mset_min_radius);
-
-    // For each radius in the array perform a search in the node space
-    // (WARN: this loop is recursive = first left, second right, then up )
-    for (auto &radius : x) {
-        this->mset_cur_radius = radius;
-        if (!this->mset_sourcenode->isTerminalNode()) {
-            this->getNodesInRadiusDown(this->mset_sourcenode->getNodeLeft(), radius - 1, MoveDirections::left, includeSelf);
-            this->getNodesInRadiusDown(this->mset_sourcenode->getNodeRight(), radius - 1, MoveDirections::right, includeSelf);
-        }
-        if (nullptr != this->mset_sourcenode->getNodeUp()) {
-            this->getNodesInRadiusUp(this->mset_sourcenode->getNodeUp(),
-                                     radius - 1,
-                                     this->mset_sourcenode->indexOf());
-        }
+        this->getNodesInRadiusDown(this->mset_sourcenode->getNodeRight(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius, includeSelf,
+                                   MoveDirections::right);
     }
+    // If the node is a leaf, then go up
+    if (nullptr != this->mset_sourcenode->getNodeUp()) {
+        this->getNodesInRadiusUp(this->mset_sourcenode->getNodeUp(), this->mset_min_radius, this->mset_max_radius-1 , this->mset_max_radius, this->mset_sourcenode->indexOf());
+    }
+
 }
 
 
 void TreeRearrangment::addMove(Move *move) {
 
-    this->mset_moves.emplace_back(move);
+    this->mset_moves.push_back(move);
 
 }
 
 
-void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, NodePosition traverse_direction) {
+void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction) {
 
-    auto vnode = new VirtualNode;
-    auto moveInstance = new Move;
+    VirtualNode *vnode;
+
     NodePosition idx;
     MoveDirections moving_direction;
+
 
     vnode = node_source;
 
     //TODO: check binary tree condition!
-    if (radius == 0) {
+    if (radius_curr <= (radius_max - radius_min)) {
 
         switch (traverse_direction) {
             case NodePosition::left:
@@ -163,40 +181,43 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
                 moving_direction = MoveDirections::undef;
 
         }
+        auto moveInstance = new Move;
+        moveInstance->initMove();
+
         moveInstance->setDirection(moving_direction);
-        moveInstance->setRadius(this->mset_cur_radius);
+        moveInstance->setRadius(radius_max - radius_curr);
         moveInstance->setTargetNode(vnode);
-        moveInstance->setMoveClass(this->mset_cur_radius);
+        moveInstance->setMoveClass(radius_max - radius_curr);
         this->addMove(moveInstance);
     }
 
-    if (radius > 0) {
+    if (radius_curr > 0) {
         if (traverse_direction == NodePosition::left) {
-            radius--;
+            radius_curr--;
             if (vnode->getNodeUp() != nullptr) {
 
                 idx = vnode->indexOf();
-                this->getNodesInRadiusUp(vnode->getNodeUp(), radius, idx);
+                this->getNodesInRadiusUp(vnode->getNodeUp(), radius_min, radius_curr, radius_max, idx);
             }
 
-            this->getNodesInRadiusDown(vnode->getNodeRight(), radius, MoveDirections::up, true);
+            this->getNodesInRadiusDown(vnode->getNodeRight(), radius_min, radius_curr, radius_max, true, MoveDirections::up);
 
         } else if (traverse_direction == NodePosition::right) {
-            radius--;
+            radius_curr--;
             if (vnode->getNodeUp() != nullptr) {
 
                 idx = vnode->indexOf();
-                this->getNodesInRadiusUp(vnode->getNodeUp(), radius, idx);
+                this->getNodesInRadiusUp(vnode->getNodeUp(), radius_min, radius_curr, radius_max, idx);
             }
 
-            this->getNodesInRadiusDown(vnode->getNodeLeft(), radius, MoveDirections::up, true);
+            this->getNodesInRadiusDown(vnode->getNodeLeft(), radius_min, radius_curr, radius_max, true, MoveDirections::up);
 
         } else if (traverse_direction == NodePosition::up) {
             // If the traverse_direction is 2, we are moving across the pseudoroot, therefore no need to decrease the radious
             if (vnode->getNodeUp() != nullptr) {
 
                 // Get the nodes in the radius from the node we reached after crossing the pseudoroot
-                this->getNodesInRadiusDown(vnode, radius, MoveDirections::up, false);
+                this->getNodesInRadiusDown(vnode, radius_min, radius_curr, radius_max, false, MoveDirections::up);
 
             }
 
@@ -207,10 +228,10 @@ void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius, 
 
 void TreeRearrangment::printMoves() {
 
-    std::cout << "[set " << this->mset_id << "] " << this->mset_strategy << " strategy" << std::endl;
-    std::cout << "[class]\t(P\t; Q)" << std::endl;
+    VLOG(2) << "[set " << this->mset_id << "] " << this->mset_strategy << " strategy" << std::endl;
+    VLOG(2) << "[class]\t(P\t; Q)" << std::endl;
     for (auto &nmove: this->mset_moves) {
-        std::cout << "[" << nmove->move_class << "]\t" << nmove->move_radius
+        VLOG(2) << "[" << nmove->move_class << "]\t" << nmove->move_radius
                   << "\t(" << this->mset_sourcenode->vnode_name << "\t; "
                   << nmove->getTargetNode()->vnode_name << ")\t"
                   << static_cast<int>(nmove->move_direction) << std::endl;
@@ -259,6 +280,7 @@ VirtualNode *TreeRearrangment::getSourceNode() {
     return this->mset_sourcenode ?: nullptr;
 }
 
+
 void TreeRearrangment::selectBestMove(unsigned long moveID) {
 
 }
@@ -266,19 +288,19 @@ void TreeRearrangment::selectBestMove(unsigned long moveID) {
 
 Move::~Move() = default;
 
+Move::Move() = default;
 
-Move::Move() {
 
-    this->move_id = 0;
-    this->move_name = "undef";
-    this->move_type = MoveType::undef;
-    this->move_class = "undef";
-    this->move_direction = MoveDirections::undef;
+void Move::initMove() {
+    move_id = 0;
+    move_name = "undef";
+    move_type = MoveType::undef;
+    move_class = "undef";
+    move_direction = MoveDirections::undef;
 
-    this->move_lk = -INFINITY;
+    move_lk = -INFINITY;
 
-    this->move_applied = false;
-
+    move_applied = false;
 }
 
 
@@ -333,8 +355,90 @@ void Move::setDirection(MoveDirections direction) {
 
 }
 
+
 void Move::recomputeLikelihood() {
 
 }
 
 
+void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh_strategy) {
+
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
+    int max_radius = input_tree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
+
+    unsigned long total_exec_moves = 0;
+
+    // Print node description with neighbors
+    for (auto &vnode:input_tree->listVNodes) {
+    //    VirtualNode *vnode = input_tree->listVNodes.at(200);
+
+        VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
+
+        // Initialise a new rearrangement list
+        auto rearrangmentList = new TreeRearrangment;
+
+        rearrangmentList->initTreeRearrangment(vnode, min_radius, max_radius, true);
+
+        // Get all the target nodes with distance == radius from the source node
+        // excluding the starting node.
+        rearrangmentList->defineMoves(false);
+
+        // Print the list of moves for the current P node (source node)
+        rearrangmentList->printMoves();
+
+        VLOG(1) << "[tsh] Strategy " << rearrangmentList->mset_strategy << std::endl;
+        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
+
+        //
+
+        // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
+        for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
+            bool status;
+
+            // Apply the move
+            status = rearrangmentList->applyMove(i);
+
+            //utree->saveTreeOnFile("../data/test.txt");
+
+            if (status) {
+                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                        << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                        << input_tree->printTreeNewick(true) << std::endl;
+                //utree->_testReachingPseudoRoot();
+            }
+
+            // Revert the move, and return to the original tree
+            status = rearrangmentList->revertMove(i);
+            //utree->saveTreeOnFile("../data/test.txt");
+            if (status) {
+                VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                        << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
+                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                        << input_tree->printTreeNewick(true) << std::endl;
+                //utree->_testReachingPseudoRoot();
+            }
+
+        }
+
+        total_exec_moves += rearrangmentList->getNumberOfMoves()*2;
+        delete rearrangmentList;
+    }
+
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+
+    VLOG(2) << "Moves applied and reverted: " << total_exec_moves << std::endl;
+    VLOG(2) << "Elapsed time: " << duration << " microseconds" << std::endl;
+    VLOG(2) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+
+
+#ifdef TSHLIB_BENCHMARK
+    std::ofstream myfile;
+    myfile.open ("tshlib_statistics.csv", std::ios_base::app);
+    myfile << input_tree->listVNodes.size()<< "," <<total_exec_moves << "," << duration << "," << (double) duration/total_exec_moves << std::endl;
+    myfile.close();
+#endif
+
+}

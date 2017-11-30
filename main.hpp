@@ -42,12 +42,13 @@
  * @see For more information visit:
  */
 
+
+
+#include <gflags/gflags.h>
+
 #ifndef TSHLIB_MAIN_HPP
 #define TSHLIB_MAIN_HPP
 
-#include <string>
 
-typedef double score_t;
-typedef float dp_score_t;
-typedef unsigned int index_t;
-typedef double distance_t;
+
+#endif //TSHEXE_MAIN_HPP
