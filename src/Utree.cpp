@@ -118,10 +118,13 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
 std::vector<VirtualNode *> UtreeUtils::fill_with_nodes(VirtualNode *n) {
     std::vector<VirtualNode *> list_nodes_n;
 
+    VirtualNode *tmp;
+
     list_nodes_n.push_back(n);
-    while (!n->isRootNode()) {
-        n = n->getNodeUp();
-        list_nodes_n.push_back(n);
+    tmp=n;
+    while (tmp->getNodeUp() != NULL) {
+        tmp = tmp->getNodeUp();
+        list_nodes_n.push_back(tmp);
     }
 
     return list_nodes_n;
@@ -145,7 +148,7 @@ std::vector<VirtualNode *> UtreeUtils::get_unique(std::vector<VirtualNode *> &li
     }
 
     while (list_nodes_n1.size() > 0) {
-        n2 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
         list_nodes.push_back(n1);
         list_nodes_n1.pop_back();
     }
@@ -207,6 +210,39 @@ void UtreeUtils::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
 
 }
 
+void ::UtreeUtils::associateNode2Alignment(Alignment *inMSA, Utree *inTree) {
+
+    for(auto &node:inTree->listVNodes){
+
+        if(node->isTerminalNode()){
+
+            for(int i=0; i<inMSA->align_dataset.size();i++){
+
+                if(inMSA->align_dataset.at(i)->seq_name.compare(node->vnode_name)==0){
+
+                    node->vnode_seqid = i;
+                    break;
+                }
+
+            }
+
+        }
+
+    }
+
+
+}
+
+VirtualNode *UtreeUtils::getPseudoRoot(VirtualNode *vn){
+
+    VirtualNode *vtemp=vn;
+    while(!vtemp->isRootNode()){
+        vtemp=vtemp->getNodeUp();
+    }
+
+    return vtemp;
+}
+
 VirtualNode::VirtualNode() {
     // Initialise a new VirtualNode completely disconnected from the tree
     this->vnode_right = nullptr;
@@ -216,6 +252,7 @@ VirtualNode::VirtualNode() {
     this->vnode_leaf = false;
     this->vnode_rotated = NodeRotation::undef;
     this->vnode_character = NULL;
+    this->vnode_seqid = -1;
 
 };
 
@@ -272,6 +309,10 @@ void VirtualNode::setSetA(bool b) {
     this->vnode_setA = b;
 }
 
+std::string VirtualNode::getNodeName(){
+    return this->vnode_name;
+}
+
 void VirtualNode::setMSAFv(Eigen::VectorXd &fv) {
     this->vnode_Fv.push_back(fv);
 }
@@ -308,9 +349,11 @@ char VirtualNode::getLeafCharacter(){
 }
 
 void VirtualNode::setChild(VirtualNode *vn){
+
     if(this->vnode_left!=NULL && this->vnode_right!=NULL){
         perror("ERROR, more than 2 children is not allowed");
     }
+
     if(this->vnode_left==NULL){
         this->vnode_left=vn;
         vn->setNodeUp(this);
@@ -358,7 +401,7 @@ VirtualNode *VirtualNode::getNodeRight() {
 void VirtualNode::_traverseVirtualNodeTree(){
 
     std::cout<<"[Name] "<<this->vnode_name<<std::endl;
-    /*
+
     if(this->vnode_up!=NULL){
         std::cout<<"[Up name] "<<this->getNodeUp()->vnode_name<<std::endl;
     }else{
@@ -369,7 +412,7 @@ void VirtualNode::_traverseVirtualNodeTree(){
     std::cout<<"[Node iota] "<<this->vnode_iota<<std::endl;
     std::cout<<"[Node beta] "<<this->vnode_beta<<std::endl;
     std::cout<<"[Node Pr] "<<this->vnode_Pr.rows() << " x " << this->vnode_Pr.cols()<<std::endl;
-    */
+
     if(this->vnode_character!=NULL){
         std::cout<<"[Node char] "<<this->vnode_character<<std::endl;
     } else{
@@ -382,8 +425,8 @@ void VirtualNode::_traverseVirtualNodeTree(){
         std::cout<<std::endl;
     }else{
 
-        //std::cout<<"[Left name] "<<this->getNodeLeft()->vnode_name<<std::endl;
-        //std::cout<<"[Right name] "<<this->getNodeRight()->vnode_name<<std::endl;
+        std::cout<<"[Left name] "<<this->getNodeLeft()->vnode_name<<std::endl;
+        std::cout<<"[Right name] "<<this->getNodeRight()->vnode_name<<std::endl;
         std::cout<<std::endl;
 
         this->getNodeLeft()->_traverseVirtualNodeTree();
@@ -487,9 +530,26 @@ void VirtualNode::revertFv(){
 
 void VirtualNode::keepFv(){
 
-    this->vnode_Fv.clear();
-    this->vnode_Fv=this->vnode_Fv_temp;
-    //this->vnode_Fv_temp=NULL;
+    this->vnode_Fv_best.clear();
+    this->vnode_Fv_best=this->vnode_Fv_temp;
+
+}
+
+void VirtualNode::clearChildren(){
+    this->vnode_left= nullptr;
+    this->vnode_right= nullptr;
+}
+
+void VirtualNode::printAncestralFlagOnFile(FILE *fid){
+
+    fprintf(fid,"%s %d\n",this->vnode_name.c_str(),this->vnode_setA);
+
+    if(this->isTerminalNode()){
+
+    }else{
+        this->getNodeLeft()->printAncestralFlagOnFile(fid);
+        this->getNodeRight()->printAncestralFlagOnFile(fid);
+    }
 
 }
 
@@ -1056,31 +1116,16 @@ void VirtualNode::setAncestralFlag(std::string MSA_col){
 
 }
 
-void VirtualNode::setLeafState(std::string s){
-    int idx;
+void Utree::setLeafState(std::string s){
 
-    //this->_updateStartNodes();
-
-    idx = 0;
-    //for (unsigned long i = 0; i < this->startVNodes.size(); i++) {
-    //_recursiveSetLeafState(this->startVNodes.at(0),s,idx);
-    //_recursiveSetLeafState(this->startVNodes.at(1),s,idx);
-    this->_recursiveSetLeafState(s,idx);
-    //}
-
-}
-
-void VirtualNode::_recursiveSetLeafState(std::string MSA_col,int &idx) {
-
-    if(this->isTerminalNode()) {
-        this->setLeafCharacter(MSA_col.at(idx));
-        idx++;
-    } else {
-        this->getNodeLeft()->_recursiveSetLeafState(MSA_col,idx);
-        this->getNodeRight()->_recursiveSetLeafState(MSA_col,idx);
+    for (auto &node:this->listVNodes) {
+        if(node->isTerminalNode()) {
+            node->setLeafCharacter(s.at(node->vnode_seqid));
+        }
     }
 
 }
+
 
 void VirtualNode::resetNodeDirections(bool revertRotations) {
 

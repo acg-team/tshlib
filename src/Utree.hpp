@@ -53,6 +53,7 @@
 
 #include "PhyTree.hpp"
 #include "Utilities.hpp"
+#include "Alignment.hpp"
 
 
 /*
@@ -86,10 +87,12 @@ public:
     double vnode_tau;                               /* Tau value up to this node */
     double vnode_nu;                                /* Nu value associated to this node */
     std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
-    std::vector<Eigen::VectorXd> vnode_Fv_temp;          /* Fv matrix computed recursively */
+    std::vector<Eigen::VectorXd> vnode_Fv_temp;
+    std::vector<Eigen::VectorXd> vnode_Fv_best;
     bool vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
     int vnode_descCount;                            /*  ? */
     char vnode_character;                           /* Character associated to this node (only if terminal node) */
+    int vnode_seqid;                                /* Seq id on alignment vector */
     int vnode_depth;                                /* Depth level of the node in the tree */
     bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
     int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
@@ -157,6 +160,8 @@ public:
 
     virtual void setSetA(bool b);
 
+    std::string getNodeName();
+
     bool getSetA();
 
     double getIota();
@@ -193,6 +198,11 @@ public:
     void revertFv();
     void keepFv();
 
+    void clearChildren();
+
+    void printAncestralFlagOnFile(FILE *fid);
+
+
     /*!
      * @brief This function returns true if the node is terminal
      * @return boolean value (true or false)
@@ -226,7 +236,6 @@ public:
     bool isParent(VirtualNode *inVNode);
 
 
-    void setLeafState(std::string s);
     void setAncestralFlag(std::string MSA_col);
 
 protected:
@@ -241,7 +250,6 @@ protected:
     virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
     void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps);
-    void _recursiveSetLeafState(std::string MSA_col,int &idx);
     void _recursiveSetDescCount();
 
 };
@@ -277,12 +285,12 @@ public:
     void setBeta(double tau, double mu);
     void setPr(int extended_alphabet_size);
     void clearFv();
+    void setLeafState(std::string s);
 
     void _printUtree();
 
 protected:
     std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
-
     virtual void _updateStartNodes();
 
 private:
@@ -302,6 +310,9 @@ namespace UtreeUtils {
     void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
     void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
     void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+    void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
+    VirtualNode *getPseudoRoot(VirtualNode *vn);
+
 }
 
 #endif //TSHLIB_UTREE_HPP

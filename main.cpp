@@ -78,7 +78,7 @@ namespace fasta_parser {
                 std::getline(in_fasta, line2);
                 //std::pair<std::string, std::string> p;
 
-                sequences.emplace_back(line, line2);
+                sequences.emplace_back(line.substr(1,line.size()), line2);
 
 
             }
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
     mu = 0.1;
     lambda = 0.2;
     //------------------------------------------------------------------------------------------------------------------
-    // INIT TREE
+    // INIT ROOTED TREE
 
     // tree filename
     std::ifstream tree_str(tree_file.c_str());
@@ -161,6 +161,9 @@ int main(int argc, char **argv) {
 
     // set name of internal nodes
     tree->set_missing_node_name("V"); //TODO: check whether V is unique
+
+    //tree->printOnlyName();
+    //exit(EXIT_SUCCESS);
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
 
@@ -169,21 +172,40 @@ int main(int argc, char **argv) {
     std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
     std::cout << std::endl;
 
+    UtreeUtils::associateNode2Alignment(alignment,utree);
+
     //---------------------------------------------------------
     // Add the root
     VirtualNode *root = new VirtualNode;
 
-    double T = tau + 1 / mu;
-    double iota = (1/mu)/T;
-    double beta = 1.0;
+//    double T = tau + 1 / mu;
+//    double iota = (1/mu)/T;
+//    double beta = 1.0;
 
+    root->setNodeParent(nullptr);
     root->setNodeName("Root");
-    //root->setIota(iota);
-    //root->setBeta(beta);
-    root->setChild(utree->startVNodes.at(0));
-    root->setChild(utree->startVNodes.at(1));
+    root->clearChildren();
+
+    VirtualNode *pseudo_root1;
+    VirtualNode *pseudo_root2;
+    pseudo_root1=UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
+    pseudo_root2=pseudo_root1->getNodeUp();
+    root->setChild(pseudo_root1);
+    root->setChild(pseudo_root2);
+
+//    std::cout<<utree->startVNodes.at(1)->getNodeName()<<utree->startVNodes.at(1)->getNodeUp()->getNodeName()<<std::endl;
+
+
+    //std::cout<<root->getNodeLeft()->getNodeName()<<std::endl;
+    //std::cout<<root->getNodeRight()->getNodeName()<<std::endl;
+    //std::cout<<root->getNodeLeft()->getNodeUp()->getNodeName()<<std::endl;
+    //std::cout<<root->getNodeRight()->getNodeUp()->getNodeName()<<std::endl;
+
+
 
     //root->_traverseVirtualNodeTree();
+
+
     //---------------------------------------------------------
 
 
@@ -199,19 +221,15 @@ int main(int argc, char **argv) {
     // compute the normalizing Poisson intensity
     nu = LKFunc::compute_nu(tau, lambda, mu);
 
-
-    //TODO: none of the node takes iota=(1/mu)/(tau + 1/mu)
     // set insertion probability to each node
     tree->set_iota(tau, mu);
     utree->setIota(tau,mu);
     root->setAllIotas(tau,mu);
 
-    //TODO: none of the node takes beta=1
     // set survival probability to each node
     tree->set_beta(tau, mu);
     utree->setBeta(tau,mu);
     root->setAllBetas(mu);
-
 
     //tree->print_local_var();
     //std::cout<<std::endl;
@@ -253,14 +271,14 @@ int main(int argc, char **argv) {
         //TODO: the order of traversal is not the same as in the fasta file
         // assign char at the leaves
         tree->set_leaf_state(s);
-        root->setLeafState(s);
+        utree->setLeafState(s);
 
-        //TODO: chack all combinations
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
         root->setAncestralFlag(s);
 
         //root->_traverseVirtualNodeTree();
+
 
         // Initialise FV matrices at each node
         tree->clear_fv();
@@ -298,7 +316,7 @@ int main(int argc, char **argv) {
     vnR=root->getNodeRight();
     vnL->setNodeParent(vnR);
     vnR->setNodeParent(vnL);
-    delete root;
+    //delete root;
     //utree->_printUtree();
     //----------------------------------------------
 
@@ -346,7 +364,11 @@ int main(int argc, char **argv) {
 
     std::vector<VirtualNode *> list_vnode_to_root;
 
-    bool is_the_best_move;
+    bool is_the_best_move = false;
+    int ID_best_move;
+
+    FILE *fid_ancestral_flag;
+    fid_ancestral_flag=fopen("/home/max/CLionProjects/tshlib/data/ancestral_flag","w");
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
@@ -366,6 +388,8 @@ int main(int argc, char **argv) {
         std::cout << "[utree rearrangment] Found " << rearrangmentList.getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
 
+
+
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
         for (unsigned long i = 0; i < rearrangmentList.getNumberOfMoves(); i++) {
             bool status;
@@ -375,27 +399,57 @@ int main(int argc, char **argv) {
 
             //utree->saveTreeOnFile("../data/test.txt");
 
-            if(status){
+            if(status) {
+
+                //Add the root
+                root->setNodeName("Root");
+                root->clearChildren();
+                pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
+                pseudo_root2 = pseudo_root1->getNodeUp();
+                root->setChild(pseudo_root1);
+                root->setChild(pseudo_root2);
+
+                //root->_traverseVirtualNodeTree();
+
                 VirtualNode *source;
                 VirtualNode *target;
                 list_vnode_to_root.clear();
-                source=rearrangmentList.getSourceNode();
-                target=rearrangmentList.getMove(i)->getTargetNode();
-                list_vnode_to_root=UtreeUtils::get_path_from_nodes(source,target);
+                source = rearrangmentList.getSourceNode();
+                target = rearrangmentList.getMove(i)->getTargetNode();
 
-                /*
-                std::cout<<"source "<<source->vnode_name<<std::endl;
-                std::cout<<"target "<<target->vnode_name<<std::endl;
-                //TODO: root considered twice...!
-                for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-                    std::cout<<"LISTA:"<<list_vnode_to_root.at(k)->vnode_name<<std::endl;
+                //std::cout<<"source "<<source->vnode_name<<std::endl;
+                //std::cout<<"target "<<target->vnode_name<<std::endl;
+
+                list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
+
+                //for(unsigned int k=0;k<list_vnode_to_root.size();k++){
+                //    std::cout<<"LISTA:"<<list_vnode_to_root.at(k)->vnode_name<<std::endl;
+                //}
+
+
+
+                for (int msa_col=0;msa_col<MSA_len;msa_col++) {
+                    std::string s = alignment->extractColumn(msa_col);
+                    utree->setLeafState(s);
+                    root->setAncestralFlag(s);
+                    root->printAncestralFlagOnFile(fid_ancestral_flag);
+                    fprintf(fid_ancestral_flag,"\n");
                 }
-                */
+
+                fprintf(fid_ancestral_flag,"\n\n");
+
 
                 UtreeUtils::recombineAllFv(list_vnode_to_root);
 
                 //TODO: here goes the smart lk recomputation
-                is_the_best_move=false;
+                ID_best_move = i; // index (ID) of the best move
+                is_the_best_move=true;
+
+                //Remove the root
+                vnL=root->getNodeLeft();
+                vnR=root->getNodeRight();
+                vnL->setNodeParent(vnR);
+                vnR->setNodeParent(vnL);
 
             }
 
@@ -415,7 +469,7 @@ int main(int argc, char **argv) {
             if(status){
 
                 if(!is_the_best_move){
-                    UtreeUtils::revertAllFv(list_vnode_to_root);
+                    //UtreeUtils::revertAllFv(list_vnode_to_root); // clear not necessary
                 }else{
                     UtreeUtils::keepAllFv(list_vnode_to_root);
                 }
@@ -434,6 +488,8 @@ int main(int argc, char **argv) {
         }
 
     }
+
+    fclose(fid_ancestral_flag);
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
