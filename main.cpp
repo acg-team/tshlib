@@ -126,6 +126,7 @@ int main(int argc, char **argv) {
     //------------------------------------------------------------------------------------------------------------------
     std::string tree_file = argv[1];
     std::string msa_file = argv[2];
+
     //------------------------------------------------------------------------------------------------------------------
     PhyTree *tree = nullptr;
     double mu;
@@ -141,11 +142,12 @@ int main(int argc, char **argv) {
     Eigen::VectorXd pi;
     double p0;
 
+    //------------------------------------------------------------------------------------------------------------------
     // LOAD MSA FROM FILE
     Alignment *alignment = fasta_parser::createAlignment(msa_file);
 
     num_leaves = alignment->align_dataset.size();
-    std::cout << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
+    LOG(INFO) << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
 
     // 1:DNA, 2:AA, 3:Codon
     is_DNA_AA_Codon = 1;
@@ -155,6 +157,7 @@ int main(int argc, char **argv) {
 
     mu = 0.1;
     lambda = 0.2;
+
     //------------------------------------------------------------------------------------------------------------------
     // INIT ROOTED TREE
 
@@ -168,24 +171,21 @@ int main(int argc, char **argv) {
     tree->set_missing_node_name("V"); //TODO: check whether V is unique
 
     //tree->printOnlyName();
-    //exit(EXIT_SUCCESS);
+
     //------------------------------------------------------------------------------------------------------------------
     // BUILD UNROOTED TREE
-
     auto utree = new Utree;
     UtreeUtils::convertUtree(tree, utree);
-    std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
-    std::cout << std::endl;
+    LOG(INFO) << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
     utree->prepareSetADesCountOnNodes((int) alignment->getAlignmentSize());
     UtreeUtils::associateNode2Alignment(alignment,utree);
 
-    //---------------------------------------------------------
     // Add the root
     auto *root = new VirtualNode;
     root->prepareSetA_DescCount((int) alignment->getAlignmentSize());
-//    double T = tau + 1 / mu;
-//    double iota = (1/mu)/T;
-//    double beta = 1.0;
+    //    double T = tau + 1 / mu;
+    //    double iota = (1/mu)/T;
+    //    double beta = 1.0;
 
     root->setNodeParent(nullptr);
     root->setNodeName("Root");
@@ -198,30 +198,16 @@ int main(int argc, char **argv) {
     root->setChild(pseudo_root1);
     root->setChild(pseudo_root2);
 
-//    std::cout<<utree->startVNodes.at(1)->getNodeName()<<utree->startVNodes.at(1)->getNodeUp()->getNodeName()<<std::endl;
-
-
-    //std::cout<<root->getNodeLeft()->getNodeName()<<std::endl;
-    //std::cout<<root->getNodeRight()->getNodeName()<<std::endl;
-    //std::cout<<root->getNodeLeft()->getNodeUp()->getNodeName()<<std::endl;
-    //std::cout<<root->getNodeRight()->getNodeUp()->getNodeName()<<std::endl;
-
-
-
-    //root->_traverseVirtualNodeTree();
-
 
     //---------------------------------------------------------
-
-
     // compute total tree length
+
     tau = tree->computeLength();
-    std::cout << "[PhyTree length] " << tau << std::endl;
+    VLOG(2) << "[PhyTree length] " << tau;
     tau=utree->computeTotalTreeLength();
-    std::cout << "[Utree length] " << tau << std::endl;
+    VLOG(2) << "[Utree length] " << tau;
     tau=root->computeTotalTreeLength();
-    std::cout << "[Tree length (from root)] " << tau << std::endl;
-    std::cout << std::endl;
+    VLOG(2) << "[Tree length (from root)] " << tau;
 
     // compute the normalizing Poisson intensity
     nu = LKFunc::compute_nu(tau, lambda, mu);
@@ -248,13 +234,10 @@ int main(int argc, char **argv) {
 
     // print newick tree
     LOG(INFO) << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
-    //------------------------------------------------------------------------------------------------------------------
-    // LOAD MSA FROM FILE
+
 
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
-
-
     num_leaves = alignment->align_dataset.size();
     LOG(INFO) << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
 
@@ -291,7 +274,6 @@ int main(int argc, char **argv) {
         std::string s = alignment->extractColumn(i);
         VLOG(2) << "[Extracted column] (" << i << ") = " << s << std::endl;
 
-        //TODO: the order of traversal is not the same as in the fasta file
         // assign char at the leaves
         tree->set_leaf_state(s);
         utree->setLeafState(s);
@@ -300,9 +282,7 @@ int main(int argc, char **argv) {
         tree->set_ancestral_flag(s);
         root->setAncestralFlag(s, i, isReferenceRun);
 
-
         //root->_traverseVirtualNodeTree();
-
 
         // Initialise FV matrices at each node
         tree->clear_fv();
@@ -313,9 +293,9 @@ int main(int argc, char **argv) {
         log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
         log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
 
-        VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
+        VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
-        std::cout << "[diff lk] " << abs(log_col_lk0-log_col_lk) << std::endl;
+        VLOG(2) << "[diff lk] " << abs(log_col_lk0-log_col_lk);
 
         logLK += log_col_lk;
 
@@ -326,14 +306,12 @@ int main(int argc, char **argv) {
     VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    std::cout << "[Initial LK] p0 = " << p0 << std::endl;
+    VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     logLK += LKFunc::phi(MSA_len, nu, p0);
     VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
-    //
-    // @MAX
+
     //------------------------------------------------------------------------------------------------------------------
-    //----------------------------------------------
     // Remove the root
     VirtualNode *vnL;
     VirtualNode *vnR;
@@ -383,24 +361,20 @@ int main(int argc, char **argv) {
     // Get all the nodes between the radius boundaries and for each of them build the move list
 
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    int min_radius = 3;
-    int max_radius = 99;
-
     unsigned long total_exec_moves = 0;
+
+    int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
+    int max_radius = utree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
 
     std::vector<VirtualNode *> list_vnode_to_root;
 
     bool is_the_best_move = false;
     int ID_best_move;
 
-    //FILE *fid_ancestral_flag;
-    //fid_ancestral_flag=fopen("../data/ancestral_flag","w");
-
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
         VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
 
-        // Initialise a new rearrangement list
         // Initialise a new rearrangement list
         auto rearrangmentList = new TreeRearrangment;
 
@@ -415,9 +389,6 @@ int main(int argc, char **argv) {
 
         VLOG(1) << "[tsh] Strategy " << rearrangmentList->mset_strategy << std::endl;
         VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
-
-
-
 
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
         for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
@@ -446,27 +417,15 @@ int main(int argc, char **argv) {
                 source = rearrangmentList->getSourceNode();
                 target = rearrangmentList->getMove(i)->getTargetNode();
 
-                //std::cout<<"source "<<source->vnode_name<<std::endl;
-                //std::cout<<"target "<<target->vnode_name<<std::endl;
 
                 list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
-
-                //for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-                //    std::cout<<"LISTA:"<<list_vnode_to_root.at(k)->vnode_name<<std::endl;
-                //}
-
 
 
                 for (int msa_col=0;msa_col<MSA_len;msa_col++) {
                     std::string s = alignment->extractColumn(msa_col);
                     utree->setLeafState(s);
                     root->setAncestralFlag(s, msa_col, false);
-                    //root->printAncestralFlagOnFile(fid_ancestral_flag);
-                    //fprintf(fid_ancestral_flag,"\n");
                 }
-
-                //fprintf(fid_ancestral_flag,"\n\n");
-
 
                 UtreeUtils::recombineAllFv(list_vnode_to_root);
 
@@ -482,9 +441,8 @@ int main(int argc, char **argv) {
 
             }
 
-
             if (status) {
-                VLOG(2) << "[apply move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
                               << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                               << utree->printTreeNewick(true) << std::endl;
@@ -505,7 +463,6 @@ int main(int argc, char **argv) {
 
             }
 
-
             if (status) {
                 VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                               << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
@@ -513,12 +470,10 @@ int main(int argc, char **argv) {
                               << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
-            total_exec_moves += rearrangmentList->getNumberOfMoves();
+            total_exec_moves += rearrangmentList->getNumberOfMoves()*2;
         }
-
+        delete rearrangmentList;
     }
-
-    //fclose(fid_ancestral_flag);
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
