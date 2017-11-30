@@ -176,13 +176,13 @@ int main(int argc, char **argv) {
     UtreeUtils::convertUtree(tree, utree);
     std::cout << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
     std::cout << std::endl;
-
+    utree->prepareSetADesCountOnNodes((int) alignment->getAlignmentSize());
     UtreeUtils::associateNode2Alignment(alignment,utree);
 
     //---------------------------------------------------------
     // Add the root
-    VirtualNode *root = new VirtualNode;
-
+    auto *root = new VirtualNode;
+    root->prepareSetA_DescCount((int) alignment->getAlignmentSize());
 //    double T = tau + 1 / mu;
 //    double iota = (1/mu)/T;
 //    double beta = 1.0;
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
     logLK = 0.0;
 
     double log_col_lk0;
-
+    bool isReferenceRun = true;
     // compute log_col_lk
     for (int i = 0; i < MSA_len; i++) {
 
@@ -298,7 +298,8 @@ int main(int argc, char **argv) {
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
-        root->setAncestralFlag(s);
+        root->setAncestralFlag(s, i, isReferenceRun);
+
 
         //root->_traverseVirtualNodeTree();
 
@@ -310,7 +311,7 @@ int main(int argc, char **argv) {
         // Compute column likelihood
         //TODO: Add weight per column
         log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-        log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
+        log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
 
         VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk << std::endl;
 
@@ -392,8 +393,8 @@ int main(int argc, char **argv) {
     bool is_the_best_move = false;
     int ID_best_move;
 
-    FILE *fid_ancestral_flag;
-    fid_ancestral_flag=fopen("../data/ancestral_flag","w");
+    //FILE *fid_ancestral_flag;
+    //fid_ancestral_flag=fopen("../data/ancestral_flag","w");
 
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
@@ -459,12 +460,12 @@ int main(int argc, char **argv) {
                 for (int msa_col=0;msa_col<MSA_len;msa_col++) {
                     std::string s = alignment->extractColumn(msa_col);
                     utree->setLeafState(s);
-                    root->setAncestralFlag(s);
-                    root->printAncestralFlagOnFile(fid_ancestral_flag);
-                    fprintf(fid_ancestral_flag,"\n");
+                    root->setAncestralFlag(s, msa_col, false);
+                    //root->printAncestralFlagOnFile(fid_ancestral_flag);
+                    //fprintf(fid_ancestral_flag,"\n");
                 }
 
-                fprintf(fid_ancestral_flag,"\n\n");
+                //fprintf(fid_ancestral_flag,"\n\n");
 
 
                 UtreeUtils::recombineAllFv(list_vnode_to_root);
@@ -517,7 +518,7 @@ int main(int argc, char **argv) {
 
     }
 
-    fclose(fid_ancestral_flag);
+    //fclose(fid_ancestral_flag);
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();

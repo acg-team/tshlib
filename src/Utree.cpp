@@ -306,7 +306,7 @@ void VirtualNode:: setLeafCharacter(char ch) {
 }
 
 void VirtualNode::setSetA(bool b) {
-    this->vnode_setA = b;
+    //this->vnode_setA = b;
 }
 
 std::string VirtualNode::getNodeName(){
@@ -317,8 +317,8 @@ void VirtualNode::setMSAFv(Eigen::VectorXd &fv) {
     this->vnode_Fv.push_back(fv);
 }
 
-bool VirtualNode::getSetA() {
-    return this->vnode_setA;
+bool VirtualNode::getSetA(int colnum) {
+    return this->vnode_setA.at(colnum);
 }
 
 double VirtualNode::getIota() {
@@ -419,7 +419,7 @@ void VirtualNode::_traverseVirtualNodeTree(){
         std::cout<<"[Node char] '' "<<std::endl;
     }
 
-    std::cout<<"[Node setA_flag] "<<this->vnode_setA<<std::endl;
+    //std::cout<<"[Node setA_flag] "<<this->vnode_setA<<std::endl;
 
     if(this->isTerminalNode()){
         std::cout<<std::endl;
@@ -542,7 +542,7 @@ void VirtualNode::clearChildren(){
 
 void VirtualNode::printAncestralFlagOnFile(FILE *fid){
 
-    fprintf(fid,"%s %d\n",this->vnode_name.c_str(),this->vnode_setA);
+    //fprintf(fid,"%s %d\n",this->vnode_name.c_str(),this->vnode_setA);
 
     if(this->isTerminalNode()){
 
@@ -730,7 +730,7 @@ void Utree::_printUtree(){
             std::cout<<"[Node char] '' "<<std::endl;
         }
 
-        std::cout<<"[Node setA_flag] "<<vn->vnode_setA<<std::endl;
+        //std::cout<<"[Node setA_flag] "<<vn->vnode_setA<<std::endl;
 
         std::cout<<std::endl;
     }
@@ -1091,49 +1091,72 @@ bool VirtualNode::isParent(VirtualNode *inVNode) {
     return status;
 }
 
-void VirtualNode::_recursiveSetDescCount() {
+void VirtualNode::_recursiveSetDescCount(int colnum, bool isReference) {
 
     if (this->isTerminalNode()) {
-        this->vnode_descCount = (this->vnode_character == '-' ? 0 : 1);
+        //this->vnode_descCount = (this->vnode_character == '-' ? 0 : 1);
+        if(isReference){
+            this->vnode_descCount.at(colnum) = (this->vnode_character == '-' ? 0 : 1);
+        } else{
+            this->vnode_descCount_temp.at(colnum) = (this->vnode_character == '-' ? 0 : 1);
+        }
     } else {
-        this->getNodeLeft()->_recursiveSetDescCount();
-        this->getNodeRight()->_recursiveSetDescCount();
-        this->vnode_descCount = this->getNodeLeft()->vnode_descCount +
-                                this->getNodeRight()->vnode_descCount;
+        this->getNodeLeft()->_recursiveSetDescCount(colnum, false);
+        this->getNodeRight()->_recursiveSetDescCount(colnum, false);
+        if (isReference) {
+            this->vnode_descCount.at(colnum) = this->getNodeLeft()->vnode_descCount.at(colnum) +
+                                               this->getNodeRight()->vnode_descCount.at(colnum);
+        }else{
+            this->vnode_descCount_temp.at(colnum) = this->getNodeLeft()->vnode_descCount_temp.at(colnum) +
+                                               this->getNodeRight()->vnode_descCount_temp.at(colnum);
+        }
     }
 
 }
 
-void VirtualNode::_recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps) {
+void VirtualNode::_recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps, int colnum, bool isReference) {
     int descCount;
 
     if (this->isTerminalNode()) {
-        descCount = this->vnode_descCount;
-        this->setSetA(descCount == num_gaps);
+        if(isReference) {
+            descCount = this->vnode_descCount.at(colnum);
+            //this->setSetA(descCount == num_gaps);
+            this->vnode_setA.at(colnum) = (descCount == num_gaps);
+        }else{
+            descCount = this->vnode_descCount_temp.at(colnum);
+            //this->setSetA(descCount == num_gaps);
+            this->vnode_setA_temp.at(colnum) = (descCount == num_gaps);
+        }
     } else {
-        this->getNodeLeft()->_recursiveSetAncestralFlag(MSA_col,num_gaps);
-        this->getNodeRight()->_recursiveSetAncestralFlag(MSA_col,num_gaps);
-
-        descCount = this->vnode_descCount;
-        this->setSetA(descCount == num_gaps);
+        this->getNodeLeft()->_recursiveSetAncestralFlag(MSA_col, num_gaps, colnum, isReference);
+        this->getNodeRight()->_recursiveSetAncestralFlag(MSA_col, num_gaps, colnum, isReference);
+        if(isReference) {
+            descCount = this->vnode_descCount.at(colnum);
+            this->vnode_setA.at(colnum) = (descCount == num_gaps);
+        }else{
+            descCount = this->vnode_descCount_temp.at(colnum);
+            this->vnode_setA_temp.at(colnum) = (descCount == num_gaps);
+        }
+        //descCount = this->vnode_descCount;
+        //this->setSetA(descCount == num_gaps);
     }
 
 }
 
-void VirtualNode::setAncestralFlag(std::string MSA_col){
+void VirtualNode::setAncestralFlag(std::string MSA_col, int colnum, bool isReference) {
 
     int num_gaps;
 
-    num_gaps=AlignUtils::countNumGapsInMSAColumn(MSA_col);
+    num_gaps= AlignUtils::countNumCharactersInMSAColumn(MSA_col);
 
     //this->_updateStartNodes();
 
     //for (unsigned long i = 0; i < this->startVNodes.size(); i++) {
-    this->_recursiveSetDescCount();
+    this->_recursiveSetDescCount(colnum, isReference);
     //_recursiveSetDescCount(this->startVNodes.at(1));
     //}
     //for (unsigned long i = 0; i < this->startVNodes.size(); i++) {
-    this->_recursiveSetAncestralFlag(MSA_col,num_gaps);
+    this->_recursiveSetAncestralFlag(MSA_col, num_gaps, colnum, isReference);
     //_recursiveSetAncestralFlag(this->startVNodes.at(1),MSA_col,num_gaps);
     //}
 
@@ -1145,6 +1168,16 @@ void Utree::setLeafState(std::string s){
         if(node->isTerminalNode()) {
             node->setLeafCharacter(s.at(node->vnode_seqid));
         }
+    }
+
+}
+
+void Utree::prepareSetADesCountOnNodes(int numcol) {
+
+    for (auto &node:this->listVNodes){
+
+        node->prepareSetA_DescCount(numcol);
+
     }
 
 }
@@ -1342,6 +1375,15 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
         }
 
     }
+
+}
+
+void VirtualNode::prepareSetA_DescCount(int numcol) {
+
+    this->vnode_descCount.resize(numcol);
+    this->vnode_descCount_temp.resize(numcol);
+    this->vnode_setA.resize(numcol);
+    this->vnode_setA_temp.resize(numcol);
 
 }
 

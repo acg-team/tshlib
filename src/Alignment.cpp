@@ -116,7 +116,7 @@ long int Alignment::getAlignmentSize() {
     return length;
 }
 
-int AlignUtils::countNumGapsInMSAColumn(const std::string MSA_col){
+int AlignUtils::countNumCharactersInMSAColumn(const std::string MSA_col){
     int num_gaps;
 
     num_gaps=0;

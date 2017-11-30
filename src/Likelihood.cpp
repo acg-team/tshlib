@@ -171,7 +171,7 @@ namespace LKFunc {
     }
 
     Eigen::VectorXd
-    compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+    compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum) {
         Eigen::VectorXd fv;
         Eigen::VectorXd fvL;
         Eigen::VectorXd fvR;
@@ -193,7 +193,7 @@ namespace LKFunc {
             idx = idx < 0 ? dim_extended_alphabet - 1 : idx;  //TODO: check the alphabet size and the gap index.
             fv[idx] = 1.0;
 
-            if (vnode->getSetA()) {
+            if (vnode->getSetA(colnum)) {
                 //std::cout<<"SETA1* "<<vnode->vnode_name<<std::endl;
                 lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
             }
@@ -202,12 +202,12 @@ namespace LKFunc {
 
         } else {
 
-            fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
-            fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+            fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, 0);
+            fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, 0);
 
             fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
 
-            if (vnode->getSetA()) {
+            if (vnode->getSetA(0)) {
                 //std::cout<<"SETA2* "<<vnode->vnode_name<<std::endl;
                 lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
             }
@@ -229,11 +229,11 @@ namespace LKFunc {
         return log(lk);
     }
 
-    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum) {
 
         double lk=0.0;
 
-        compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size);
+        compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size, colnum);
 
         return log(lk);
     }

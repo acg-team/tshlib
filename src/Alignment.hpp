@@ -83,7 +83,7 @@ protected:
 };
 
 namespace AlignUtils {
-    int countNumGapsInMSAColumn(const std::string MSA_col);
+    int countNumCharactersInMSAColumn(const std::string MSA_col);
 
 
 }

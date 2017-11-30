@@ -89,8 +89,10 @@ public:
     std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
     std::vector<Eigen::VectorXd> vnode_Fv_temp;
     std::vector<Eigen::VectorXd> vnode_Fv_best;
-    bool vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
-    int vnode_descCount;                            /*  ? */
+    std::vector<bool> vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
+    std::vector<int> vnode_descCount;                            /* Counter of the characters associated    */
+    std::vector<bool> vnode_setA_temp;                                /* Flag: Include node in computing the set A -- might be not necessary */
+    std::vector<int> vnode_descCount_temp;                            /* Counter of the characters associated    */
     char vnode_character;                           /* Character associated to this node (only if terminal node) */
     int vnode_seqid;                                /* Seq id on alignment vector */
     int vnode_depth;                                /* Depth level of the node in the tree */
@@ -162,7 +164,7 @@ public:
 
     std::string getNodeName();
 
-    bool getSetA();
+    bool getSetA(int colnum);
 
     double getIota();
 
@@ -193,6 +195,8 @@ public:
     void setAllIotas(double tau, double mu);
 
     void setAllBetas(double mu);
+
+    void prepareSetA_DescCount(int numcol);
 
     void recombineFv();
     void revertFv();
@@ -236,7 +240,7 @@ public:
     bool isParent(VirtualNode *inVNode);
 
 
-    void setAncestralFlag(std::string MSA_col);
+    void setAncestralFlag(std::string MSA_col, int colnum, bool isReference);
 
 protected:
     VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
@@ -249,8 +253,8 @@ protected:
 
     virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
-    void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps);
-    void _recursiveSetDescCount();
+    void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps, int colnum, bool isReference);
+    void _recursiveSetDescCount(int colnum, bool isReference);
 
 };
 
@@ -288,6 +292,7 @@ public:
     void setPr(int extended_alphabet_size);
     void clearFv();
     void setLeafState(std::string s);
+    void prepareSetADesCountOnNodes(int numcol);
 
     void _printUtree();
 
