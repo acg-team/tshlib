@@ -645,6 +645,8 @@ Utree::~Utree(){
         delete vnode;
     }
 
+    delete this->rootnode;
+
 }
 
 double Utree::computeTotalTreeLength() {
@@ -773,7 +775,15 @@ void Utree::clearFv() {
 }
 
 
-Utree::Utree() = default;
+Utree::Utree(){
+
+    // Added virtual root to utree
+    auto root = new VirtualNode;
+    root->vnode_name = "root";
+
+    this->rootnode = root;
+
+};
 
 void Utree::_updateStartNodes() {
 
@@ -1190,6 +1200,32 @@ void Utree::printAllNodesNeighbors() {
     for(auto &node:this->listVNodes){
         VLOG(2) << node->printNeighbours();
     }
+
+}
+
+void Utree::addRootNode() {
+
+
+    this->_updateStartNodes();
+
+    this->startVNodes.at(0)->disconnectNode();
+    //this->startVNodes.at(1)->disconnectNode();
+
+    this->rootnode->connectNode(this->startVNodes.at(0));
+    this->rootnode->connectNode(this->startVNodes.at(1));
+
+}
+
+void Utree::removeRootNode() {
+
+    VirtualNode *right = this->rootnode->getNodeRight();
+    VirtualNode *left = this->rootnode->getNodeLeft();
+
+    left->disconnectNode();
+    right->disconnectNode();
+
+    left->connectNode(right);
+
 
 }
 

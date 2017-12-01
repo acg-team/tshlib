@@ -414,13 +414,6 @@ int main(int argc, char **argv) {
 
             list_vnode_to_root = UtreeUtils::get_unique(path2root_1,path2root_2);
 
-            //list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
-
-            //Remove the root
-            //vnL=root->getNodeLeft();
-            //vnR=root->getNodeRight();
-            //vnL->setNodeParent(vnR);
-            //vnR->setNodeParent(vnL);
 
             // Apply the move
             status = rearrangmentList->applyMove(i);
@@ -441,12 +434,15 @@ int main(int argc, char **argv) {
 
                 testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root);
 
+                utree->addRootNode();
+
                 //UtreeUtils::recombineAllFv(list_vnode_to_root);
 
                 //TODO: here goes the smart lk recomputation
                 ID_best_move = i; // index (ID) of the best move
                 is_the_best_move=true;
 
+                utree->removeRootNode();
 
 
             }

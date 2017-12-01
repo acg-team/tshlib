@@ -264,6 +264,7 @@ public:
 
     std::vector<VirtualNode *> listVNodes;
     std::vector<VirtualNode *> startVNodes;
+    VirtualNode *rootnode;
 
     Utree();
 
@@ -286,6 +287,8 @@ public:
 
     virtual void printAllNodesNeighbors();
 
+    virtual void addRootNode();
+    virtual void removeRootNode();
 
     virtual void _testReachingPseudoRoot();
 
