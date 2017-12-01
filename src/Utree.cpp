@@ -44,6 +44,7 @@
 #include <string>
 #include <random>
 #include <fstream>
+#include <glog/logging.h>
 
 #include "Utree.hpp"
 #include "Alignment.hpp"
@@ -169,8 +170,10 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
     std::vector<VirtualNode *> list_nodes_n1;
     std::vector<VirtualNode *> list_nodes_n2;
 
+
     // add nodes from n1 to root
     list_nodes_n1 = fill_with_nodes(vn1);
+
 
     // add nodes from n2 to root
     list_nodes_n2 = fill_with_nodes(vn2);
@@ -1101,8 +1104,8 @@ void VirtualNode::_recursiveSetDescCount(int colnum, bool isReference) {
             this->vnode_descCount_temp.at(colnum) = (this->vnode_character == '-' ? 0 : 1);
         }
     } else {
-        this->getNodeLeft()->_recursiveSetDescCount(colnum, false);
-        this->getNodeRight()->_recursiveSetDescCount(colnum, false);
+        this->getNodeLeft()->_recursiveSetDescCount(colnum, isReference);
+        this->getNodeRight()->_recursiveSetDescCount(colnum, isReference);
         if (isReference) {
             this->vnode_descCount.at(colnum) = this->getNodeLeft()->vnode_descCount.at(colnum) +
                                                this->getNodeRight()->vnode_descCount.at(colnum);
@@ -1178,6 +1181,14 @@ void Utree::prepareSetADesCountOnNodes(int numcol) {
 
         node->prepareSetA_DescCount(numcol);
 
+    }
+
+}
+
+void Utree::printAllNodesNeighbors() {
+
+    for(auto &node:this->listVNodes){
+        VLOG(2) << node->printNeighbours();
     }
 
 }

@@ -46,7 +46,6 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <chrono>
 #include <glog/logging.h>
 #include <gflags/gflags.h>
 //#define LOGURU_IMPLEMENTATION 1
@@ -55,11 +54,10 @@
 //#include <loguru.hpp>
 #include <Utree.hpp>
 #include <TreeRearrangment.hpp>
-#include <Alignment.hpp>
 #include <Likelihood.hpp>
 #include <newick.hpp>
 
-#include "main.hpp"
+void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utree, std::vector<VirtualNode *> &list_vnode_to_root);
 
 namespace fasta_parser {
 
@@ -325,6 +323,7 @@ int main(int argc, char **argv) {
 
     // Save tree to file
     //utree->saveTreeOnFile("../data/test.txt");
+    utree->printAllNodesNeighbors();
 
     //------------------------------------------------------------------------------------------------------------------
     // TEST
@@ -390,64 +389,69 @@ int main(int argc, char **argv) {
         VLOG(1) << "[tsh] Strategy " << rearrangmentList->mset_strategy << std::endl;
         VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
 
+
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
         for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
             bool status;
 
+//            //Add the root
+//            root->setNodeName("Root");
+//            root->clearChildren();
+//            pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
+//            pseudo_root2 = pseudo_root1->getNodeUp();
+//            root->setChild(pseudo_root1);
+//            root->setChild(pseudo_root2);
+
+            VirtualNode *source;
+            VirtualNode *target;
+            list_vnode_to_root.clear();
+
+            source = rearrangmentList->getSourceNode();
+            target = rearrangmentList->getMove(i)->getTargetNode();
+
+            std::vector<VirtualNode *> path2root_1 = utree->findPseudoRoot(source, false);
+            std::vector<VirtualNode *> path2root_2 = utree->findPseudoRoot(target, false);
+
+            list_vnode_to_root = UtreeUtils::get_unique(path2root_1,path2root_2);
+
+            //list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
+
+            //Remove the root
+            //vnL=root->getNodeLeft();
+            //vnR=root->getNodeRight();
+            //vnL->setNodeParent(vnR);
+            //vnR->setNodeParent(vnL);
+
             // Apply the move
             status = rearrangmentList->applyMove(i);
+
+            if (status) {
+                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                        << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                        << utree->printTreeNewick(true) << std::endl;
+                //utree->_testReachingPseudoRoot();
+            }
 
             //utree->saveTreeOnFile("../data/test.txt");
 
             if(status) {
-
-                //Add the root
-                root->setNodeName("Root");
-                root->clearChildren();
-                pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
-                pseudo_root2 = pseudo_root1->getNodeUp();
-                root->setChild(pseudo_root1);
-                root->setChild(pseudo_root2);
-
-                //root->_traverseVirtualNodeTree();
-
-                VirtualNode *source;
-                VirtualNode *target;
-                list_vnode_to_root.clear();
-                source = rearrangmentList->getSourceNode();
-                target = rearrangmentList->getMove(i)->getTargetNode();
+                //utree->printAllNodesNeighbors();
 
 
-                list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
+                testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root);
 
-
-                for (int msa_col=0;msa_col<MSA_len;msa_col++) {
-                    std::string s = alignment->extractColumn(msa_col);
-                    utree->setLeafState(s);
-                    root->setAncestralFlag(s, msa_col, false);
-                }
-
-                UtreeUtils::recombineAllFv(list_vnode_to_root);
+                //UtreeUtils::recombineAllFv(list_vnode_to_root);
 
                 //TODO: here goes the smart lk recomputation
                 ID_best_move = i; // index (ID) of the best move
                 is_the_best_move=true;
 
-                //Remove the root
-                vnL=root->getNodeLeft();
-                vnR=root->getNodeRight();
-                vnL->setNodeParent(vnR);
-                vnR->setNodeParent(vnL);
+
 
             }
 
-            if (status) {
-                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
-                              << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
-                              << utree->printTreeNewick(true) << std::endl;
-                //utree->_testReachingPseudoRoot();
-            }
+
 
             // Revert the move, and return to the original tree
             status = rearrangmentList->revertMove(i);
@@ -458,7 +462,7 @@ int main(int argc, char **argv) {
                 if(!is_the_best_move){
                     //UtreeUtils::revertAllFv(list_vnode_to_root); // clear not necessary
                 }else{
-                    UtreeUtils::keepAllFv(list_vnode_to_root);
+                    //UtreeUtils::keepAllFv(list_vnode_to_root);
                 }
 
             }
@@ -486,4 +490,33 @@ int main(int argc, char **argv) {
 
 
     exit(0);
+}
+
+void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utree, std::vector<VirtualNode *> &list_vnode_to_root) {
+    for (int n = 0; n < utree->listVNodes.size(); n++) {
+        VirtualNode *tempnode = utree->listVNodes.at(n);
+
+        for (int msa_col = 0; msa_col < MSA_len; msa_col++) {
+
+            std::__1::string s = alignment->extractColumn(msa_col);
+            utree->setLeafState(s);
+
+            utree->findPseudoRoot(tempnode, false).back()->setAncestralFlag(s, msa_col, false);
+            utree->findPseudoRoot(tempnode, true).back()->setAncestralFlag(s, msa_col, false);
+            //utree->findPseudoRoot()
+            // root->setAncestralFlag(s, msa_col, false);
+
+            bool temp = tempnode->vnode_setA_temp.at(msa_col);
+            bool ref = tempnode->vnode_setA.at(msa_col);
+
+            if (ref == false && temp == true) {
+                if (find(list_vnode_to_root.begin(), list_vnode_to_root.end(), tempnode) != list_vnode_to_root.end()) {
+                } else {
+
+                    //VLOG(1) << "[Not found] Root <" << root->getNodeLeft()->vnode_name << ";" << root->getNodeRight()->vnode_name << ">" ;
+                    LOG(FATAL) << "[Not found] This node> " << tempnode->vnode_name << "@" << msa_col + 1 << "temp: " << temp << " ref:  " << ref;
+                }
+            }
+        }
+    }
 }

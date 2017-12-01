@@ -35,15 +35,14 @@ g <- ggplot(tgc, aes(x=moves, y=time, colour=opt, group = opt)) +
   geom_errorbar(aes(ymin=time-se, ymax=time+se), colour="black", width=.1, position=pd) +
   geom_line(position=pd) +
   geom_point(position=pd, size=1.5, fill="white", shape=21) + # 21 is filled circle
-  geom_smooth(span = 0.3) +
+  geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3), se = FALSE) +
   labs(title="TSHLIB - Benchmark 1: Graph perturbation using bidirectional node swapping (d>3, n=10)",
        subtitle="Benchmark performed on 2.9 GHz Intel Core i5 with 8 GB 2133 MHz LPDDR3 using a random generated set of binary graphs",
        caption="(C) Lorenzo Gatti & Massimo Maiolo 2017",
-       x="Swaps (node swaps + revert swaps)",
-       y="Time (microseconds)",
+       x="swap moves (apply + revert)",
+       y="computational time / (microseconds)",
        color=NULL)+
-  theme(legend.justification=c(1,0),
-        legend.position=c(1,0))+
+  theme(legend.justification=c(1,0),legend.position=c(2,0)) +
   scale_colour_hue(name="Optimisation scheme",      # Legend label, use darker colors
                    breaks=unique(tgc$opt),
                    labels=unique(tgc$opt),
@@ -65,11 +64,10 @@ g <- ggplot(tgc, aes(x=nodes, y=time, colour=opt, group = opt)) +
   labs(title="TSHLIB - Benchmark 2: Full tree-space search (d>3, n=10)",
        subtitle="Benchmark performed on 2.9 GHz Intel Core i5 with 8 GB 2133 MHz LPDDR3 using a random generated set of binary graphs",
        caption="(C) Lorenzo Gatti & Massimo Maiolo 2017",
-       x="Tree size / nodes (internal + terminal)",
-       y="Computational time / (microseconds)",
+       x="graph size / (nodes)",
+       y="computational time / (microseconds)",
        color=NULL)+
-  theme(legend.justification=c(1,0),
-      legend.position=c(1,0))+
+  theme(legend.justification=c(1,0),legend.position=c(2,0)) +
   scale_colour_hue(name="Optimisation scheme",    # Legend label, use darker colors
                    breaks=unique(tgc$opt),
                    labels=unique(tgc$opt),
@@ -87,15 +85,17 @@ g <- ggplot(tgc, aes(x=nodes, y=metric, colour=opt, group = opt)) +
   geom_errorbar(aes(ymin=metric-se, ymax=metric+se), colour="black", width=.1, position=pd) +
   geom_line(position=pd) +
   geom_point(position=pd, size=1.5, fill="white", shape=21) + # 21 is filled circle
-  geom_smooth(span = 0.3) +
+  geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3), se = FALSE) +
   labs(title="TSHLIB - Benchmark 3: Performance of defining, applying and reverting rearrangements (d>3, n=10)",
        subtitle="Benchmark performed on 2.9 GHz Intel Core i5 with 8 GB 2133 MHz LPDDR3 using a random generated set of binary graphs",
        caption="(C) Lorenzo Gatti & Massimo Maiolo 2017",
-       x="Tree size / Nodes (internal + terminal)",
-       y="Move/Time (microseconds)",
+       x="graph size / (nodes)",
+       y="swap move/computational time (microseconds)",
        color=NULL)+
-  theme(legend.justification=c(1,0),
-      legend.position=c(1,0))+
+  theme(legend.position = c(0.98, .98),
+        legend.justification = c("left", "top"),
+        legend.box.just = "left",
+        legend.margin = margin(6, 6, 6, 6)) +
   scale_colour_hue(name="Optimisation scheme",    # Legend label, use darker colors
                    breaks=unique(tgc$opt),
                    labels=unique(tgc$opt),

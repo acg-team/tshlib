@@ -284,6 +284,9 @@ public:
 
     virtual void saveTreeOnFile(std::string outfilepath);
 
+    virtual void printAllNodesNeighbors();
+
+
     virtual void _testReachingPseudoRoot();
 
     double computeTotalTreeLength();
