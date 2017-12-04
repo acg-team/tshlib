@@ -138,7 +138,6 @@ int main(int argc, char **argv) {
     int is_DNA_AA_Codon;
     int extended_alphabet_size;
     unsigned long num_leaves;
-    unsigned long MSA_len;
     double log_col_lk;
     double logLK;
     Eigen::VectorXd pi;
@@ -183,23 +182,8 @@ int main(int argc, char **argv) {
     UtreeUtils::associateNode2Alignment(alignment, utree);
 
     // Add the root
-    auto *root = new VirtualNode;
-    root->prepareSetA_DescCount((int) alignment->getAlignmentSize());
-    //    double T = tau + 1 / mu;
-    //    double iota = (1/mu)/T;
-    //    double beta = 1.0;
-
-    root->setNodeParent(nullptr);
-    root->setNodeName("Root");
-    root->clearChildren();
-
-    VirtualNode *pseudo_root1;
-    VirtualNode *pseudo_root2;
-    pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
-    pseudo_root2 = pseudo_root1->getNodeUp();
-    root->setChild(pseudo_root1);
-    root->setChild(pseudo_root2);
-
+    utree->addVirtualRootNode();
+    utree->rootnode->prepareSetA_DescCount((int) alignment->getAlignmentSize());
 
     //---------------------------------------------------------
     // compute total tree length
@@ -208,7 +192,8 @@ int main(int argc, char **argv) {
     VLOG(2) << "[PhyTree length] " << tau;
     tau = utree->computeTotalTreeLength();
     VLOG(2) << "[Utree length] " << tau;
-    tau = root->computeTotalTreeLength();
+    //tau = root->computeTotalTreeLength();
+    tau = utree->rootnode->computeTotalTreeLength();
     VLOG(2) << "[Tree length (from root)] " << tau;
 
     // compute the normalizing Poisson intensity
@@ -216,17 +201,17 @@ int main(int argc, char **argv) {
 
     // set insertion probability to each node
     tree->set_iota(tau, mu);
+
     utree->setIota(tau, mu);
-    root->setAllIotas(tau, mu);
+    //root->setAllIotas(tau, mu);
+    utree->rootnode->setAllIotas(tau, mu);
 
     // set survival probability to each node
     tree->set_beta(tau, mu);
     utree->setBeta(tau, mu);
-    root->setAllBetas(mu);
 
-    //tree->print_local_var();
-    //std::cout<<std::endl;
-    //utree->_printUtree();
+    //root->setAllBetas(mu);
+    utree->rootnode->setAllBetas(mu);
 
     // set "pseudo" probability matrix
     tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
@@ -255,14 +240,7 @@ int main(int argc, char **argv) {
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
     pi << 0.25, 0.25, 0.25, 0.25, 0.25;
-//    pi[0] = 0.25;
-//    pi[1] = 0.25;
-//    pi[2] = 0.25;
-//    pi[3] = 0.25;
-//    pi[4] = 0.0;
 
-    // get MSA length
-    MSA_len = static_cast<int>(alignment->getAlignmentSize());
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
@@ -282,7 +260,8 @@ int main(int argc, char **argv) {
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
-        root->setAncestralFlag(s, i, isReferenceRun);
+        //root->setAncestralFlag(s, i, isReferenceRun);
+        utree->rootnode->setAncestralFlag(s, i, isReferenceRun);
 
         //root->_traverseVirtualNodeTree();
 
@@ -293,7 +272,8 @@ int main(int argc, char **argv) {
         // Compute column likelihood
         //TODO: Add weight per column
         log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-        log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
+        //log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
+        log_col_lk = LKFunc::compute_col_lk(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
 
         VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
@@ -307,24 +287,18 @@ int main(int argc, char **argv) {
     p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
     VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
-    p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    //p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    p0 = LKFunc::compute_log_lk_empty_col(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size);
     VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
-    logLK += LKFunc::phi(MSA_len, nu, p0);
+    logLK += LKFunc::phi((int) alignment->align_length, nu, p0);
     VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
 
     //------------------------------------------------------------------------------------------------------------------
     // Remove the root
-    VirtualNode *vnL;
-    VirtualNode *vnR;
-    vnL = root->getNodeLeft();
-    vnR = root->getNodeRight();
-    vnL->setNodeParent(vnR);
-    vnR->setNodeParent(vnL);
-    //delete root;
-    //utree->_printUtree();
-    //----------------------------------------------
+    utree->removeVirtualRootNode();
 
+    //----------------------------------------------
     // Save tree to file
     //utree->saveTreeOnFile("../data/test.txt");
     utree->printAllNodesNeighbors();
@@ -399,7 +373,6 @@ int main(int argc, char **argv) {
             bool status;
             logLK = 0;
 
-
             VirtualNode *source;
             VirtualNode *target;
             list_vnode_to_root.clear();
@@ -412,7 +385,8 @@ int main(int argc, char **argv) {
 
             list_vnode_to_root = UtreeUtils::get_unique(path2root_1, path2root_2);
 
-            list_vnode_to_root.push_back(root);
+            //list_vnode_to_root.push_back(root);
+            list_vnode_to_root.push_back(utree->rootnode);
             std::reverse(list_vnode_to_root.begin(), list_vnode_to_root.end());
 
             //list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
@@ -432,38 +406,27 @@ int main(int argc, char **argv) {
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {
+
                 //utree->printAllNodesNeighbors();
                 //testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root)
 
                 // Add the root
-                root->clearChildren();
-                pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
-                pseudo_root2 = pseudo_root1->getNodeUp();
-                root->setChild(pseudo_root1);
-                root->setChild(pseudo_root2);
 
-                UtreeUtils::recombineAllFv(list_vnode_to_root);
-                //UtreeUtils::recombineAllEmptyFv(source, target, pi, extended_alphabet_size); //TODO: Check for mistakes. it crashes.
-
+                utree->addVirtualRootNode();
 
 
                 //UtreeUtils::recombineAllFv(list_vnode_to_root);
-                logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
+                //UtreeUtils::recombineAllEmptyFv(source, target, pi, extended_alphabet_size); //TODO: Check for mistakes. it crashes.
+
+                //logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
                 //double lkEmpty = UtreeUtils::computeLogLkEmptyColumnBothSides(source, target, pi, MSA_len, nu,  extended_alphabet_size);
                 //logLK += lkEmpty;
-                VLOG(2) << "[Tree LK]" << logLK;
+                //VLOG(2) << "[Tree LK]" << logLK;
 
-                //Remove the root
-                vnL=root->getNodeLeft();
-                vnR=root->getNodeRight();
-                vnL->setNodeParent(vnR);
-                vnR->setNodeParent(vnL);
+                utree->removeVirtualRootNode();
 
-
-                //TODO: here goes the smart lk recomputation
                 ID_best_move = i; // index (ID) of the best move
                 is_the_best_move = true;
-
 
             }
 

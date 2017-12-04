@@ -178,8 +178,6 @@ public:
 
     char getLeafCharacter();
 
-    void setChild(VirtualNode *vn);
-
     const Eigen::MatrixXd &getPr();
 
     VirtualNode *getNodeUp();
@@ -189,8 +187,6 @@ public:
     VirtualNode *getNodeRight();
 
     void _traverseVirtualNodeTree();
-
-    void setNodeParent(VirtualNode *vn);
 
     double computeTotalTreeLength();
 
@@ -292,8 +288,8 @@ public:
 
     virtual void printAllNodesNeighbors();
 
-    virtual void addRootNode();
-    virtual void removeRootNode();
+    virtual void addVirtualRootNode();
+    virtual void removeVirtualRootNode();
 
     virtual void _testReachingPseudoRoot();
 

@@ -482,21 +482,6 @@ char VirtualNode::getLeafCharacter(){
     return this->vnode_character;
 }
 
-void VirtualNode::setChild(VirtualNode *vn){
-
-    if(this->vnode_left!=NULL && this->vnode_right!=NULL){
-        perror("ERROR, more than 2 children is not allowed");
-    }
-
-    if(this->vnode_left==NULL){
-        this->vnode_left=vn;
-        vn->setNodeUp(this);
-    }else{
-        this->vnode_right=vn;
-        vn->setNodeUp(this);
-    }
-}
-
 VirtualNode *VirtualNode::getNodeUp() {
 
     return this->vnode_up ?: nullptr;
@@ -570,13 +555,6 @@ void VirtualNode::_traverseVirtualNodeTree(){
 
 }
 
-void VirtualNode::setNodeParent(VirtualNode *vn){
-    //if(this->getNodeUp()!=NULL){
-    //    perror("ERROR: root node already assigned");
-    //}else{
-        this->vnode_up=vn;
-    //}
-}
 
 double VirtualNode::computeTotalTreeLength() {
 
@@ -1299,16 +1277,10 @@ void VirtualNode::setAncestralFlag(std::string MSA_col, int colnum, bool isRefer
 
     num_gaps= AlignUtils::countNumCharactersInMSAColumn(MSA_col);
 
-    //this->_updateStartNodes();
-
-    //for (unsigned long i = 0; i < this->startVNodes.size(); i++) {
     this->_recursiveSetDescCount(colnum, isReference);
-    //_recursiveSetDescCount(this->startVNodes.at(1));
-    //}
-    //for (unsigned long i = 0; i < this->startVNodes.size(); i++) {
+
     this->_recursiveSetAncestralFlag(MSA_col, num_gaps, colnum, isReference);
-    //_recursiveSetAncestralFlag(this->startVNodes.at(1),MSA_col,num_gaps);
-    //}
+
 
 }
 
@@ -1340,29 +1312,38 @@ void Utree::printAllNodesNeighbors() {
 
 }
 
-void Utree::addRootNode() {
+void Utree::addVirtualRootNode() {
 
-
+    // Update starting nodes in the startVNodes array
     this->_updateStartNodes();
 
-    this->startVNodes.at(0)->disconnectNode();
-    //this->startVNodes.at(1)->disconnectNode();
+    // Clear children nodes in the virtual root
+    this->rootnode->clearChildren();
 
+    // Disconnect the bidirectional connection in the pseudoroot nodes
+    this->startVNodes.at(0)->disconnectNode();
+
+    // Reconnect nodes to virtual root node
     this->rootnode->connectNode(this->startVNodes.at(0));
     this->rootnode->connectNode(this->startVNodes.at(1));
 
 }
 
-void Utree::removeRootNode() {
-
-    VirtualNode *right = this->rootnode->getNodeRight();
+void Utree::removeVirtualRootNode() {
+    // Get reference children nodes from virtual root
     VirtualNode *left = this->rootnode->getNodeLeft();
+    VirtualNode *right = this->rootnode->getNodeRight();
 
+    // Disconnect nodes from virtual root node
     left->disconnectNode();
     right->disconnectNode();
 
-    left->connectNode(right);
+    // Establish bidirectional connection
+    left->setNodeUp(right);
+    right->setNodeUp(left);
 
+    // Clear residual connection with virtual root node
+    this->rootnode->clearChildren();
 
 }
 
