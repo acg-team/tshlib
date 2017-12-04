@@ -41,6 +41,7 @@
  *
  */
 
+#include "Likelihood.hpp"
 #include <string>
 #include <random>
 #include <fstream>
@@ -160,7 +161,7 @@ std::vector<VirtualNode *> UtreeUtils::get_unique(std::vector<VirtualNode *> &li
         list_nodes_n2.pop_back();
     }
 
-    std::reverse(list_nodes.begin(), list_nodes.end());
+
 
     return list_nodes;
 }
@@ -245,6 +246,136 @@ VirtualNode *UtreeUtils::getPseudoRoot(VirtualNode *vn){
 
     return vtemp;
 }
+
+double UtreeUtils::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi) {
+
+    double lk = 0;
+    for(int alignment_column=0; alignment_column<alignment.getAlignmentSize(); alignment_column++) {
+        double lk_col = 0;
+        for (auto &vnode:list_vnode_to_root) {
+            int currNodeDescCount;
+            if (!vnode->isTerminalNode()) {
+
+                currNodeDescCount = vnode->getNodeLeft()->vnode_descCount.at(alignment_column) + vnode->getNodeRight()->vnode_descCount.at(alignment_column);
+
+                if (currNodeDescCount != alignment.align_num_characters.at(alignment_column)) {
+
+                    lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_temp.at(alignment_column).dot(pi));
+
+                }
+            }else{
+
+                lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_temp.at(alignment_column).dot(pi));
+            }
+
+        }
+
+        VLOG(2) << "[tree lk] column: " << alignment_column << " LK: " << lk_col;
+        lk = lk+log(lk_col);
+    }
+
+    return lk;
+
+
+}
+
+
+double UtreeUtils::computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet) {
+
+    double lk;
+    double lk_sideA = UtreeUtils::computeLkEmptyColumn(source, pi, dim_extended_alphabet);
+    double lk_sideB = UtreeUtils::computeLkEmptyColumn(target, pi, dim_extended_alphabet);
+
+    lk = lk_sideA + lk_sideB;
+    // TODO: getnodeup is fermi uno prima del nodo root.
+    lk = LKFunc::phi(m, nu, lk);
+
+    return lk;
+}
+
+
+double UtreeUtils::computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet ) {
+
+    Eigen::VectorXd fv;
+    double lk = 0;
+
+    if(vnode->getNodeUp()){
+        if (vnode->isTerminalNode()) {
+            fv = Eigen::VectorXd::Zero(dim_extended_alphabet);
+
+            fv[dim_extended_alphabet - 1] = 1.0;
+
+            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
+
+        } else {
+
+            fv = (vnode->getNodeLeft()->getPr() *
+                    vnode->getNodeLeft()->vnode_Fv_empty_temp).cwiseProduct(vnode->getNodeRight()->getPr() *
+                                                                                                     vnode->getNodeRight()->vnode_Fv_empty_temp);
+
+            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
+
+        }
+
+
+        UtreeUtils::computeLkEmptyColumn(vnode->getNodeUp(), pi, dim_extended_alphabet);
+    }
+
+
+
+    return lk;
+
+
+}
+
+void UtreeUtils::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet) {
+
+    if(vnode->getNodeUp()){
+        if (vnode->isTerminalNode()) {
+
+            vnode->vnode_Fv_empty_temp = Eigen::VectorXd::Zero(dim_extended_alphabet);
+            vnode->vnode_Fv_empty_temp[dim_extended_alphabet - 1] = 1.0;
+
+        }else{
+            vnode->vnode_Fv_empty_temp = vnode->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_temp);
+
+        }
+        UtreeUtils::recombineEmptyFv(vnode->getNodeUp(), pi, dim_extended_alphabet);
+
+    }
+
+
+}
+
+void UtreeUtils::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int dim_extended_alphabet) {
+
+    // TODO: avoid double passing on common nodes
+
+    if(!source->isTerminalNode()){
+
+        UtreeUtils::recombineEmptyFv(source->getNodeLeft(), pi, dim_extended_alphabet);
+        UtreeUtils::recombineEmptyFv(source->getNodeRight(), pi, dim_extended_alphabet);
+
+    }else{
+
+        UtreeUtils::recombineEmptyFv(source, pi, dim_extended_alphabet);
+
+    }
+
+    if(!target->isTerminalNode()){
+
+        UtreeUtils::recombineEmptyFv(target->getNodeLeft(), pi, dim_extended_alphabet);
+        UtreeUtils::recombineEmptyFv(target->getNodeRight(), pi, dim_extended_alphabet);
+
+    }else{
+
+        UtreeUtils::recombineEmptyFv(target, pi, dim_extended_alphabet);
+
+    }
+
+
+}
+
 
 VirtualNode::VirtualNode() {
     // Initialise a new VirtualNode completely disconnected from the tree
@@ -504,26 +635,32 @@ void VirtualNode::recombineFv(){
     unsigned int lL,lR;
 
     if(this->isTerminalNode()){
-        return;
-    }
 
-    lL=this->getNodeLeft()->vnode_Fv.size();
-    lR=this->getNodeRight()->vnode_Fv.size();
+        for(unsigned int k=0;k<this->vnode_Fv.size();k++){
+            this->vnode_Fv_temp.push_back(this->vnode_Fv.at(k));
+        }
 
-    if(lL!=lR){
-        perror("ERROR: left fv size different from right fv size");
-        exit(EXIT_FAILURE);
-    }
+    }else {
 
-    this->vnode_Fv_temp.clear();
-    for(unsigned int k=0;k<lL;k++){
-        Eigen::VectorXd &fvL=this->getNodeLeft()->vnode_Fv.at(k);
-        Eigen::VectorXd &fvR=this->getNodeRight()->vnode_Fv.at(k);
-        Eigen::VectorXd fv0=fvL.cwiseProduct(fvR);
-        this->vnode_Fv_temp.push_back(fv0);
+        lL = this->getNodeLeft()->vnode_Fv.size();
+        lR = this->getNodeRight()->vnode_Fv.size();
+
+        if (lL != lR) {
+            perror("ERROR: left fv size different from right fv size");
+            exit(EXIT_FAILURE);
+        }
+
+        this->vnode_Fv_temp.clear();
+        for (unsigned int k = 0; k < lL; k++) {
+            Eigen::VectorXd &fvL = this->getNodeLeft()->vnode_Fv.at(k);
+            Eigen::VectorXd &fvR = this->getNodeRight()->vnode_Fv.at(k);
+            Eigen::VectorXd fv0 = fvL.cwiseProduct(fvR);
+            this->vnode_Fv_temp.push_back(fv0);
+        }
     }
 
 }
+
 
 void VirtualNode::revertFv(){
 
@@ -1397,6 +1534,7 @@ void VirtualNode::prepareSetA_DescCount(int numcol) {
     this->vnode_setA_temp.resize(numcol);
 
 }
+
 
 VirtualNode::~VirtualNode() = default;
 

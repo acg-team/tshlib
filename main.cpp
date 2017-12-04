@@ -79,7 +79,7 @@ namespace fasta_parser {
                 std::getline(in_fasta, line2);
                 //std::pair<std::string, std::string> p;
 
-                sequences.emplace_back(line.substr(1,line.size()), line2);
+                sequences.emplace_back(line.substr(1, line.size()), line2);
 
 
             }
@@ -98,6 +98,10 @@ namespace fasta_parser {
         for (int i = 0; i < msa.size(); i++) {
             alignment->addSequence(msa.at(i).first, msa.at(i).second);
         }
+
+        alignment->getAlignmentSize();
+
+        alignment->align_num_characters.resize((unsigned long) alignment->align_length);
 
         return alignment;
 
@@ -146,7 +150,7 @@ int main(int argc, char **argv) {
 
     num_leaves = alignment->align_dataset.size();
     LOG(INFO) << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
-
+    alignment->countNumberCharactersinColumn();
     // 1:DNA, 2:AA, 3:Codon
     is_DNA_AA_Codon = 1;
 
@@ -176,7 +180,7 @@ int main(int argc, char **argv) {
     UtreeUtils::convertUtree(tree, utree);
     LOG(INFO) << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
     utree->prepareSetADesCountOnNodes((int) alignment->getAlignmentSize());
-    UtreeUtils::associateNode2Alignment(alignment,utree);
+    UtreeUtils::associateNode2Alignment(alignment, utree);
 
     // Add the root
     auto *root = new VirtualNode;
@@ -191,8 +195,8 @@ int main(int argc, char **argv) {
 
     VirtualNode *pseudo_root1;
     VirtualNode *pseudo_root2;
-    pseudo_root1=UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
-    pseudo_root2=pseudo_root1->getNodeUp();
+    pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
+    pseudo_root2 = pseudo_root1->getNodeUp();
     root->setChild(pseudo_root1);
     root->setChild(pseudo_root2);
 
@@ -202,9 +206,9 @@ int main(int argc, char **argv) {
 
     tau = tree->computeLength();
     VLOG(2) << "[PhyTree length] " << tau;
-    tau=utree->computeTotalTreeLength();
+    tau = utree->computeTotalTreeLength();
     VLOG(2) << "[Utree length] " << tau;
-    tau=root->computeTotalTreeLength();
+    tau = root->computeTotalTreeLength();
     VLOG(2) << "[Tree length (from root)] " << tau;
 
     // compute the normalizing Poisson intensity
@@ -212,12 +216,12 @@ int main(int argc, char **argv) {
 
     // set insertion probability to each node
     tree->set_iota(tau, mu);
-    utree->setIota(tau,mu);
-    root->setAllIotas(tau,mu);
+    utree->setIota(tau, mu);
+    root->setAllIotas(tau, mu);
 
     // set survival probability to each node
     tree->set_beta(tau, mu);
-    utree->setBeta(tau,mu);
+    utree->setBeta(tau, mu);
     root->setAllBetas(mu);
 
     //tree->print_local_var();
@@ -250,7 +254,7 @@ int main(int argc, char **argv) {
 
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
-    pi << 0.25,0.25,0.25,0.25,0.25;
+    pi << 0.25, 0.25, 0.25, 0.25, 0.25;
 //    pi[0] = 0.25;
 //    pi[1] = 0.25;
 //    pi[2] = 0.25;
@@ -266,7 +270,7 @@ int main(int argc, char **argv) {
     double log_col_lk0;
     bool isReferenceRun = true;
     // compute log_col_lk
-    for (int i = 0; i < MSA_len; i++) {
+    for (int i = 0; i < alignment->getAlignmentSize(); i++) {
 
         // extract MSA column
         std::string s = alignment->extractColumn(i);
@@ -274,7 +278,7 @@ int main(int argc, char **argv) {
 
         // assign char at the leaves
         tree->set_leaf_state(s);
-        utree->setLeafState(s);
+        utree->setLeafState(s); //TODO: remove field char in VirtualNode --> Use the MSA directly
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         tree->set_ancestral_flag(s);
@@ -284,7 +288,7 @@ int main(int argc, char **argv) {
 
         // Initialise FV matrices at each node
         tree->clear_fv();
-        utree->clearFv();
+        //utree->clearFv();
 
         // Compute column likelihood
         //TODO: Add weight per column
@@ -293,7 +297,7 @@ int main(int argc, char **argv) {
 
         VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
-        VLOG(2) << "[diff lk] " << abs(log_col_lk0-log_col_lk);
+        VLOG(2) << "[diff lk] " << abs(log_col_lk0 - log_col_lk);
 
         logLK += log_col_lk;
 
@@ -313,8 +317,8 @@ int main(int argc, char **argv) {
     // Remove the root
     VirtualNode *vnL;
     VirtualNode *vnR;
-    vnL=root->getNodeLeft();
-    vnR=root->getNodeRight();
+    vnL = root->getNodeLeft();
+    vnR = root->getNodeRight();
     vnL->setNodeParent(vnR);
     vnR->setNodeParent(vnL);
     //delete root;
@@ -393,14 +397,8 @@ int main(int argc, char **argv) {
         // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
         for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
             bool status;
+            logLK = 0;
 
-//            //Add the root
-//            root->setNodeName("Root");
-//            root->clearChildren();
-//            pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
-//            pseudo_root2 = pseudo_root1->getNodeUp();
-//            root->setChild(pseudo_root1);
-//            root->setChild(pseudo_root2);
 
             VirtualNode *source;
             VirtualNode *target;
@@ -412,15 +410,12 @@ int main(int argc, char **argv) {
             std::vector<VirtualNode *> path2root_1 = utree->findPseudoRoot(source, false);
             std::vector<VirtualNode *> path2root_2 = utree->findPseudoRoot(target, false);
 
-            list_vnode_to_root = UtreeUtils::get_unique(path2root_1,path2root_2);
+            list_vnode_to_root = UtreeUtils::get_unique(path2root_1, path2root_2);
+
+            list_vnode_to_root.push_back(root);
+            std::reverse(list_vnode_to_root.begin(), list_vnode_to_root.end());
 
             //list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
-
-            //Remove the root
-            //vnL=root->getNodeLeft();
-            //vnR=root->getNodeRight();
-            //vnL->setNodeParent(vnR);
-            //vnR->setNodeParent(vnL);
 
             // Apply the move
             status = rearrangmentList->applyMove(i);
@@ -435,18 +430,36 @@ int main(int argc, char **argv) {
 
             //utree->saveTreeOnFile("../data/test.txt");
 
-            if(status) {
+            if (status) {
                 //utree->printAllNodesNeighbors();
+                //testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root)
+
+                // Add the root
+                root->clearChildren();
+                pseudo_root1 = UtreeUtils::getPseudoRoot(utree->startVNodes.at(0));
+                pseudo_root2 = pseudo_root1->getNodeUp();
+                root->setChild(pseudo_root1);
+                root->setChild(pseudo_root2);
+
+                UtreeUtils::recombineAllFv(list_vnode_to_root);
+                //UtreeUtils::recombineAllEmptyFv(source, target, pi, extended_alphabet_size); //TODO: Check for mistakes. it crashes.
 
 
-                testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root);
+                logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
+                //double lkEmpty = UtreeUtils::computeLogLkEmptyColumnBothSides(source, target, pi, MSA_len, nu,  extended_alphabet_size);
+                //logLK += lkEmpty;
+                VLOG(2) << "[Tree LK]" << logLK;
 
-                //UtreeUtils::recombineAllFv(list_vnode_to_root);
+                //Remove the root
+                vnL=root->getNodeLeft();
+                vnR=root->getNodeRight();
+                vnL->setNodeParent(vnR);
+                vnR->setNodeParent(vnL);
+
 
                 //TODO: here goes the smart lk recomputation
                 ID_best_move = i; // index (ID) of the best move
-                is_the_best_move=true;
-
+                is_the_best_move = true;
 
 
             }
@@ -457,11 +470,11 @@ int main(int argc, char **argv) {
             status = rearrangmentList->revertMove(i);
             //utree->saveTreeOnFile("../data/test.txt");
 
-            if(status){
+            if (status) {
 
-                if(!is_the_best_move){
+                if (!is_the_best_move) {
                     //UtreeUtils::revertAllFv(list_vnode_to_root); // clear not necessary
-                }else{
+                } else {
                     //UtreeUtils::keepAllFv(list_vnode_to_root);
                 }
 
@@ -469,22 +482,22 @@ int main(int argc, char **argv) {
 
             if (status) {
                 VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                              << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
-                              << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
-                              << utree->printTreeNewick(true) << std::endl;
+                        << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
+                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                        << utree->printTreeNewick(true) << std::endl;
                 //utree->_testReachingPseudoRoot();
             }
-            total_exec_moves += rearrangmentList->getNumberOfMoves()*2;
+            total_exec_moves += rearrangmentList->getNumberOfMoves() * 2;
         }
         delete rearrangmentList;
     }
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     VLOG(0) << "Moves applied and reverted: " << total_exec_moves << std::endl;
     VLOG(0) << "Elapsed time: " << duration << " microseconds" << std::endl;
-    VLOG(0) << "*** " << (double) duration/total_exec_moves << " microseconds/move *** " << std::endl;
+    VLOG(0) << "*** " << (double) duration / total_exec_moves << " microseconds/move *** " << std::endl;
 
     //treesearchheuristics::testTSH(utree, TreeSearchHeuristics::classic_Mixed);
 

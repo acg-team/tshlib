@@ -57,6 +57,7 @@ Alignment::Alignment(bool compressed) {
 Alignment::Alignment() {
     this->align_compressed = false;
     this->align_alphabetsize = 0;
+
 }
 
 
@@ -113,7 +114,34 @@ long int Alignment::getAlignmentSize() {
 
 
     }
+
+    this->align_length = length;
+
     return length;
+}
+
+void Alignment::countNumberCharactersinColumn() {
+
+    int numCharacters;
+
+    for(int c=0;c<this->getAlignmentSize();c++){
+        numCharacters=0;
+
+        for (int i = 0; i < this->align_dataset.size(); i++) {
+
+            char ch = this->align_dataset.at(i)->seq_data.at(c);
+            if ( ch != '-'){
+                numCharacters++;
+            }
+
+            //num_gaps += (int)(this->align_dataset.at(c)->seq_data.at(i) != '-');
+        }
+
+        this->align_num_characters.at(c) = numCharacters;
+
+    }
+
+
 }
 
 int AlignUtils::countNumCharactersInMSAColumn(const std::string MSA_col){
