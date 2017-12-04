@@ -60,6 +60,8 @@ public:
     bool align_compressed;
     std::vector<Sequence *> align_dataset;
     std::vector<int> align_weight;
+    std::vector<int> align_num_characters;
+    long align_length;
 
     Alignment();
 
@@ -68,6 +70,8 @@ public:
     void addSequence(std::string label, std::string data);
 
     void addWeight(std::vector<int> column_weight);
+
+    void countNumberCharactersinColumn();
 
     long int getAlignmentSize();
 

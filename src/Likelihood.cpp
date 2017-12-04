@@ -71,30 +71,27 @@ namespace LKFunc {
     }
 
 
-    Eigen::VectorXd
+    void
     compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
-        Eigen::VectorXd fv;
-        Eigen::VectorXd fvL;
-        Eigen::VectorXd fvR;
 
         if (vnode->isTerminalNode()) {
-            fv = Eigen::VectorXd::Zero(dim_extended_alphabet);
+            vnode->vnode_Fv_empty = Eigen::VectorXd::Zero(dim_extended_alphabet);
 
-            fv[dim_extended_alphabet - 1] = 1.0;
+            vnode->vnode_Fv_empty[dim_extended_alphabet - 1] = 1.0;
 
-            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
+            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty.dot(pi)));
 
         } else {
 
-            fvL = compute_lk_empty_col(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
-            fvR = compute_lk_empty_col(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+            compute_lk_empty_col(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+            compute_lk_empty_col(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
-            fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
+            vnode->vnode_Fv_empty = (vnode->getNodeLeft()->getPr() * vnode->getNodeLeft()->vnode_Fv_empty).cwiseProduct(vnode->getNodeRight()->getPr() * vnode->getNodeRight()
+                    ->vnode_Fv_empty);
 
-            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
+            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty.dot(pi)));
 
         }
-        return fv;
     }
 
     double compute_log_lk_empty_col(PhyTree &node, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
@@ -106,16 +103,16 @@ namespace LKFunc {
     }
 
     double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
- //       VirtualNode *pseudo_root;
+        //       VirtualNode *pseudo_root;
         double p0;
 
-   //     pseudo_root=utree.startVNodes.at(0);
+        //     pseudo_root=utree.startVNodes.at(0);
 
         compute_lk_empty_col(root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
 //        pseudo_root=utree.startVNodes.at(1);
 
-  //      compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+        //      compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
         return log(p0);
     }
@@ -197,23 +194,23 @@ namespace LKFunc {
                 //std::cout<<"SETA1* "<<vnode->vnode_name<<std::endl;
                 lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
             }
-
-            vnode->setMSAFv(fv);
+            vnode->vnode_Fv.push_back(fv);
+            //vnode->setMSAFv(fv);
 
         } else {
 
-            fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, 0);
-            fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, 0);
+            fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum);
+            fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum);
 
             fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
 
-            if (vnode->getSetA(0)) {
+            if (vnode->getSetA(colnum)) {
                 //std::cout<<"SETA2* "<<vnode->vnode_name<<std::endl;
                 lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
             }
 
-
-            vnode->setMSAFv(fv);
+            vnode->vnode_Fv.push_back(fv);
+            //vnode->setMSAFv(fv);
 
 
         }
@@ -222,7 +219,7 @@ namespace LKFunc {
 
     double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size) {
 
-        double lk=0.0;
+        double lk = 0.0;
 
         compute_lk_recursive(tree, lk, pi, is_DNA_AA_Codon, alphabet_size);
 
@@ -231,7 +228,7 @@ namespace LKFunc {
 
     double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum) {
 
-        double lk=0.0;
+        double lk = 0.0;
 
         compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size, colnum);
 

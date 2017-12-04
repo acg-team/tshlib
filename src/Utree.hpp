@@ -89,7 +89,9 @@ public:
     std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
     std::vector<Eigen::VectorXd> vnode_Fv_temp;
     std::vector<Eigen::VectorXd> vnode_Fv_best;
-    std::vector<bool> vnode_setA;                                /* Flag: Include node in computing the set A -- might be not necessary */
+    Eigen::VectorXd vnode_Fv_empty;
+    Eigen::VectorXd vnode_Fv_empty_temp;
+    std::vector<bool> vnode_setA;                                   /* Flag: Include node in computing the set A -- might be not necessary */
     std::vector<int> vnode_descCount;                            /* Counter of the characters associated    */
     std::vector<bool> vnode_setA_temp;                                /* Flag: Include node in computing the set A -- might be not necessary */
     std::vector<int> vnode_descCount_temp;                            /* Counter of the characters associated    */
@@ -199,7 +201,9 @@ public:
     void prepareSetA_DescCount(int numcol);
 
     void recombineFv();
+
     void revertFv();
+
     void keepFv();
 
     void clearChildren();
@@ -254,6 +258,7 @@ protected:
     virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
     void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps, int colnum, bool isReference);
+
     void _recursiveSetDescCount(int colnum, bool isReference);
 
 };
@@ -293,22 +298,30 @@ public:
     virtual void _testReachingPseudoRoot();
 
     double computeTotalTreeLength();
+
     void setIota(double tau, double mu);
+
     void setBeta(double tau, double mu);
+
     void setPr(int extended_alphabet_size);
+
     void clearFv();
+
     void setLeafState(std::string s);
+
     void prepareSetADesCountOnNodes(int numcol);
 
     void _printUtree();
 
 protected:
     std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
+
     virtual void _updateStartNodes();
 
 private:
 
 };
+
 
 
 namespace UtreeUtils {
@@ -318,12 +331,29 @@ namespace UtreeUtils {
     void convertUtree(PhyTree *in_tree, Utree *out_tree);
 
     std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+
     std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
+
     std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
+
     void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+
+    void recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet);
+
+    void recombineAllEmptyFv(VirtualNode *source, VirtualNode *target,Eigen::VectorXd &pi, int dim_extended_alphabet );
+
     void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+
     void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+
+    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi);
+
+    double computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet );
+
+    double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
+
     void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
+
     VirtualNode *getPseudoRoot(VirtualNode *vn);
 
 }
