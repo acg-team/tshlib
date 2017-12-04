@@ -337,7 +337,11 @@ void UtreeUtils::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int d
             vnode->vnode_Fv_empty_temp[dim_extended_alphabet - 1] = 1.0;
 
         }else{
-            vnode->vnode_Fv_empty_temp = vnode->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_temp);
+
+            Eigen::VectorXd temp1 = vnode->getNodeLeft()->vnode_Fv_empty_temp;
+            Eigen::VectorXd temp2 = vnode->getNodeRight()->vnode_Fv_empty_temp;
+
+            vnode->vnode_Fv_empty_temp = temp1 * temp2;
 
         }
         UtreeUtils::recombineEmptyFv(vnode->getNodeUp(), pi, dim_extended_alphabet);
@@ -350,7 +354,6 @@ void UtreeUtils::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int d
 void UtreeUtils::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int dim_extended_alphabet) {
 
     // TODO: avoid double passing on common nodes
-
     if(!source->isTerminalNode()){
 
         UtreeUtils::recombineEmptyFv(source->getNodeLeft(), pi, dim_extended_alphabet);
@@ -1345,6 +1348,51 @@ void Utree::removeVirtualRootNode() {
     // Clear residual connection with virtual root node
     this->rootnode->clearChildren();
 
+}
+
+std::vector<VirtualNode *> Utree::computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2) {
+
+    std::vector<VirtualNode *> path2root_1 = this->findPseudoRoot(vnode_1, false);
+    std::vector<VirtualNode *> path2root_2 = this->findPseudoRoot(vnode_2, false);
+
+    std::vector<VirtualNode *> list_vnode_to_root = this->_unique(path2root_1, path2root_2);
+
+    //delete(path2root_1);
+    //delete(path2root_2);
+    return list_vnode_to_root;
+}
+
+std::vector<VirtualNode *> Utree::_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2) {
+
+    std::vector<VirtualNode *> list_nodes;
+    VirtualNode *n1;
+    VirtualNode *n2;
+
+    while (list_nodes_n1.size() > 0 && list_nodes_n2.size() > 0) {
+        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
+        if (n1 == n2) {
+            list_nodes.push_back(n1);
+            list_nodes_n1.pop_back();
+            list_nodes_n2.pop_back();
+        } else {
+            break;
+        }
+    }
+
+    while (list_nodes_n1.size() > 0) {
+        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+        list_nodes.push_back(n1);
+        list_nodes_n1.pop_back();
+    }
+
+    while (list_nodes_n2.size() > 0) {
+        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
+        list_nodes.push_back(n2);
+        list_nodes_n2.pop_back();
+    }
+
+    return list_nodes;
 }
 
 

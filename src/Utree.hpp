@@ -278,39 +278,72 @@ public:
      */
     std::vector<VirtualNode *> findPseudoRoot(VirtualNode *inVNode, bool fixPseudoRootOnNextSubtree = false);
 
+    /*!
+     * @brief This function adds a complete VirtualNode to the listVNodes attribute of the class Utree
+     * @param inVNode       Pointer to the VirtualNode to add
+     * @param isStartNode
+     */
     virtual void addMember(VirtualNode *inVNode, bool isStartNode = false);
-
+    /*!
+     * @brief
+     * @param showInternalNodeNames
+     * @return
+     */
     std::string printTreeNewick(bool showInternalNodeNames);
-
+    /*!
+     * @brief
+     * @return
+     */
     int getMaxNodeDistance();
 
+    /*!
+     * @brief
+     * @param outfilepath
+     */
     virtual void saveTreeOnFile(std::string outfilepath);
 
+    /*!
+     * @brief
+     */
     virtual void printAllNodesNeighbors();
 
+    /*!
+     * @brief This function create a virtual root on the utree object. It breaks the link between two pseudoroot virtualnodes
+     */
     virtual void addVirtualRootNode();
+
+    /*!
+     * @brief This function remove the virtual root node added with the companion function addVirtualRootNode()
+     */
     virtual void removeVirtualRootNode();
 
     virtual void _testReachingPseudoRoot();
 
-    double computeTotalTreeLength();
+    virtual double computeTotalTreeLength();
 
-    void setIota(double tau, double mu);
+    virtual void setIota(double tau, double mu);
 
-    void setBeta(double tau, double mu);
+    virtual void setBeta(double tau, double mu);
 
-    void setPr(int extended_alphabet_size);
+    virtual void setPr(int extended_alphabet_size);
 
-    void clearFv();
+    virtual void clearFv();
 
-    void setLeafState(std::string s);
+    virtual void setLeafState(std::string s);
 
-    void prepareSetADesCountOnNodes(int numcol);
+    virtual void prepareSetADesCountOnNodes(int numcol);
 
-    void _printUtree();
+    virtual void _printUtree();
+
+    std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
+
+
+
 
 protected:
     std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
+
+    std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
 
     virtual void _updateStartNodes();
 

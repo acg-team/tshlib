@@ -345,9 +345,6 @@ int main(int argc, char **argv) {
 
     std::vector<VirtualNode *> list_vnode_to_root;
 
-    bool is_the_best_move = false;
-    int ID_best_move;
-
     // Print node description with neighbors
     for (auto &vnode:utree->listVNodes) {
         VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
@@ -373,24 +370,12 @@ int main(int argc, char **argv) {
             bool status;
             logLK = 0;
 
-            VirtualNode *source;
-            VirtualNode *target;
+            // Prepare the list of nodes involved in the move
+            // TODO: This list belongs specifically to the tree-rearrangement definition -> move to TreeRearrangment class
             list_vnode_to_root.clear();
-
-            source = rearrangmentList->getSourceNode();
-            target = rearrangmentList->getMove(i)->getTargetNode();
-
-            std::vector<VirtualNode *> path2root_1 = utree->findPseudoRoot(source, false);
-            std::vector<VirtualNode *> path2root_2 = utree->findPseudoRoot(target, false);
-
-            list_vnode_to_root = UtreeUtils::get_unique(path2root_1, path2root_2);
-
-            //list_vnode_to_root.push_back(root);
+            list_vnode_to_root = utree->computePathBetweenNodes(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode());
             list_vnode_to_root.push_back(utree->rootnode);
             std::reverse(list_vnode_to_root.begin(), list_vnode_to_root.end());
-
-            //list_vnode_to_root = UtreeUtils::get_path_from_nodes(source, target);
-
 
             // Apply the move
             status = rearrangmentList->applyMove(i);
@@ -406,30 +391,25 @@ int main(int argc, char **argv) {
             //utree->saveTreeOnFile("../data/test.txt");
 
             if (status) {
-
                 //utree->printAllNodesNeighbors();
                 //testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root)
 
                 // Add the root
-
                 utree->addVirtualRootNode();
 
+                UtreeUtils::recombineAllFv(list_vnode_to_root);
 
-                //UtreeUtils::recombineAllFv(list_vnode_to_root);
-                //UtreeUtils::recombineAllEmptyFv(source, target, pi, extended_alphabet_size); //TODO: Check for mistakes. it crashes.
+                //TODO: Check for mistakes. it crashes.
+                //UtreeUtils::recombineAllEmptyFv(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode(), pi, extended_alphabet_size);
 
-                //logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
+                logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
                 //double lkEmpty = UtreeUtils::computeLogLkEmptyColumnBothSides(source, target, pi, MSA_len, nu,  extended_alphabet_size);
                 //logLK += lkEmpty;
-                //VLOG(2) << "[Tree LK]" << logLK;
+                VLOG(2) << "[Tree LK]" << logLK;
 
                 utree->removeVirtualRootNode();
 
-                ID_best_move = i; // index (ID) of the best move
-                is_the_best_move = true;
-
             }
-
 
 
             // Revert the move, and return to the original tree
@@ -438,7 +418,7 @@ int main(int argc, char **argv) {
 
             if (status) {
 
-                if (!is_the_best_move) {
+                if (!rearrangmentList->getMove(i)->move_applied) {
                     //UtreeUtils::revertAllFv(list_vnode_to_root); // clear not necessary
                 } else {
                     //UtreeUtils::keepAllFv(list_vnode_to_root);
