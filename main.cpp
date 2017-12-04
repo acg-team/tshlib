@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
     // BUILD UNROOTED TREE
     auto utree = new Utree;
     UtreeUtils::convertUtree(tree, utree);
-    LOG(INFO) << "[Initial utree] " << utree->printTreeNewick(true) << std::endl;
+    LOG(INFO) << "[Initial Utree Topology] " << utree->printTreeNewick(true) << std::endl;
     utree->prepareSetADesCountOnNodes((int) alignment->getAlignmentSize());
     UtreeUtils::associateNode2Alignment(alignment, utree);
 
@@ -188,8 +188,8 @@ int main(int argc, char **argv) {
     //---------------------------------------------------------
     // compute total tree length
 
-    tau = tree->computeLength();
-    VLOG(2) << "[PhyTree length] " << tau;
+    //tau = tree->computeLength();
+    //VLOG(2) << "[PhyTree length] " << tau;
     tau = utree->computeTotalTreeLength();
     VLOG(2) << "[Utree length] " << tau;
     //tau = root->computeTotalTreeLength();
@@ -200,33 +200,31 @@ int main(int argc, char **argv) {
     nu = LKFunc::compute_nu(tau, lambda, mu);
 
     // set insertion probability to each node
-    tree->set_iota(tau, mu);
+    //tree->set_iota(tau, mu);
 
     utree->setIota(tau, mu);
     //root->setAllIotas(tau, mu);
     utree->rootnode->setAllIotas(tau, mu);
 
     // set survival probability to each node
-    tree->set_beta(tau, mu);
+    //tree->set_beta(tau, mu);
     utree->setBeta(tau, mu);
 
     //root->setAllBetas(mu);
     utree->rootnode->setAllBetas(mu);
 
     // set "pseudo" probability matrix
-    tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
+    //tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
     utree->setPr(extended_alphabet_size);
 
     //root->_traverseVirtualNodeTree();
 
     // print newick tree
-    LOG(INFO) << "[Initial Tree Topology] " << tree->formatNewick() << std::endl;
+    //LOG(INFO) << "[Initial PhyTree Topology] " << tree->formatNewick() << std::endl;
 
 
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
-    num_leaves = alignment->align_dataset.size();
-    LOG(INFO) << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
 
     // 1:DNA, 2:AA, 3:Codon
     is_DNA_AA_Codon = 1;
@@ -241,12 +239,12 @@ int main(int argc, char **argv) {
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
     pi << 0.25, 0.25, 0.25, 0.25, 0.25;
 
-
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
 
     double log_col_lk0;
     bool isReferenceRun = true;
+
     // compute log_col_lk
     for (int i = 0; i < alignment->getAlignmentSize(); i++) {
 
@@ -255,37 +253,36 @@ int main(int argc, char **argv) {
         VLOG(2) << "[Extracted column] (" << i << ") = " << s << std::endl;
 
         // assign char at the leaves
-        tree->set_leaf_state(s);
+        //tree->set_leaf_state(s);
         utree->setLeafState(s); //TODO: remove field char in VirtualNode --> Use the MSA directly
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
-        tree->set_ancestral_flag(s);
+        //tree->set_ancestral_flag(s);
         //root->setAncestralFlag(s, i, isReferenceRun);
         utree->rootnode->setAncestralFlag(s, i, isReferenceRun);
 
         //root->_traverseVirtualNodeTree();
 
         // Initialise FV matrices at each node
-        tree->clear_fv();
+        //tree->clear_fv();
         //utree->clearFv();
 
         // Compute column likelihood
         //TODO: Add weight per column
-        log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+        //log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
         //log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
         log_col_lk = LKFunc::compute_col_lk(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
-
         VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
-        VLOG(2) << "[diff lk] " << abs(log_col_lk0 - log_col_lk);
+        //VLOG(2) << "[diff lk] " << abs(log_col_lk0 - log_col_lk);
 
         logLK += log_col_lk;
 
     }
 
     // compute empty column likelihood
-    p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
+    //p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    //VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     //p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
     p0 = LKFunc::compute_log_lk_empty_col(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size);
@@ -343,6 +340,7 @@ int main(int argc, char **argv) {
     int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
     int max_radius = utree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
 
+    bool computeMoveLikelihood = false;
     std::vector<VirtualNode *> list_vnode_to_root;
 
     // Print node description with neighbors
@@ -380,17 +378,18 @@ int main(int argc, char **argv) {
             // Apply the move
             status = rearrangmentList->applyMove(i);
 
-            if (status) {
-                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                        << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
-                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
-                        << utree->printTreeNewick(true) << std::endl;
-                //utree->_testReachingPseudoRoot();
-            }
+            VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                    << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                    << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                    << utree->printTreeNewick(true) << std::endl;
 
+            // Print root reachability from every node (includes rotations)
+            //utree->_testReachingPseudoRoot();
+
+            // Print tree on file
             //utree->saveTreeOnFile("../data/test.txt");
 
-            if (status) {
+            if (computeMoveLikelihood) {
                 //utree->printAllNodesNeighbors();
                 //testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root)
 
@@ -411,12 +410,13 @@ int main(int argc, char **argv) {
 
             }
 
-
             // Revert the move, and return to the original tree
             status = rearrangmentList->revertMove(i);
+
+            // Print tree on file
             //utree->saveTreeOnFile("../data/test.txt");
 
-            if (status) {
+            if (computeMoveLikelihood) {
 
                 if (!rearrangmentList->getMove(i)->move_applied) {
                     //UtreeUtils::revertAllFv(list_vnode_to_root); // clear not necessary
@@ -426,15 +426,19 @@ int main(int argc, char **argv) {
 
             }
 
-            if (status) {
-                VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                        << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
-                        << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
-                        << utree->printTreeNewick(true) << std::endl;
-                //utree->_testReachingPseudoRoot();
-            }
+            VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                    << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
+                    << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                    << utree->printTreeNewick(true) << std::endl;
+
+            // Print root reachability from every node (includes rotations)
+            //utree->_testReachingPseudoRoot();
+
+            // Count moves performed
             total_exec_moves += rearrangmentList->getNumberOfMoves() * 2;
         }
+
+        // Clean memory
         delete rearrangmentList;
     }
 
