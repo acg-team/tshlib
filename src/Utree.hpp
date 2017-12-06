@@ -359,11 +359,22 @@ namespace UtreeUtils {
 
     void convertUtree(PhyTree *in_tree, Utree *out_tree);
 
-    std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+    /*!
+     * @brief This function has been ported in Utree::_unique
+     * @param n
+     * @return
+     */
+    //std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+
 
     std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
 
-    std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
+/*!
+     * @brief This function has been ported in Utree::computePathBetweenNodes
+     * @param n
+     * @return
+     */
+    //std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
 
     void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 

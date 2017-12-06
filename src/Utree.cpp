@@ -132,40 +132,41 @@ std::vector<VirtualNode *> UtreeUtils::fill_with_nodes(VirtualNode *n) {
     return list_nodes_n;
 }
 
-std::vector<VirtualNode *> UtreeUtils::get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2) {
-    std::vector<VirtualNode *> list_nodes;
-    VirtualNode *n1;
-    VirtualNode *n2;
+//std::vector<VirtualNode *> UtreeUtils::get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2) {
+//    std::vector<VirtualNode *> list_nodes;
+//    VirtualNode *n1;
+//    VirtualNode *n2;
+//
+//    while (list_nodes_n1.size() > 0 && list_nodes_n2.size() > 0) {
+//        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+//        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
+//        if (n1 == n2) {
+//            list_nodes.push_back(n1);
+//            list_nodes_n1.pop_back();
+//            list_nodes_n2.pop_back();
+//        } else {
+//            break;
+//        }
+//    }
+//
+//    while (list_nodes_n1.size() > 0) {
+//        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
+//        list_nodes.push_back(n1);
+//        list_nodes_n1.pop_back();
+//    }
+//
+//    while (list_nodes_n2.size() > 0) {
+//        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
+//        list_nodes.push_back(n2);
+//        list_nodes_n2.pop_back();
+//    }
+//
+//
+//
+//    return list_nodes;
+//}
 
-    while (list_nodes_n1.size() > 0 && list_nodes_n2.size() > 0) {
-        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
-        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
-        if (n1 == n2) {
-            list_nodes.push_back(n1);
-            list_nodes_n1.pop_back();
-            list_nodes_n2.pop_back();
-        } else {
-            break;
-        }
-    }
-
-    while (list_nodes_n1.size() > 0) {
-        n1 = list_nodes_n1.at(list_nodes_n1.size() - 1);
-        list_nodes.push_back(n1);
-        list_nodes_n1.pop_back();
-    }
-
-    while (list_nodes_n2.size() > 0) {
-        n2 = list_nodes_n2.at(list_nodes_n2.size() - 1);
-        list_nodes.push_back(n2);
-        list_nodes_n2.pop_back();
-    }
-
-
-
-    return list_nodes;
-}
-
+/*
 std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2) {
     std::vector<VirtualNode *> list_nodes_n0;
     std::vector<VirtualNode *> list_nodes_n1;
@@ -183,6 +184,7 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
 
     return list_nodes_n0;
 }
+*/
 
 void UtreeUtils::recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root){
     VirtualNode *vn;
@@ -337,11 +339,8 @@ void UtreeUtils::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int d
             vnode->vnode_Fv_empty_temp[dim_extended_alphabet - 1] = 1.0;
 
         }else{
-
-            Eigen::VectorXd temp1 = vnode->getNodeLeft()->vnode_Fv_empty_temp;
-            Eigen::VectorXd temp2 = vnode->getNodeRight()->vnode_Fv_empty_temp;
-
-            vnode->vnode_Fv_empty_temp = temp1 * temp2;
+            // TODO: source target should have to initialise first the children and only after themselves.
+            vnode->vnode_Fv_empty_temp =  vnode->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_temp);
 
         }
         UtreeUtils::recombineEmptyFv(vnode->getNodeUp(), pi, dim_extended_alphabet);

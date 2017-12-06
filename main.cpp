@@ -56,6 +56,7 @@
 #include <TreeRearrangment.hpp>
 #include <Likelihood.hpp>
 #include <newick.hpp>
+#include <Optimization_Brent.hpp>
 
 void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utree, std::vector<VirtualNode *> &list_vnode_to_root);
 
@@ -340,7 +341,7 @@ int main(int argc, char **argv) {
     int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
     int max_radius = utree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
 
-    bool computeMoveLikelihood = false;
+    bool computeMoveLikelihood = true;
     std::vector<VirtualNode *> list_vnode_to_root;
 
     // Print node description with neighbors
@@ -402,6 +403,14 @@ int main(int argc, char **argv) {
                 //UtreeUtils::recombineAllEmptyFv(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode(), pi, extended_alphabet_size);
 
                 logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
+
+                double max_lenght = pi[1] * 1.1;
+                double min_lenght = pi[1] * 0.9;
+
+                double newLk = Generic_Brent_Lk(&pi[1], min_lenght, max_lenght, SMALL, BRENT_ITMAX,
+                UtreeUtils::computePartialLK, list_vnode_to_root, *alignment, pi, logLK);
+
+
                 //double lkEmpty = UtreeUtils::computeLogLkEmptyColumnBothSides(source, target, pi, MSA_len, nu,  extended_alphabet_size);
                 //logLK += lkEmpty;
                 VLOG(2) << "[Tree LK]" << logLK;
