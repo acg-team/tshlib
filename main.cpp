@@ -202,8 +202,23 @@ int main(int argc, char **argv) {
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
     pi << 0.25, 0.25, 0.25, 0.25, 0.25;
-    Q = Eigen::MatrixXd::Identity(extended_alphabet_size,extended_alphabet_size);
-   // Q[0] << 0.1, 0.1, 0.1, 0.1, 0.1;
+
+    // Fill Q matrix as for JC69
+    Q = Eigen::MatrixXd::Zero(extended_alphabet_size,extended_alphabet_size);
+    for(int r = 0; r<Q.rows()-1; r++){
+        for(int c=0; c<Q.cols()-1; c++ ){
+
+            if(r==c){
+                Q(r,c) =  -3.0/4.0-mu;
+            }else{
+                Q(r,c) =  1.0/4.0;
+            }
+
+        }
+        Q(r,extended_alphabet_size-1) = mu;
+    }
+
+
 
     auto likelihood = new Likelihood();
 
@@ -214,6 +229,10 @@ int main(int argc, char **argv) {
 
     // set insertion probability to each node
     //tree->set_iota(tau, mu);
+
+    auto pip_model = new PIP;
+    pip_model->lambda = lambda;
+    pip_model->mu = mu;
 
     utree->setIota(tau, mu);
     //root->setAllIotas(tau, mu);
@@ -296,6 +315,7 @@ int main(int argc, char **argv) {
     //VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     //p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    // TODO: Initilise FV_Empty for each node
     p0 = likelihood->compute_log_lk_empty_col(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size);
     VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
@@ -410,7 +430,7 @@ int main(int argc, char **argv) {
                 likelihood->recombineAllFv(list_vnode_to_root);
 
                 //TODO: Check for mistakes. it crashes.
-                //UtreeUtils::recombineAllEmptyFv(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode(), pi, extended_alphabet_size);
+                //likelihood->recombineAllEmptyFv(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode(), pi, extended_alphabet_size);
 
                 logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
 
@@ -421,8 +441,13 @@ int main(int argc, char **argv) {
                                                 LKFunc::LKcore , *likelihood, list_vnode_to_root, *alignment, logLK);
 
 
-                //double lkEmpty = UtreeUtils::computeLogLkEmptyColumnBothSides(source, target, pi, MSA_len, nu,  extended_alphabet_size);
-                //logLK += lkEmpty;
+                double lkEmpty = likelihood->computeLogLkEmptyColumnBothSides(rearrangmentList->getSourceNode(),
+                                                                              rearrangmentList->getMove(i)->getTargetNode(),
+                                                                              pi,
+                                                                              alignment->getAlignmentSize(),
+                                                                              nu,
+                                                                              extended_alphabet_size);
+                logLK += lkEmpty;
                 VLOG(2) << "[Tree LK]" << logLK;
 
                 utree->removeVirtualRootNode();

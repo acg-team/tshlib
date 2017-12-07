@@ -53,6 +53,7 @@
 #include "Utree.hpp"
 #include "Alignment.hpp"
 
+enum class ModelParameters_PIP{lamda, mu, tau, branch, qmatrix, pi, undef};
 
 const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
                            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -86,6 +87,40 @@ const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
                              -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                              -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
+class Model {
+
+public:
+    Utree *tree;
+    Alignment *alignment;
+    double lk;
+
+    Model();
+    virtual ~Model();
+
+    double computeLikelihood();
+
+};
+
+class PIP : public Model{
+
+public:
+
+    double lambda;
+    double mu;
+    Eigen::VectorXd pi;
+    Eigen::MatrixXd Q;
+    double nu;
+    double tau;
+    double phi;
+
+
+    PIP();
+    virtual ~PIP();
+    double computeLikelihood();
+
+};
+
+
 class Likelihood {
 private:
 
@@ -103,6 +138,7 @@ public:
     Utree *tree;
     Eigen::VectorXd pi;
     Eigen::MatrixXd Q;
+    double lambda;
 
     Likelihood();
 

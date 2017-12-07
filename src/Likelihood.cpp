@@ -417,6 +417,7 @@ void Likelihood::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int d
             vnode->vnode_Fv_empty_temp =  vnode->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_temp);
 
         }
+        //switch(vnode->indexOf()
         recombineEmptyFv(vnode->getNodeUp(), pi, dim_extended_alphabet);
 
     }
@@ -471,3 +472,11 @@ double LKFunc::LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Ali
     return lk.computePartialLK(list_node, alignment, lk.pi);
 
 }
+
+PIP::PIP() = default;
+
+PIP::~PIP() = default;
+
+Model::Model() = default;
+
+Model::~Model() = default;

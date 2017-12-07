@@ -458,6 +458,7 @@ void VirtualNode::recombineFv(){
             Eigen::VectorXd fv0 = fvL.cwiseProduct(fvR);
             this->vnode_Fv_temp.push_back(fv0);
         }
+        this->vnode_Fv_empty_temp = this->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(this->getNodeRight()->vnode_Fv_empty_temp);
     }
 
 }
