@@ -236,6 +236,7 @@ public:
      * @brief The function checks if the current node is a parent of another node using a recursive structure
      * @param inVNode VirtualNode pointer
      * @return False if the node passed is not parent of the current one, True otherwise
+     * @deprecated
      */
     bool isParent(VirtualNode *inVNode);
 
@@ -367,7 +368,7 @@ namespace UtreeUtils {
     //std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
 
 
-    std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
+    //std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
 
 /*!
      * @brief This function has been ported in Utree::computePathBetweenNodes
@@ -375,22 +376,6 @@ namespace UtreeUtils {
      * @return
      */
     //std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
-
-    void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
-
-    void recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet);
-
-    void recombineAllEmptyFv(VirtualNode *source, VirtualNode *target,Eigen::VectorXd &pi, int dim_extended_alphabet );
-
-    void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
-
-    void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
-
-    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi);
-
-    double computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet );
-
-    double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
 
     void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
 

@@ -142,6 +142,7 @@ int main(int argc, char **argv) {
     double log_col_lk;
     double logLK;
     Eigen::VectorXd pi;
+    Eigen::MatrixXd Q;
     double p0;
 
     //------------------------------------------------------------------------------------------------------------------
@@ -197,8 +198,19 @@ int main(int argc, char **argv) {
     tau = utree->rootnode->computeTotalTreeLength();
     VLOG(2) << "[Tree length (from root)] " << tau;
 
+
+    // set Pi, steady state frequencies
+    pi = Eigen::VectorXd::Zero(extended_alphabet_size);
+    pi << 0.25, 0.25, 0.25, 0.25, 0.25;
+    Q = Eigen::MatrixXd::Identity(extended_alphabet_size,extended_alphabet_size);
+   // Q[0] << 0.1, 0.1, 0.1, 0.1, 0.1;
+
+    auto likelihood = new Likelihood();
+
+    likelihood->Init(utree, pi, Q);
+
     // compute the normalizing Poisson intensity
-    nu = LKFunc::compute_nu(tau, lambda, mu);
+    nu = likelihood->compute_nu(tau, lambda, mu);
 
     // set insertion probability to each node
     //tree->set_iota(tau, mu);
@@ -236,9 +248,7 @@ int main(int argc, char **argv) {
     // set "pseudo" probability matrix
     tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
 
-    // set Pi, steady state frequencies
-    pi = Eigen::VectorXd::Zero(extended_alphabet_size);
-    pi << 0.25, 0.25, 0.25, 0.25, 0.25;
+
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
@@ -272,7 +282,7 @@ int main(int argc, char **argv) {
         //TODO: Add weight per column
         //log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
         //log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
-        log_col_lk = LKFunc::compute_col_lk(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
+        log_col_lk = likelihood->compute_col_lk(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
         VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
         //VLOG(2) << "[diff lk] " << abs(log_col_lk0 - log_col_lk);
@@ -286,10 +296,10 @@ int main(int argc, char **argv) {
     //VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     //p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    p0 = LKFunc::compute_log_lk_empty_col(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    p0 = likelihood->compute_log_lk_empty_col(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size);
     VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
-    logLK += LKFunc::phi((int) alignment->align_length, nu, p0);
+    logLK += likelihood->phi((int) alignment->align_length, nu, p0);
     VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
 
     //------------------------------------------------------------------------------------------------------------------
@@ -397,18 +407,18 @@ int main(int argc, char **argv) {
                 // Add the root
                 utree->addVirtualRootNode();
 
-                UtreeUtils::recombineAllFv(list_vnode_to_root);
+                likelihood->recombineAllFv(list_vnode_to_root);
 
                 //TODO: Check for mistakes. it crashes.
                 //UtreeUtils::recombineAllEmptyFv(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode(), pi, extended_alphabet_size);
 
-                logLK = UtreeUtils::computePartialLK(list_vnode_to_root, *alignment, pi);
+                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
 
                 double max_lenght = pi[1] * 1.1;
                 double min_lenght = pi[1] * 0.9;
 
                 double newLk = Generic_Brent_Lk(&pi[1], min_lenght, max_lenght, SMALL, BRENT_ITMAX,
-                UtreeUtils::computePartialLK, list_vnode_to_root, *alignment, pi, logLK);
+                                                LKFunc::LKcore , *likelihood, list_vnode_to_root, *alignment, logLK);
 
 
                 //double lkEmpty = UtreeUtils::computeLogLkEmptyColumnBothSides(source, target, pi, MSA_len, nu,  extended_alphabet_size);

@@ -117,20 +117,20 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
 
 }
 
-std::vector<VirtualNode *> UtreeUtils::fill_with_nodes(VirtualNode *n) {
-    std::vector<VirtualNode *> list_nodes_n;
-
-    VirtualNode *tmp;
-
-    list_nodes_n.push_back(n);
-    tmp=n;
-    while (tmp->getNodeUp() != NULL) {
-        tmp = tmp->getNodeUp();
-        list_nodes_n.push_back(tmp);
-    }
-
-    return list_nodes_n;
-}
+//std::vector<VirtualNode *> UtreeUtils::fill_with_nodes(VirtualNode *n) {
+//    std::vector<VirtualNode *> list_nodes_n;
+//
+//    VirtualNode *tmp;
+//
+//    list_nodes_n.push_back(n);
+//    tmp=n;
+//    while (tmp->getNodeUp() != NULL) {
+//        tmp = tmp->getNodeUp();
+//        list_nodes_n.push_back(tmp);
+//    }
+//
+//    return list_nodes_n;
+//}
 
 //std::vector<VirtualNode *> UtreeUtils::get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2) {
 //    std::vector<VirtualNode *> list_nodes;
@@ -166,56 +166,6 @@ std::vector<VirtualNode *> UtreeUtils::fill_with_nodes(VirtualNode *n) {
 //    return list_nodes;
 //}
 
-/*
-std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2) {
-    std::vector<VirtualNode *> list_nodes_n0;
-    std::vector<VirtualNode *> list_nodes_n1;
-    std::vector<VirtualNode *> list_nodes_n2;
-
-
-    // add nodes from n1 to root
-    list_nodes_n1 = fill_with_nodes(vn1);
-
-
-    // add nodes from n2 to root
-    list_nodes_n2 = fill_with_nodes(vn2);
-
-    list_nodes_n0 = get_unique(list_nodes_n1, list_nodes_n2);
-
-    return list_nodes_n0;
-}
-*/
-
-void UtreeUtils::recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root){
-    VirtualNode *vn;
-
-    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-        vn=list_vnode_to_root.at(k);
-        vn->recombineFv();
-    }
-
-}
-
-void UtreeUtils::revertAllFv(std::vector<VirtualNode *> list_vnode_to_root){
-    VirtualNode *vn;
-
-    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-        vn=list_vnode_to_root.at(k);
-        vn->revertFv();
-    }
-
-}
-
-void UtreeUtils::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
-    VirtualNode *vn;
-
-    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-        vn=list_vnode_to_root.at(k);
-        vn->keepFv();
-    }
-
-}
-
 void ::UtreeUtils::associateNode2Alignment(Alignment *inMSA, Utree *inTree) {
 
     for(auto &node:inTree->listVNodes){
@@ -247,135 +197,6 @@ VirtualNode *UtreeUtils::getPseudoRoot(VirtualNode *vn){
     }
 
     return vtemp;
-}
-
-double UtreeUtils::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi) {
-
-    double lk = 0;
-    for(int alignment_column=0; alignment_column<alignment.getAlignmentSize(); alignment_column++) {
-        double lk_col = 0;
-        for (auto &vnode:list_vnode_to_root) {
-            int currNodeDescCount;
-            if (!vnode->isTerminalNode()) {
-
-                currNodeDescCount = vnode->getNodeLeft()->vnode_descCount.at(alignment_column) + vnode->getNodeRight()->vnode_descCount.at(alignment_column);
-
-                if (currNodeDescCount != alignment.align_num_characters.at(alignment_column)) {
-
-                    lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_temp.at(alignment_column).dot(pi));
-
-                }
-            }else{
-
-                lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_temp.at(alignment_column).dot(pi));
-            }
-
-        }
-
-        VLOG(2) << "[tree lk] column: " << alignment_column << " LK: " << lk_col;
-        lk = lk+log(lk_col);
-    }
-
-    return lk;
-
-
-}
-
-
-double UtreeUtils::computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet) {
-
-    double lk;
-    double lk_sideA = UtreeUtils::computeLkEmptyColumn(source, pi, dim_extended_alphabet);
-    double lk_sideB = UtreeUtils::computeLkEmptyColumn(target, pi, dim_extended_alphabet);
-
-    lk = lk_sideA + lk_sideB;
-    // TODO: getnodeup is fermi uno prima del nodo root.
-    lk = LKFunc::phi(m, nu, lk);
-
-    return lk;
-}
-
-
-double UtreeUtils::computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet ) {
-
-    Eigen::VectorXd fv;
-    double lk = 0;
-
-    if(vnode->getNodeUp()){
-        if (vnode->isTerminalNode()) {
-            fv = Eigen::VectorXd::Zero(dim_extended_alphabet);
-
-            fv[dim_extended_alphabet - 1] = 1.0;
-
-            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
-
-        } else {
-
-            fv = (vnode->getNodeLeft()->getPr() *
-                    vnode->getNodeLeft()->vnode_Fv_empty_temp).cwiseProduct(vnode->getNodeRight()->getPr() *
-                                                                                                     vnode->getNodeRight()->vnode_Fv_empty_temp);
-
-            lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
-
-        }
-
-
-        UtreeUtils::computeLkEmptyColumn(vnode->getNodeUp(), pi, dim_extended_alphabet);
-    }
-
-
-
-    return lk;
-
-
-}
-
-void UtreeUtils::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet) {
-
-    if(vnode->getNodeUp()){
-        if (vnode->isTerminalNode()) {
-
-            vnode->vnode_Fv_empty_temp = Eigen::VectorXd::Zero(dim_extended_alphabet);
-            vnode->vnode_Fv_empty_temp[dim_extended_alphabet - 1] = 1.0;
-
-        }else{
-            // TODO: source target should have to initialise first the children and only after themselves.
-            vnode->vnode_Fv_empty_temp =  vnode->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_temp);
-
-        }
-        UtreeUtils::recombineEmptyFv(vnode->getNodeUp(), pi, dim_extended_alphabet);
-
-    }
-
-
-}
-
-void UtreeUtils::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int dim_extended_alphabet) {
-
-    // TODO: avoid double passing on common nodes
-    if(!source->isTerminalNode()){
-
-        UtreeUtils::recombineEmptyFv(source->getNodeLeft(), pi, dim_extended_alphabet);
-        UtreeUtils::recombineEmptyFv(source->getNodeRight(), pi, dim_extended_alphabet);
-
-    }else{
-
-        UtreeUtils::recombineEmptyFv(source, pi, dim_extended_alphabet);
-
-    }
-
-    if(!target->isTerminalNode()){
-
-        UtreeUtils::recombineEmptyFv(target->getNodeLeft(), pi, dim_extended_alphabet);
-        UtreeUtils::recombineEmptyFv(target->getNodeRight(), pi, dim_extended_alphabet);
-
-    }else{
-
-        UtreeUtils::recombineEmptyFv(target, pi, dim_extended_alphabet);
-
-    }
-
-
 }
 
 
@@ -875,6 +696,7 @@ void Utree::setPr(int extended_alphabet_size){
 
             for (int i = 0; i < extended_alphabet_size; i++) {
                 for (int j = 0; j < extended_alphabet_size; j++) {
+                    //TODO: Here we need the Q matrix (real)
                     vn->vnode_Pr(i,j) = 0.1 * vn->vnode_branchlength; //fake
                 }
             }

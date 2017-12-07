@@ -40,6 +40,7 @@
  */
 #include <cmath>
 #include "Optimization_Brent.hpp"
+#include "Likelihood.hpp"
 
 int sgn(double d){
     double eps = 1e-10;
@@ -47,8 +48,8 @@ int sgn(double d){
 }
 
 double Generic_Brent_Lk(double *param, double ax, double cx, double tol,
-                        int n_iter_max, double (*obj_func)(std::vector<VirtualNode *> &, Alignment &, Eigen::VectorXd &),
-                        std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi, double start_LK) {
+                        int n_iter_max, double (*obj_func)(Likelihood &, std::vector<VirtualNode *> &, Alignment &),
+                        Likelihood &likelihood, std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, double start_LK) {
     int iter;
     double a, b, d, etemp, fu, fv, fw, fx, p, q, r, tol1, tol2, u, v, w, x, xm;
     double e = 0.0;
@@ -100,7 +101,7 @@ double Generic_Brent_Lk(double *param, double ax, double cx, double tol,
 
         //old_lnL = (stree) ? (stree->tree->c_lnL) : (tree->c_lnL);
         //old_lnL = 0;
-        fu = -(*obj_func)(list_vnode_to_root, alignment, pi);
+        fu = -(*obj_func)(likelihood, list_vnode_to_root, alignment);
 
         cur_lnL = fu;
         // Did I reach convergence or max iteration? If yes, stop it!

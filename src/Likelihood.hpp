@@ -45,8 +45,13 @@
 #define TSHEXE_LIKELIHOOD_HPP
 
 #include <vector>
+#include <string>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/MatrixFunctions>
 #include "PhyTree.hpp"
 #include "Utree.hpp"
+#include "Alignment.hpp"
 
 
 const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -84,63 +89,83 @@ const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
 class Likelihood {
 private:
 
-    virtual void InitEmptyColumn();
+     //void InitEmptyColumn();
 
-    virtual void ComputeRecursiveLK();
+     //void ComputeRecursiveLK();
 
-    virtual double computeNu();
+     //double computeNu();
 
-    virtual double computePhy();
+     //double computePhy();
 
 
 public:
     //PhyTree *link_node;
-    std::vector<double> fv;
-    std::vector<double> pi;
-    bool partial_lk;
+    Utree *tree;
+    Eigen::VectorXd pi;
+    Eigen::MatrixXd Q;
 
     Likelihood();
 
     //Likelihood(PhyTree *node);
-    virtual ~Likelihood();
+     ~Likelihood();
 
 
-    virtual void Init();
+    void Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q);
 
-    void Clear();
+    //void Clear();
 
-    virtual void Update();
+    //virtual void Update();
 
+    void
+    compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    Eigen::VectorXd
+    compute_lk_recursive(VirtualNode *vn, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum);
+
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum);
+
+    double compute_nu(double tau, double lambda, double mu);
+
+    double phi(int m, double nu, double p0);
+
+    void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+
+    void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+
+    void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+
+    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi);
+
+    double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
+
+    double computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet );
+
+    void recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet);
+
+    void recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int dim_extended_alphabet );
 
 protected:
 
 };
 
 
+
+
+
+
 namespace LKFunc {
+
+    double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment);
+
     Eigen::VectorXd
     compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
-void
-    compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
-
-
     double compute_log_lk_empty_col(PhyTree &node, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
-
-    double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
     Eigen::VectorXd
     compute_lk_recursive(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
-    Eigen::VectorXd
-    compute_lk_recursive(VirtualNode *vn, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum);
-
-
     double compute_col_lk(PhyTree &tree, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size);
-    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum);
 
-    double compute_nu(double tau, double lambda, double mu);
-
-    double phi(int m, double nu, double p0);
 }
 #endif //TSHEXE_LIKELIHOOD_HPP
