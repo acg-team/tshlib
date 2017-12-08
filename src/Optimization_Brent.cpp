@@ -47,9 +47,9 @@ int sgn(double d){
     return d<-eps?-1:d>eps;
 }
 
-double Generic_Brent_Lk(double *param, double ax, double cx, double tol,
+bool Generic_Brent_Lk(double *param, double ax, double cx, double tol,
                         int n_iter_max, double (*obj_func)(Likelihood &, std::vector<VirtualNode *> &, Alignment &),
-                        Likelihood &likelihood, std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, double start_LK) {
+                        Likelihood &likelihood, std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, double &start_LK) {
     int iter;
     double a, b, d, etemp, fu, fv, fw, fx, p, q, r, tol1, tol2, u, v, w, x, xm;
     double e = 0.0;
@@ -109,7 +109,8 @@ double Generic_Brent_Lk(double *param, double ax, double cx, double tol,
             (*param) = x;
             //return (*obj_func)(branch, tree);
             //return (stree) ? (stree->tree->c_lnL) : (tree->c_lnL);
-            return cur_lnL;
+            start_LK = -cur_lnL;
+            return true;
         }
 
         if (fu <= fx) {
@@ -132,8 +133,8 @@ double Generic_Brent_Lk(double *param, double ax, double cx, double tol,
 
         old_lnL = fu;
     }
-
-    return (-1);
+    // TODO: it should return a boolean
+    return (false);
     /* Not Reached ??  *param=x;   */
     /* Not Reached ??  return fx; */
 }

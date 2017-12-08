@@ -47,6 +47,7 @@
 #include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Utilities.hpp"
+#include "Likelihood.hpp"
 
 enum class TreeSearchHeuristics{classic_NNI, classic_SPR, classic_Mixed, particle_swarm};
 
@@ -58,15 +59,15 @@ protected:
     VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
 
 public:
-    int move_id;                    /* Move ID - Useful in case of parallel independent executions*/
-    std::string move_name;          /* Move Name - Unused */
-    int move_radius;                /* Move Radius */
-    MoveDirections move_direction;  /* Move Direction for applying a rotation to the VirtualNode pointers */
-    double move_lk;                 /* Likelihood of the move if applied */
-    bool move_applied;              /* Indicator is set to true if the move is applied to the tree */
-    std::string move_class;         /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-    MoveType move_type;             /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-
+    int move_id;                            /* Move ID - Useful in case of parallel independent executions*/
+    std::string move_name;                  /* Move Name - Unused */
+    int move_radius;                        /* Move Radius */
+    MoveDirections move_direction;          /* Move Direction for applying a rotation to the VirtualNode pointers */
+    double move_lk;                         /* Likelihood of the move if applied */
+    bool move_applied;                      /* Indicator is set to true if the move is applied to the tree */
+    std::string move_class;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+    MoveType move_type;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+    std::vector<VirtualNode *> move_nodesinvolved;      /* list of nodes involved in the rearrangement under the move spefications */
 
     /*!
      * @brief Standard constructor
@@ -110,6 +111,7 @@ public:
 class TreeRearrangment {
 private:
 
+    Utree *tree;
     std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
     int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
     int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
@@ -125,7 +127,7 @@ public:
 
     virtual void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
-    virtual void initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths);
+    virtual void initTreeRearrangment(Utree *ref_tree, int min_radius, int max_radius, bool preserve_blengths, VirtualNode *node_source);
 
     virtual ~TreeRearrangment();
 
@@ -148,6 +150,8 @@ public:
     unsigned long getNumberOfMoves();
 
     virtual void selectBestMove(unsigned long moveID);
+
+    virtual void generateNodeList(ModelParameters_PIP parameter);
 
 protected:
 

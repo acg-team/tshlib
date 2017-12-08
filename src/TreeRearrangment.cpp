@@ -80,8 +80,9 @@ void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int radius
 }
 
 
-void TreeRearrangment::initTreeRearrangment(VirtualNode *node_source, int min_radius, int max_radius, bool preserve_blengths) {
+void TreeRearrangment::initTreeRearrangment(Utree *ref_tree, int min_radius, int max_radius, bool preserve_blengths, VirtualNode *node_source) {
 
+    this->tree = ref_tree;
     this->mset_sourcenode = node_source;
     this->mset_id = node_source->vnode_name + ":" + std::to_string(min_radius) + "-" + std::to_string(max_radius);
     this->mset_min_radius = min_radius;
@@ -285,6 +286,12 @@ void TreeRearrangment::selectBestMove(unsigned long moveID) {
 
 }
 
+void TreeRearrangment::generateNodeList(ModelParameters_PIP parameter) {
+
+
+
+}
+
 
 Move::~Move() = default;
 
@@ -378,7 +385,7 @@ void ::treesearchheuristics::testTSH(Utree *input_tree, TreeSearchHeuristics tsh
         // Initialise a new rearrangement list
         auto rearrangmentList = new TreeRearrangment;
 
-        rearrangmentList->initTreeRearrangment(vnode, min_radius, max_radius, true);
+        rearrangmentList->initTreeRearrangment(nullptr, min_radius, max_radius, true, vnode);
 
         // Get all the target nodes with distance == radius from the source node
         // excluding the starting node.

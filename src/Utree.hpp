@@ -86,16 +86,17 @@ public:
     Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
     double vnode_tau;                               /* Tau value up to this node */
     double vnode_nu;                                /* Nu value associated to this node */
-    std::vector<Eigen::VectorXd> vnode_Fv;          /* Fv matrix computed recursively */
-    std::vector<Eigen::VectorXd> vnode_Fv_temp;
+    std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
+    std::vector<Eigen::VectorXd> vnode_Fv_operative;
     std::vector<Eigen::VectorXd> vnode_Fv_best;
-    Eigen::VectorXd vnode_Fv_empty;
-    Eigen::VectorXd vnode_Fv_empty_temp;
+    Eigen::VectorXd vnode_Fv_empty_backup;
+    Eigen::VectorXd vnode_Fv_empty_operative;
+    Eigen::VectorXd vnode_Fv_empty_best;
     std::vector<bool> vnode_setA;                                   /* Flag: Include node in computing the set A -- might be not necessary */
     std::vector<int> vnode_descCount;                            /* Counter of the characters associated    */
     std::vector<bool> vnode_setA_temp;                                /* Flag: Include node in computing the set A -- might be not necessary */
     std::vector<int> vnode_descCount_temp;                            /* Counter of the characters associated    */
-    char vnode_character;                           /* Character associated to this node (only if terminal node) */
+    //char vnode_character;                           /* Character associated to this node (only if terminal node) */
     int vnode_seqid;                                /* Seq id on alignment vector */
     int vnode_depth;                                /* Depth level of the node in the tree */
     bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
@@ -241,7 +242,7 @@ public:
     bool isParent(VirtualNode *inVNode);
 
 
-    void setAncestralFlag(std::string MSA_col, int colnum, bool isReference);
+    void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
 protected:
     VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
@@ -254,9 +255,9 @@ protected:
 
     virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
-    void _recursiveSetAncestralFlag(std::string &MSA_col, int num_gaps, int colnum, bool isReference);
+    void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
-    void _recursiveSetDescCount(int colnum, bool isReference);
+    void _recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum);
 
 };
 
@@ -325,8 +326,6 @@ public:
     virtual void setIota(double tau, double mu);
 
     virtual void setBeta(double tau, double mu);
-
-    virtual void setPr(int extended_alphabet_size);
 
     virtual void clearFv();
 

@@ -77,6 +77,7 @@ public:
 
 
 
+
     std::string extractColumn(int index);
 
     ~Alignment();
@@ -87,7 +88,7 @@ protected:
 };
 
 namespace AlignUtils {
-    int countNumCharactersInMSAColumn(const std::string MSA_col);
+    //int countNumCharactersInMSAColumn(const std::string MSA_col);
 
 
 }

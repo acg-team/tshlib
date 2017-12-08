@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 
     // set "pseudo" probability matrix
     //tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
-    utree->setPr(extended_alphabet_size);
+    likelihood->setPr(utree, extended_alphabet_size);
 
     //root->_traverseVirtualNodeTree();
 
@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
         //tree->set_ancestral_flag(s);
         //root->setAncestralFlag(s, i, isReferenceRun);
-        utree->rootnode->setAncestralFlag(s, i, isReferenceRun);
+        utree->rootnode->setAncestralFlag(*alignment, i, isReferenceRun);
 
         //root->_traverseVirtualNodeTree();
 
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
         //TODO: Add weight per column
         //log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
         //log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
-        log_col_lk = likelihood->compute_col_lk(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
+        log_col_lk = likelihood->compute_col_lk(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
         VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
 
         //VLOG(2) << "[diff lk] " << abs(log_col_lk0 - log_col_lk);
@@ -316,11 +316,18 @@ int main(int argc, char **argv) {
 
     //p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
     // TODO: Initilise FV_Empty for each node
-    p0 = likelihood->compute_log_lk_empty_col(utree->rootnode, pi, is_DNA_AA_Codon, extended_alphabet_size);
+    p0 = likelihood->compute_log_lk_empty_col(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
     VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
     logLK += likelihood->phi((int) alignment->align_length, nu, p0);
     VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
+
+
+    likelihood->loadParametersOperative();
+    std::vector<VirtualNode *> allnodes_postorder;
+    likelihood->fillNodeListComplete_bottomUp(allnodes_postorder, utree->rootnode);
+
+    VLOG(2) << "[Initial LK] from fillNodes " << likelihood->computePartialLK(allnodes_postorder, *alignment, likelihood->pi);
 
     //------------------------------------------------------------------------------------------------------------------
     // Remove the root
@@ -381,7 +388,7 @@ int main(int argc, char **argv) {
         // Initialise a new rearrangement list
         auto rearrangmentList = new TreeRearrangment;
 
-        rearrangmentList->initTreeRearrangment(vnode, min_radius, max_radius, true);
+        rearrangmentList->initTreeRearrangment(utree, min_radius, max_radius, true, vnode);
 
         // Get all the target nodes with distance == radius from the source node
         // excluding the starting node.
@@ -409,17 +416,14 @@ int main(int argc, char **argv) {
             // Apply the move
             status = rearrangmentList->applyMove(i);
 
-            VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                    << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
-                    << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
-                    << utree->printTreeNewick(true) << std::endl;
+
 
             // Print root reachability from every node (includes rotations)
             //utree->_testReachingPseudoRoot();
 
             // Print tree on file
             //utree->saveTreeOnFile("../data/test.txt");
-
+            bool isLKImproved = false;
             if (computeMoveLikelihood) {
                 //utree->printAllNodesNeighbors();
                 //testSetAinRootPath(MSA_len, alignment, utree, list_vnode_to_root)
@@ -433,26 +437,27 @@ int main(int argc, char **argv) {
                 //likelihood->recombineAllEmptyFv(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode(), pi, extended_alphabet_size);
 
                 logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
-
+                //VLOG(2) << "[Tree LK] Before Brent: " << logLK;
                 double max_lenght = pi[1] * 1.1;
                 double min_lenght = pi[1] * 0.9;
 
-                double newLk = Generic_Brent_Lk(&pi[1], min_lenght, max_lenght, SMALL, BRENT_ITMAX,
-                                                LKFunc::LKcore , *likelihood, list_vnode_to_root, *alignment, logLK);
+                //isLKImproved = Generic_Brent_Lk(&likelihood->pi[1], min_lenght, max_lenght, SMALL, BRENT_ITMAX,
+                //                                LKFunc::LKcore , *likelihood, list_vnode_to_root, *alignment, logLK);
 
-
-                double lkEmpty = likelihood->computeLogLkEmptyColumnBothSides(rearrangmentList->getSourceNode(),
-                                                                              rearrangmentList->getMove(i)->getTargetNode(),
-                                                                              pi,
-                                                                              alignment->getAlignmentSize(),
-                                                                              nu,
-                                                                              extended_alphabet_size);
-                logLK += lkEmpty;
-                VLOG(2) << "[Tree LK]" << logLK;
+                rearrangmentList->getMove(i)->move_lk = logLK;
+                //VLOG(2) << "[Tree LK] Ater Brent: " << logLK;
 
                 utree->removeVirtualRootNode();
 
             }
+
+            VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
+                    << " | (" << isLKImproved <<") " << rearrangmentList->getMove(i)->move_lk
+                    << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
+                    << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
+                    << utree->printTreeNewick(true) << std::endl;
+
+
 
             // Revert the move, and return to the original tree
             status = rearrangmentList->revertMove(i);
@@ -462,11 +467,11 @@ int main(int argc, char **argv) {
 
             if (computeMoveLikelihood) {
 
-                if (!rearrangmentList->getMove(i)->move_applied) {
-                    //UtreeUtils::revertAllFv(list_vnode_to_root); // clear not necessary
-                } else {
+                //if (!rearrangmentList->getMove(i)->move_applied) {
+                likelihood->revertAllFv(list_vnode_to_root); // clear not necessary
+                //} else {
                     //UtreeUtils::keepAllFv(list_vnode_to_root);
-                }
+                //}
 
             }
 
@@ -508,8 +513,8 @@ void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utre
             std::__1::string s = alignment->extractColumn(msa_col);
             utree->setLeafState(s);
 
-            utree->findPseudoRoot(tempnode, false).back()->setAncestralFlag(s, msa_col, false);
-            utree->findPseudoRoot(tempnode, true).back()->setAncestralFlag(s, msa_col, false);
+            utree->findPseudoRoot(tempnode, false).back()->setAncestralFlag(*alignment, msa_col, false);
+            utree->findPseudoRoot(tempnode, true).back()->setAncestralFlag(*alignment, msa_col, false);
             //utree->findPseudoRoot()
             // root->setAncestralFlag(s, msa_col, false);
 

@@ -44,8 +44,8 @@
 #include <fstream>
 #include <random>
 #include <glog/logging.h>
-#include <gflags/gflags_declare.h>
-#include <glog/vlog_is_on.h>
+#include <glog/logging.h>
+#include <gflags/gflags.h>
 #include "Likelihood.hpp"
 
 namespace LKFunc {
@@ -173,27 +173,27 @@ void
 Likelihood::compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
 
     if (vnode->isTerminalNode()) {
-        vnode->vnode_Fv_empty = Eigen::VectorXd::Zero(dim_extended_alphabet);
+        vnode->vnode_Fv_empty_backup = Eigen::VectorXd::Zero(dim_extended_alphabet);
 
-        vnode->vnode_Fv_empty[dim_extended_alphabet - 1] = 1.0;
+        vnode->vnode_Fv_empty_backup[dim_extended_alphabet - 1] = 1.0;
 
-        lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty.dot(pi)));
+        lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty_backup.dot(pi)));
 
     } else {
 
         compute_lk_empty_col(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
         compute_lk_empty_col(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
-        vnode->vnode_Fv_empty = (vnode->getNodeLeft()->getPr() * vnode->getNodeLeft()->vnode_Fv_empty).cwiseProduct(vnode->getNodeRight()->getPr() * vnode->getNodeRight()
-                ->vnode_Fv_empty);
+        vnode->vnode_Fv_empty_backup = (vnode->getNodeLeft()->getPr() * vnode->getNodeLeft()->vnode_Fv_empty_backup).cwiseProduct(vnode->getNodeRight()->getPr() * vnode->getNodeRight()
+                ->vnode_Fv_empty_backup);
 
-        lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty.dot(pi)));
+        lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty_backup.dot(pi)));
 
     }
 }
 
 Eigen::VectorXd
-Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum) {
+Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA) {
     Eigen::VectorXd fv;
     Eigen::VectorXd fvL;
     Eigen::VectorXd fvR;
@@ -202,11 +202,12 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
         fv = Eigen::VectorXd::Zero(dim_extended_alphabet);
 
         int idx;
+
         // TODO: Maybe this can be antoher function independt.
         if (is_DNA_AA_Codon == 1) {
-            idx = mytable[(int) vnode->getLeafCharacter()];
+            idx = mytable[(int) MSA.align_dataset.at(vnode->vnode_seqid)->seq_data.at(colnum)];
         } else if (is_DNA_AA_Codon == 2) {
-            idx = mytableAA[(int) vnode->getLeafCharacter()];
+            idx = mytableAA[(int) MSA.align_dataset.at(vnode->vnode_seqid)->seq_data.at(colnum)];
         } else {
             perror("not implemented for codon model yet\n");
             exit(EXIT_FAILURE);
@@ -219,13 +220,15 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
             //std::cout<<"SETA1* "<<vnode->vnode_name<<std::endl;
             lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
         }
-        vnode->vnode_Fv.push_back(fv);
+        vnode->vnode_Fv_backup.push_back(fv);
+        vnode->vnode_Fv_empty_backup = Eigen::VectorXd::Zero(dim_extended_alphabet);
+        vnode->vnode_Fv_empty_backup(dim_extended_alphabet-1) = 1;
         //vnode->setMSAFv(fv);
 
     } else {
 
-        fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum);
-        fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum);
+        fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum, MSA);
+        fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum, MSA);
 
         fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
 
@@ -234,7 +237,7 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
             lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
         }
 
-        vnode->vnode_Fv.push_back(fv);
+        vnode->vnode_Fv_backup.push_back(fv);
         //vnode->setMSAFv(fv);
 
 
@@ -242,11 +245,11 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
     return fv;
 }
 
-double Likelihood::compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum) {
+double Likelihood::compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA) {
 
     double lk = 0.0;
 
-    compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size, colnum);
+    compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size, colnum, MSA);
 
     return log(lk);
 }
@@ -257,6 +260,7 @@ double Likelihood::compute_nu(double tau, double lambda, double mu) {
         perror("ERROR in compute_nu: mu too small");
     }
 
+    this->nu = lambda * (tau + 1 / mu);
     return lambda * (tau + 1 / mu);
 }
 
@@ -326,11 +330,16 @@ void Likelihood::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
 }
 
 double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi) {
+    double lk_empty = 0;
+    double size = list_vnode_to_root.size();
 
     double lk = 0;
     for(int alignment_column=0; alignment_column<alignment.getAlignmentSize(); alignment_column++) {
         double lk_col = 0;
         for (auto &vnode:list_vnode_to_root) {
+
+            lk_empty += vnode->getIota() * (1- vnode->getBeta() + vnode->getBeta()* (vnode->vnode_Fv_empty_operative.dot(pi)));
+
             int currNodeDescCount;
             if (!vnode->isTerminalNode()) {
 
@@ -338,20 +347,24 @@ double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_ro
 
                 if (currNodeDescCount != alignment.align_num_characters.at(alignment_column)) {
 
-                    lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_temp.at(alignment_column).dot(pi));
+                    lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_operative.at(alignment_column).dot(pi));
 
                 }
+
             }else{
 
-                lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_temp.at(alignment_column).dot(pi));
+                lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_operative.at(alignment_column).dot(pi));
             }
 
         }
 
-        VLOG(2) << "[tree lk] column: " << alignment_column << " LK: " << lk_col;
+        //VLOG(2) << "[tree lk] column: " << alignment_column << " LK: " << lk_col;
         lk = lk+log(lk_col);
     }
 
+    // compute PHi
+    double log_phi_value = phi(alignment.getAlignmentSize(), this->nu, lk_empty);
+    lk += log_phi_value;
     return lk;
 
 
@@ -386,8 +399,8 @@ double Likelihood::computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi,
         } else {
 
             fv = (vnode->getNodeLeft()->getPr() *
-                    vnode->getNodeLeft()->vnode_Fv_empty_temp).cwiseProduct(vnode->getNodeRight()->getPr() *
-                                                                                                     vnode->getNodeRight()->vnode_Fv_empty_temp);
+                    vnode->getNodeLeft()->vnode_Fv_empty_operative).cwiseProduct(vnode->getNodeRight()->getPr() *
+                                                                                                     vnode->getNodeRight()->vnode_Fv_empty_operative);
 
             lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (fv.dot(pi)));
 
@@ -409,12 +422,12 @@ void Likelihood::recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int d
     if(vnode->getNodeUp()){
         if (vnode->isTerminalNode()) {
 
-            vnode->vnode_Fv_empty_temp = ::Eigen::DenseBase<::Eigen::Matrix<double, -1, 1, 0, -1, 1>>::Zero(dim_extended_alphabet);
-            vnode->vnode_Fv_empty_temp[dim_extended_alphabet - 1] = 1.0;
+            vnode->vnode_Fv_empty_operative = ::Eigen::DenseBase<::Eigen::Matrix<double, -1, 1, 0, -1, 1>>::Zero(dim_extended_alphabet);
+            vnode->vnode_Fv_empty_operative[dim_extended_alphabet - 1] = 1.0;
 
         }else{
             // TODO: source target should have to initialise first the children and only after themselves.
-            vnode->vnode_Fv_empty_temp =  vnode->getNodeLeft()->vnode_Fv_empty_temp.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_temp);
+            vnode->vnode_Fv_empty_operative =  vnode->getNodeLeft()->vnode_Fv_empty_operative.cwiseProduct(vnode->getNodeRight()->vnode_Fv_empty_operative);
 
         }
         //switch(vnode->indexOf()
@@ -460,6 +473,89 @@ void Likelihood::Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q) {
     this->Q = Q;
 
 }
+
+
+void Likelihood::setPr(Utree *tree, int extended_alphabet_size) {
+
+    // TODO: the following 4 lines have to be computed only when Q changes!!!
+    Eigen::EigenSolver<MatrixExtended> solver(this->Q);
+    this->sigma = solver.eigenvalues().real();
+    this->V = solver.eigenvectors().real();
+    this->Vi = this->V.inverse();
+
+    for (auto &vnode:tree->listVNodes) {
+
+        //if (vnode->vnode_Pr.rows() * vnode->vnode_Pr.cols() != 0) {
+
+            // Clear the matrix containing the probability matrix
+            vnode->vnode_Pr.resize(0, 0);
+
+            // Recompute the Q matrix with the exponential equal to the branch lenght
+            vnode->vnode_Pr.resize(extended_alphabet_size, extended_alphabet_size);
+
+            //MatrixExtended Qtemp;
+            //Qtemp = ;
+
+            vnode->vnode_Pr = this->V * (this->sigma * vnode->vnode_branchlength).array().exp().matrix().asDiagonal() * this->Vi;
+
+
+        //}
+    }
+}
+
+void Likelihood::fillNodeListComplete_bottomUp(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode) {
+
+    if(!vnode->isTerminalNode()){
+
+        fillNodeListComplete_bottomUp(nodelist, vnode->getNodeLeft());
+        fillNodeListComplete_bottomUp(nodelist, vnode->getNodeRight());
+        nodelist.push_back(vnode);
+
+    }else{
+
+        nodelist.push_back(vnode);
+    }
+
+
+
+}
+
+void Likelihood::loadParametersOperative() {
+
+    for (auto &vnode:this->tree->listVNodes){
+        std::swap(vnode->vnode_Fv_backup,vnode->vnode_Fv_operative);
+        std::swap(vnode->vnode_Fv_empty_backup, vnode->vnode_Fv_empty_operative);
+    }
+    if(this->tree->rootnode) {
+        std::swap(this->tree->rootnode->vnode_Fv_backup, this->tree->rootnode->vnode_Fv_operative);
+        std::swap(this->tree->rootnode->vnode_Fv_empty_backup, this->tree->rootnode->vnode_Fv_empty_operative);
+    }
+
+}
+/*!
+ * @brief
+ * not used
+ */
+void Likelihood::unloadParametersOperative() {
+
+    for (auto &vnode:this->tree->listVNodes){
+
+        std::vector<Eigen::VectorXd>*tempFV;
+        Eigen::VectorXd *tempEmptyFV;
+
+        tempFV = &vnode->vnode_Fv_operative;
+        tempEmptyFV = &vnode->vnode_Fv_empty_operative;
+
+        vnode->vnode_Fv_backup = vnode->vnode_Fv_operative;
+        vnode->vnode_Fv_empty_backup = vnode->vnode_Fv_empty_operative;
+
+        vnode->vnode_Fv_operative = *tempFV;
+        vnode->vnode_Fv_empty_operative = *tempEmptyFV;
+
+    }
+
+}
+
 
 Likelihood::Likelihood() = default;
 Likelihood::~Likelihood() = default;

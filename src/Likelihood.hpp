@@ -112,6 +112,8 @@ public:
     double nu;
     double tau;
     double phi;
+    Eigen::MatrixXd V;
+    Eigen::MatrixXd Vi;
 
 
     PIP();
@@ -122,6 +124,8 @@ public:
 
 
 class Likelihood {
+    typedef Eigen::Matrix<double,  5, 5> MatrixExtended;
+    typedef Eigen::Matrix<double,  5, 1> VectorExtended;
 private:
 
      //void InitEmptyColumn();
@@ -137,8 +141,12 @@ public:
     //PhyTree *link_node;
     Utree *tree;
     Eigen::VectorXd pi;
-    Eigen::MatrixXd Q;
+    MatrixExtended Q;
     double lambda;
+    double nu;
+    MatrixExtended V;
+    MatrixExtended Vi;
+    VectorExtended sigma;
 
     Likelihood();
 
@@ -156,13 +164,21 @@ public:
     compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
     double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
     Eigen::VectorXd
-    compute_lk_recursive(VirtualNode *vn, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum);
+    compute_lk_recursive(VirtualNode *vn, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA);
 
-    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum);
-
+    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA);
+    /*!
+     * @brief
+     * @param tau
+     * @param lambda
+     * @param mu
+     * @return
+     */
     double compute_nu(double tau, double lambda, double mu);
 
     double phi(int m, double nu, double p0);
+
+    void fillNodeListComplete_bottomUp(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode);
 
     void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
@@ -179,6 +195,12 @@ public:
     void recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet);
 
     void recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int dim_extended_alphabet );
+
+    void setPr(Utree *tree, int extended_alphabet_size);
+
+    void loadParametersOperative();
+    void unloadParametersOperative();
+
 
 protected:
 
