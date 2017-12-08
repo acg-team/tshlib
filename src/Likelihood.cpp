@@ -532,28 +532,17 @@ void Likelihood::loadParametersOperative() {
     }
 
 }
-/*!
- * @brief
- * not used
- */
+
 void Likelihood::unloadParametersOperative() {
 
     for (auto &vnode:this->tree->listVNodes){
-
-        std::vector<Eigen::VectorXd>*tempFV;
-        Eigen::VectorXd *tempEmptyFV;
-
-        tempFV = &vnode->vnode_Fv_operative;
-        tempEmptyFV = &vnode->vnode_Fv_empty_operative;
-
-        vnode->vnode_Fv_backup = vnode->vnode_Fv_operative;
-        vnode->vnode_Fv_empty_backup = vnode->vnode_Fv_empty_operative;
-
-        vnode->vnode_Fv_operative = *tempFV;
-        vnode->vnode_Fv_empty_operative = *tempEmptyFV;
-
+        std::swap(vnode->vnode_Fv_operative, vnode->vnode_Fv_backup);
+        std::swap(vnode->vnode_Fv_empty_operative, vnode->vnode_Fv_empty_backup);
     }
-
+    if(this->tree->rootnode) {
+        std::swap(this->tree->rootnode->vnode_Fv_operative, this->tree->rootnode->vnode_Fv_backup);
+        std::swap(this->tree->rootnode->vnode_Fv_empty_operative, this->tree->rootnode->vnode_Fv_empty_backup);
+    }
 }
 
 

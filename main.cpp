@@ -329,6 +329,7 @@ int main(int argc, char **argv) {
 
     VLOG(2) << "[Initial LK] from fillNodes " << likelihood->computePartialLK(allnodes_postorder, *alignment, likelihood->pi);
 
+    likelihood->unloadParametersOperative();
     //------------------------------------------------------------------------------------------------------------------
     // Remove the root
     utree->removeVirtualRootNode();
