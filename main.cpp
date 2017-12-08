@@ -246,7 +246,6 @@ int main(int argc, char **argv) {
     utree->rootnode->setAllBetas(mu);
 
     // set "pseudo" probability matrix
-    //tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
     likelihood->setPr(utree, extended_alphabet_size);
 
     //root->_traverseVirtualNodeTree();
@@ -264,11 +263,6 @@ int main(int argc, char **argv) {
     // DNA alphabet
     extended_alphabet_size = 5;
 
-    // set "pseudo" probability matrix
-    tree->tmp_initPr(extended_alphabet_size); //TODO: pass Q from codonPhyML (?)
-
-
-
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
 
@@ -278,17 +272,7 @@ int main(int argc, char **argv) {
     // compute log_col_lk
     for (int i = 0; i < alignment->getAlignmentSize(); i++) {
 
-        // extract MSA column
-        std::string s = alignment->extractColumn(i);
-        VLOG(2) << "[Extracted column] (" << i << ") = " << s << std::endl;
-
-        // assign char at the leaves
-        //tree->set_leaf_state(s);
-        utree->setLeafState(s); //TODO: remove field char in VirtualNode --> Use the MSA directly
-
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
-        //tree->set_ancestral_flag(s);
-        //root->setAncestralFlag(s, i, isReferenceRun);
         utree->rootnode->setAncestralFlag(*alignment, i, isReferenceRun);
 
         //root->_traverseVirtualNodeTree();
@@ -299,37 +283,29 @@ int main(int argc, char **argv) {
 
         // Compute column likelihood
         //TODO: Add weight per column
-        //log_col_lk0 = LKFunc::compute_col_lk(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-        //log_col_lk = LKFunc::compute_col_lk(root, pi, is_DNA_AA_Codon, extended_alphabet_size, i);
-        log_col_lk = likelihood->compute_col_lk(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
-        VLOG(2) << "[Initial LK] P(c" << i << ") = " << log_col_lk;
-
-        //VLOG(2) << "[diff lk] " << abs(log_col_lk0 - log_col_lk);
-
-        logLK += log_col_lk;
+        likelihood->computeLikelihoodComponents(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
 
     }
 
     // compute empty column likelihood
+    likelihood->computeLikelihoodComponents_EmptyColumn(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
+
     //p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
     //VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
 
-    //p0 = LKFunc::compute_log_lk_empty_col(root, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    // TODO: Initilise FV_Empty for each node
-    p0 = likelihood->compute_log_lk_empty_col(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
-    VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
+    //logLK += likelihood->phi((int) alignment->align_length, nu, p0);
+    //VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
 
-    logLK += likelihood->phi((int) alignment->align_length, nu, p0);
-    VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
-
-
+    //----------------------------------------------
     likelihood->loadParametersOperative();
     std::vector<VirtualNode *> allnodes_postorder;
     likelihood->fillNodeListComplete_bottomUp(allnodes_postorder, utree->rootnode);
-
-    VLOG(2) << "[Initial LK] from fillNodes " << likelihood->computePartialLK(allnodes_postorder, *alignment, likelihood->pi);
-
+    logLK = likelihood->computePartialLK(allnodes_postorder, *alignment, likelihood->pi);
     likelihood->unloadParametersOperative();
+
+    VLOG(2) << "[Initial LK] Full Tree from partial lk routines " << logLK;
+
+
     //------------------------------------------------------------------------------------------------------------------
     // Remove the root
     utree->removeVirtualRootNode();

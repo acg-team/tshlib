@@ -161,12 +161,12 @@ public:
     //virtual void Update();
 
     void
-    compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
-    double compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    _computeLikelihoodComponentsEmptyColumn_recursive(VirtualNode *vnode, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
+    double computeLikelihoodComponents_EmptyColumn(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
     Eigen::VectorXd
-    compute_lk_recursive(VirtualNode *vn, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA);
+    _computeLikelihoodComponents_recursive(VirtualNode *vn, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA);
 
-    double compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA);
+    double computeLikelihoodComponents(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA);
     /*!
      * @brief
      * @param tau

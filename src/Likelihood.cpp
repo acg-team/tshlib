@@ -154,46 +154,37 @@ namespace LKFunc {
 }
 
 
-double Likelihood::compute_log_lk_empty_col(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
-    //       VirtualNode *pseudo_root;
-    double p0;
+double Likelihood::computeLikelihoodComponents_EmptyColumn(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
 
-    //     pseudo_root=utree.startVNodes.at(0);
+    _computeLikelihoodComponentsEmptyColumn_recursive(root, pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
-    compute_lk_empty_col(root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
-
-//        pseudo_root=utree.startVNodes.at(1);
-
-    //      compute_lk_empty_col(pseudo_root, p0, pi, is_DNA_AA_Codon, dim_extended_alphabet);
-
-    return log(p0);
 }
 
 void
-Likelihood::compute_lk_empty_col(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
+Likelihood::_computeLikelihoodComponentsEmptyColumn_recursive(VirtualNode *vnode, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
 
     if (vnode->isTerminalNode()) {
         vnode->vnode_Fv_empty_backup = Eigen::VectorXd::Zero(dim_extended_alphabet);
 
         vnode->vnode_Fv_empty_backup[dim_extended_alphabet - 1] = 1.0;
 
-        lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty_backup.dot(pi)));
+        //lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty_backup.dot(pi)));
 
     } else {
 
-        compute_lk_empty_col(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
-        compute_lk_empty_col(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet);
+        _computeLikelihoodComponentsEmptyColumn_recursive(vnode->getNodeLeft(), pi, is_DNA_AA_Codon, dim_extended_alphabet);
+        _computeLikelihoodComponentsEmptyColumn_recursive(vnode->getNodeRight(), pi, is_DNA_AA_Codon, dim_extended_alphabet);
 
         vnode->vnode_Fv_empty_backup = (vnode->getNodeLeft()->getPr() * vnode->getNodeLeft()->vnode_Fv_empty_backup).cwiseProduct(vnode->getNodeRight()->getPr() * vnode->getNodeRight()
                 ->vnode_Fv_empty_backup);
 
-        lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty_backup.dot(pi)));
+        //lk += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * (vnode->vnode_Fv_empty_backup.dot(pi)));
 
     }
 }
 
 Eigen::VectorXd
-Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA) {
+Likelihood::_computeLikelihoodComponents_recursive(VirtualNode *vnode, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA) {
     Eigen::VectorXd fv;
     Eigen::VectorXd fvL;
     Eigen::VectorXd fvR;
@@ -216,10 +207,10 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
         idx = idx < 0 ? dim_extended_alphabet - 1 : idx;  //TODO: check the alphabet size and the gap index.
         fv[idx] = 1.0;
 
-        if (vnode->getSetA(colnum)) {
+        //if (vnode->getSetA(colnum)) {
             //std::cout<<"SETA1* "<<vnode->vnode_name<<std::endl;
-            lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
-        }
+        //    lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
+        //}
         vnode->vnode_Fv_backup.push_back(fv);
         vnode->vnode_Fv_empty_backup = Eigen::VectorXd::Zero(dim_extended_alphabet);
         vnode->vnode_Fv_empty_backup(dim_extended_alphabet-1) = 1;
@@ -227,15 +218,15 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
 
     } else {
 
-        fvL = compute_lk_recursive(vnode->getNodeLeft(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum, MSA);
-        fvR = compute_lk_recursive(vnode->getNodeRight(), lk, pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum, MSA);
+        fvL = _computeLikelihoodComponents_recursive(vnode->getNodeLeft(), pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum, MSA);
+        fvR = _computeLikelihoodComponents_recursive(vnode->getNodeRight(), pi, is_DNA_AA_Codon, dim_extended_alphabet, colnum, MSA);
 
         fv = (vnode->getNodeLeft()->getPr() * fvL).cwiseProduct(vnode->getNodeRight()->getPr() * fvR);
 
-        if (vnode->getSetA(colnum)) {
+        //if (vnode->getSetA(colnum)) {
             //std::cout<<"SETA2* "<<vnode->vnode_name<<std::endl;
-            lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
-        }
+        //    lk += vnode->getIota() * vnode->getBeta() * (fv.dot(pi));
+        //}
 
         vnode->vnode_Fv_backup.push_back(fv);
         //vnode->setMSAFv(fv);
@@ -245,13 +236,8 @@ Likelihood::compute_lk_recursive(VirtualNode *vnode, double &lk, Eigen::VectorXd
     return fv;
 }
 
-double Likelihood::compute_col_lk(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA) {
-
-    double lk = 0.0;
-
-    compute_lk_recursive(root, lk, pi, is_DNA_AA_Codon, alphabet_size, colnum, MSA);
-
-    return log(lk);
+double Likelihood::computeLikelihoodComponents(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA) {
+    _computeLikelihoodComponents_recursive(root, pi, is_DNA_AA_Codon, alphabet_size, colnum, MSA);
 }
 
 double Likelihood::compute_nu(double tau, double lambda, double mu) {
