@@ -168,12 +168,8 @@ int main(int argc, char **argv) {
     alignment->countNumberCharactersinColumn();
     // 1:DNA, 2:AA, 3:Codon
 
-
-    // DNA alphabet
-    extended_alphabet_size = 5;
-
-    mu = 0.1;
-    lambda = 0.2;
+    // TODO: extended_alphabet_size to be deleted
+    extended_alphabet_size = 5; // DNA alphabet
 
     //------------------------------------------------------------------------------------------------------------------
     // INIT ROOTED TREE
@@ -207,12 +203,14 @@ int main(int argc, char **argv) {
 
     //tau = tree->computeLength();
     //VLOG(2) << "[PhyTree length] " << tau;
-    tau = utree->computeTotalTreeLength();
-    VLOG(2) << "[Utree length] " << tau;
+    //tau = utree->computeTotalTreeLength();
+    //VLOG(2) << "[Utree length] " << tau;
     //tau = root->computeTotalTreeLength();
-    tau = utree->rootnode->computeTotalTreeLength();
-    VLOG(2) << "[Tree length (from root)] " << tau;
+    //tau = utree->rootnode->computeTotalTreeLength();
+    //VLOG(2) << "[Tree length (from root)] " << tau;
 
+    mu = 0.1;
+    lambda = 0.2;
 
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
@@ -258,9 +256,6 @@ int main(int argc, char **argv) {
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
 
-    // DNA alphabet
-    // TODO: extended_alphabet_size to be deleted
-    extended_alphabet_size = 5;
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
@@ -271,49 +266,26 @@ int main(int argc, char **argv) {
     std::vector<VirtualNode *> allnodes_postorder;
     likelihood->fillNodeListComplete_bottomUp(allnodes_postorder, utree->rootnode);
 
-    // set survival probability to each node
+    // Set survival probability to each node in the list
     likelihood->setAllIotas(allnodes_postorder);
+    // Set deletion probability to each node in the list
     likelihood->setAllBetas(allnodes_postorder);
-
+    // Set insertion histories on each node of the list
     likelihood->setInsertionHistories(allnodes_postorder,*alignment);
-    // set "pseudo" probability matrix
-    likelihood->setPr(utree, extended_alphabet_size);
 
+    // set probability matrix -- exponential of substitution rates
+    likelihood->computePr(allnodes_postorder, extended_alphabet_size);
 
     //TODO: Add weight per column
-    likelihood->computeFV(allnodes_postorder, *alignment);
-    //likelihood->unloadParametersOperative();
-
     // Initialise likelihood components on the tree
-    //for (int i = 0; i < alignment->getAlignmentSize(); i++) {
+    likelihood->computeFV(allnodes_postorder, *alignment);
 
-        // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
-        //utree->rootnode->setAncestralFlag(*alignment, i, isReferenceRun);
-
-        //root->_traverseVirtualNodeTree();
-
-        // Initialise FV matrices at each node
-        //tree->clear_fv();
-        //utree->clearFv();
-
-        // Compute column likelihood
-        //likelihood->computeLikelihoodComponents(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
-
-    //}
-
-    // compute empty column likelihood
-    //likelihood->computeLikelihoodComponents_EmptyColumn(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
-
-    //p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
-    //VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
-
-    //logLK += likelihood->phi((int) alignment->align_length, nu, p0);
-    //VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
+    //likelihood->unloadParametersOperative();
 
     //----------------------------------------------
     //likelihood->loadParametersOperative();
 
-    logLK = likelihood->computePartialLK(allnodes_postorder, *alignment, likelihood->pi);
+    logLK = likelihood->computePartialLK(allnodes_postorder, *alignment);
     likelihood->saveLikelihoodComponents();
 
     VLOG(2) << "[Initial LK] Full Tree from partial lk routines " << logLK;
@@ -365,7 +337,7 @@ int main(int argc, char **argv) {
     unsigned long total_exec_moves = 0;
 
     int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
-    int max_radius = utree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
+    int max_radius = utree->getMaxNodeDistance(); // Full tree traversing from any node of the tree
 
     bool computeMoveLikelihood = true;
     std::vector<VirtualNode *> list_vnode_to_root;
@@ -401,7 +373,6 @@ int main(int argc, char **argv) {
             list_vnode_to_root.clear();
             list_vnode_to_root = utree->computePathBetweenNodes(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode());
             list_vnode_to_root.push_back(utree->rootnode);
-            //std::reverse(list_vnode_to_root.begin(), list_vnode_to_root.end());
 
             // Apply the move
             status = rearrangmentList->applyMove(i);
@@ -424,7 +395,7 @@ int main(int argc, char **argv) {
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
                 likelihood->recombineAllFv(list_vnode_to_root);
                 likelihood->setInsertionHistories(list_vnode_to_root,*alignment);
-                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
+                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
 
 
                 //VLOG(2) << "[Tree LK] Before Brent: " << logLK;
@@ -473,7 +444,7 @@ int main(int argc, char **argv) {
                 //likelihood->revertAllFv(list_vnode_to_root); // clear not necessary
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
                 likelihood->recombineAllFv(list_vnode_to_root);
-                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
+                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
                 rearrangmentList->getMove(i)->move_lk = logLK;
 
                 utree->removeVirtualRootNode();
@@ -549,3 +520,29 @@ void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utre
         }
     }
 }
+
+
+//for (int i = 0; i < alignment->getAlignmentSize(); i++) {
+
+// set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
+//utree->rootnode->setAncestralFlag(*alignment, i, isReferenceRun);
+
+//root->_traverseVirtualNodeTree();
+
+// Initialise FV matrices at each node
+//tree->clear_fv();
+//utree->clearFv();
+
+// Compute column likelihood
+//likelihood->computeLikelihoodComponents(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
+
+//}
+
+// compute empty column likelihood
+//likelihood->computeLikelihoodComponents_EmptyColumn(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
+
+//p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
+//VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
+
+//logLK += likelihood->phi((int) alignment->align_length, nu, p0);
+//VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;

@@ -310,7 +310,7 @@ void Likelihood::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
 
 }
 
-double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi) {
+double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment) {
     double lk_empty = 0;
     double size = list_vnode_to_root.size();
 
@@ -319,22 +319,23 @@ double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_ro
         double lk_col = 0;
         for (auto &vnode:list_vnode_to_root) {
 
-            lk_empty += vnode->getIota() * (1- vnode->getBeta() + vnode->getBeta()* (vnode->vnode_Fv_empty_operative.dot(pi)));
+            lk_empty += vnode->getIota() * (1- vnode->getBeta() + vnode->getBeta()* (vnode->vnode_Fv_empty_operative.dot(this->pi)));
 
             int currNodeDescCount;
             if (!vnode->isTerminalNode()) {
 
-                currNodeDescCount = vnode->getNodeLeft()->vnode_descCount_operative.at(alignment_column) + vnode->getNodeRight()->vnode_descCount_operative.at(alignment_column);
+                currNodeDescCount =     vnode->getNodeLeft()->vnode_descCount_operative.at(alignment_column) +
+                                        vnode->getNodeRight()->vnode_descCount_operative.at(alignment_column);
 
                 if (currNodeDescCount != alignment.align_num_characters.at(alignment_column)) {
 
-                    lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_operative.at(alignment_column).dot(pi));
+                    lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_operative.at(alignment_column).dot(this->pi));
 
                 }
 
             }else{
 
-                lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_operative.at(alignment_column).dot(pi));
+                lk_col += vnode->getIota() * vnode->getBeta() * (vnode->vnode_Fv_operative.at(alignment_column).dot(this->pi));
             }
 
         }
@@ -345,7 +346,7 @@ double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_ro
 
     // compute PHi
     double log_phi_value = phi(alignment.getAlignmentSize(), this->nu, lk_empty);
-    lk += log_phi_value;
+    // lk += log_phi_value;
     return lk;
 
 
@@ -461,7 +462,7 @@ void Likelihood::Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q, doub
 }
 
 
-void Likelihood::setPr(Utree *tree, int extended_alphabet_size) {
+void Likelihood::computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size) {
 
     // TODO: the following 4 lines have to be computed only when Q changes!!!
     Eigen::EigenSolver<MatrixExtended> solver(this->Q);
@@ -469,9 +470,7 @@ void Likelihood::setPr(Utree *tree, int extended_alphabet_size) {
     this->V = solver.eigenvectors().real();
     this->Vi = this->V.inverse();
 
-    for (auto &vnode:tree->listVNodes) {
-
-        //if (vnode->vnode_Pr.rows() * vnode->vnode_Pr.cols() != 0) {
+    for (auto &vnode:listNodes) {
 
             // Clear the matrix containing the probability matrix
             vnode->vnode_Pr.resize(0, 0);
@@ -479,13 +478,8 @@ void Likelihood::setPr(Utree *tree, int extended_alphabet_size) {
             // Recompute the Q matrix with the exponential equal to the branch lenght
             vnode->vnode_Pr.resize(extended_alphabet_size, extended_alphabet_size);
 
-            //MatrixExtended Qtemp;
-            //Qtemp = ;
-
             vnode->vnode_Pr = this->V * (this->sigma * vnode->vnode_branchlength).array().exp().matrix().asDiagonal() * this->Vi;
 
-
-        //}
     }
 }
 
@@ -720,7 +714,7 @@ Likelihood::~Likelihood() = default;
 
 
 double LKFunc::LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment){
-    return lk.computePartialLK(list_node, alignment, lk.pi);
+    return lk.computePartialLK(list_node, alignment);
 
 }
 

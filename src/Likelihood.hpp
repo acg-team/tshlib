@@ -191,7 +191,7 @@ public:
 
     void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
-    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, Eigen::VectorXd &pi);
+    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
 
     double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
 
@@ -201,9 +201,10 @@ public:
 
     void recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int dim_extended_alphabet );
 
-    void setPr(Utree *tree, int extended_alphabet_size);
+    void computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size);
 
     void loadLikelihoodComponents_Operative();
+
     void unloadLikelihoodComponents_Operative();
 
     void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
