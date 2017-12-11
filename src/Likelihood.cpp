@@ -252,7 +252,7 @@ void Likelihood::setNu() {
 }
 
 
-double Likelihood::phi(int m, double nu, double p0) {
+double Likelihood::phi(int m, double p0) {
     double p;
     double log_factorial_m;
 
@@ -261,7 +261,7 @@ double Likelihood::phi(int m, double nu, double p0) {
         log_factorial_m += log(i);
     }
 
-    p = -log_factorial_m + m * log(nu) + (nu * (p0 - 1));
+    p = -log_factorial_m + m * log(this->nu) + (this->nu * (p0 - 1));
 
     return p;
 }
@@ -313,7 +313,6 @@ void Likelihood::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
 
 double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment) {
     double lk_empty = 0;
-    double size = list_vnode_to_root.size();
 
     double lk = 0;
     for(int alignment_column=0; alignment_column<alignment.getAlignmentSize(); alignment_column++) {
@@ -346,7 +345,7 @@ double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_ro
     }
 
     // compute PHi
-    double log_phi_value = phi(alignment.getAlignmentSize(), this->nu, lk_empty);
+    //double log_phi_value = phi(alignment.getAlignmentSize(), this->nu, lk_empty);
     // lk += log_phi_value;
     return lk;
 
@@ -451,15 +450,15 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 }
 */
 
-void Likelihood::Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q, double mu, double lambda) {
+void Likelihood::Init(Utree *inUtree, Eigen::VectorXd &valPi, Eigen::MatrixXd &valQ, double valMu, double valLambda) {
 
-    this->tree = tree;
-    this->pi = pi;
-    this->Q = Q;
+    this->tree = inUtree;
+    this->pi = valPi;
+    this->Q = valQ;
 
-    this->tau = tree->computeTotalTreeLength();
-    this->mu = mu;
-    this->lambda = lambda;
+    this->tau = inUtree->computeTotalTreeLength();
+    this->mu = valMu;
+    this->lambda = valLambda;
     this->setNu();
 
 }

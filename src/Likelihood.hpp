@@ -177,7 +177,7 @@ public:
      ~Likelihood();
 
 
-    void Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q, double mu, double lambda);
+    void Init(Utree *inUtree, Eigen::VectorXd &valPi, Eigen::MatrixXd &valQ, double valMu, double valLambda);
 
     void computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
 
@@ -190,7 +190,7 @@ public:
      */
     void setNu();
 
-    double phi(int m, double nu, double p0);
+    double phi(int m, double p0);
 
     void compileNodeList_postorder(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode);
 
