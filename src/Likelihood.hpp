@@ -142,6 +142,8 @@ public:
     Utree *tree;
     Eigen::VectorXd pi;
     MatrixExtended Q;
+    double mu;
+    double tau;
     double lambda;
     double nu;
     MatrixExtended V;
@@ -154,7 +156,7 @@ public:
      ~Likelihood();
 
 
-    void Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q);
+    void Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q, double mu, double lambda);
 
     //void Clear();
 
@@ -166,6 +168,9 @@ public:
     Eigen::VectorXd
     _computeLikelihoodComponents_recursive(VirtualNode *vn, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA);
 
+    void computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
+
+
     double computeLikelihoodComponents(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA);
     /*!
      * @brief
@@ -174,7 +179,7 @@ public:
      * @param mu
      * @return
      */
-    double compute_nu(double tau, double lambda, double mu);
+    void setNu();
 
     double phi(int m, double nu, double p0);
 
@@ -198,9 +203,16 @@ public:
 
     void setPr(Utree *tree, int extended_alphabet_size);
 
-    void loadParametersOperative();
-    void unloadParametersOperative();
+    void loadLikelihoodComponents_Operative();
+    void unloadLikelihoodComponents_Operative();
 
+    void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
+
+    void saveLikelihoodComponents();
+
+    void setAllIotas(std::vector<VirtualNode *> &listNodes);
+
+    void setAllBetas(std::vector<VirtualNode *> &listNodes);
 
 protected:
 

@@ -240,14 +240,14 @@ double Likelihood::computeLikelihoodComponents(VirtualNode *root, Eigen::VectorX
     _computeLikelihoodComponents_recursive(root, pi, is_DNA_AA_Codon, alphabet_size, colnum, MSA);
 }
 
-double Likelihood::compute_nu(double tau, double lambda, double mu) {
+void Likelihood::setNu() {
 
-    if (fabs(mu) < 1e-8) {
-        perror("ERROR in compute_nu: mu too small");
+    if (fabs(this->mu) < 1e-8) {
+        perror("ERROR in setNu: mu too small");
     }
 
-    this->nu = lambda * (tau + 1 / mu);
-    return lambda * (tau + 1 / mu);
+    this->nu = this->lambda * (this->tau + 1 / this->mu);
+    //return lambda * (tau + 1 / mu);
 }
 
 
@@ -286,32 +286,27 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
 */
 
 void Likelihood::recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root){
-    VirtualNode *vn;
 
-    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-        vn=list_vnode_to_root.at(k);
-        vn->recombineFv();
+    for(auto &vnode:list_vnode_to_root){
+        vnode->recombineFv();
     }
 
 }
 
 void Likelihood::revertAllFv(std::vector<VirtualNode *> list_vnode_to_root){
-    VirtualNode *vn;
 
-    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-        vn=list_vnode_to_root.at(k);
-        vn->revertFv();
+    for(auto &vnode:list_vnode_to_root){
+        vnode->revertFv();
     }
 
 }
 
 void Likelihood::keepAllFv(std::vector<VirtualNode *> list_vnode_to_root){
-    VirtualNode *vn;
 
-    for(unsigned int k=0;k<list_vnode_to_root.size();k++){
-        vn=list_vnode_to_root.at(k);
-        vn->keepFv();
+    for(auto &vnode:list_vnode_to_root){
+        vnode->keepFv();
     }
+
 
 }
 
@@ -329,7 +324,7 @@ double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_ro
             int currNodeDescCount;
             if (!vnode->isTerminalNode()) {
 
-                currNodeDescCount = vnode->getNodeLeft()->vnode_descCount.at(alignment_column) + vnode->getNodeRight()->vnode_descCount.at(alignment_column);
+                currNodeDescCount = vnode->getNodeLeft()->vnode_descCount_operative.at(alignment_column) + vnode->getNodeRight()->vnode_descCount_operative.at(alignment_column);
 
                 if (currNodeDescCount != alignment.align_num_characters.at(alignment_column)) {
 
@@ -452,11 +447,16 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 
 }
 
-void Likelihood::Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q) {
+void Likelihood::Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q, double mu, double lambda) {
 
     this->tree = tree;
     this->pi = pi;
     this->Q = Q;
+
+    this->tau = tree->computeTotalTreeLength();
+    this->mu = mu;
+    this->lambda = lambda;
+    this->setNu();
 
 }
 
@@ -506,29 +506,209 @@ void Likelihood::fillNodeListComplete_bottomUp(std::vector<VirtualNode *> &nodel
 
 }
 
-void Likelihood::loadParametersOperative() {
+void Likelihood::loadLikelihoodComponents_Operative() {
 
     for (auto &vnode:this->tree->listVNodes){
         std::swap(vnode->vnode_Fv_backup,vnode->vnode_Fv_operative);
         std::swap(vnode->vnode_Fv_empty_backup, vnode->vnode_Fv_empty_operative);
+        std::swap(vnode->vnode_descCount_backup, vnode->vnode_descCount_operative);
+
     }
     if(this->tree->rootnode) {
         std::swap(this->tree->rootnode->vnode_Fv_backup, this->tree->rootnode->vnode_Fv_operative);
         std::swap(this->tree->rootnode->vnode_Fv_empty_backup, this->tree->rootnode->vnode_Fv_empty_operative);
+        std::swap(this->tree->rootnode->vnode_descCount_backup, this->tree->rootnode->vnode_descCount_operative);
+
     }
 
 }
 
-void Likelihood::unloadParametersOperative() {
+void Likelihood::unloadLikelihoodComponents_Operative() {
 
     for (auto &vnode:this->tree->listVNodes){
         std::swap(vnode->vnode_Fv_operative, vnode->vnode_Fv_backup);
         std::swap(vnode->vnode_Fv_empty_operative, vnode->vnode_Fv_empty_backup);
+        std::swap(vnode->vnode_descCount_operative, vnode->vnode_descCount_backup);
     }
     if(this->tree->rootnode) {
         std::swap(this->tree->rootnode->vnode_Fv_operative, this->tree->rootnode->vnode_Fv_backup);
         std::swap(this->tree->rootnode->vnode_Fv_empty_operative, this->tree->rootnode->vnode_Fv_empty_backup);
+        std::swap(this->tree->rootnode->vnode_descCount_operative, this->tree->rootnode->vnode_descCount_backup);
+
     }
+}
+
+void Likelihood::setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA) {
+
+    for(int i=0; i<MSA.getAlignmentSize(); i++) {
+        for (auto &vnode:listNodes) {
+
+            if (vnode->isTerminalNode()) {
+
+                vnode->vnode_descCount_operative.at(i) = (MSA.align_dataset.at(vnode->vnode_seqid)->seq_data.at(i) == '-' ? 0 : 1);
+
+            } else {
+
+                vnode->vnode_descCount_operative.at(i) = vnode->getNodeLeft()->vnode_descCount_operative.at(i) +
+                        vnode->getNodeRight()->vnode_descCount_operative.at(i);
+
+            }
+
+            vnode->vnode_setA_operative.at(i) = (vnode->vnode_descCount_operative.at(i) == MSA.align_num_characters.at(i));
+
+        }
+    }
+
+
+}
+
+void Likelihood::computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA) {
+
+    for (auto &vnode:listNodes) {
+        for(int i=0;i<MSA.getAlignmentSize();i++) {
+            if (vnode->isTerminalNode()) {
+                Eigen::VectorXd fv = Eigen::VectorXd::Zero(MSA.align_alphabetsize);
+
+                int idx;
+
+                // TODO: Maybe this can be antoher function independt.
+                if ( MSA.alphabet == AlignmentAlphabet::dna) {
+                    idx = mytable[(int) MSA.align_dataset.at(vnode->vnode_seqid)->seq_data.at(i)];
+                } else if ( MSA.alphabet == AlignmentAlphabet::aa) {
+                    idx = mytableAA[(int) MSA.align_dataset.at(vnode->vnode_seqid)->seq_data.at(i)];
+                } else {
+                    perror("not implemented for codon model yet\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                //TODO: check the alphabet size and the gap index.
+                idx = idx < 0 ? MSA.align_alphabetsize - 1 : idx;
+                fv[idx] = 1.0;
+
+                vnode->vnode_Fv_operative.at(i) = fv;
+                vnode->vnode_Fv_empty_operative = Eigen::VectorXd::Zero(MSA.align_alphabetsize);
+                vnode->vnode_Fv_empty_operative(MSA.align_alphabetsize - 1) = 1;
+
+            } else {
+
+                Eigen::VectorXd &fvL = vnode->getNodeLeft()->vnode_Fv_operative.at(i);
+                Eigen::VectorXd &fvR = vnode->getNodeRight()->vnode_Fv_operative.at(i);
+
+                vnode->vnode_Fv_operative[i] = (vnode->getNodeLeft()->getPr() * (fvL)).cwiseProduct(vnode->getNodeRight()->getPr() * (fvR));
+            }
+        }
+
+        if(vnode->isTerminalNode()){
+
+            vnode->vnode_Fv_empty_operative = Eigen::VectorXd::Zero(MSA.align_alphabetsize);
+            vnode->vnode_Fv_empty_operative[MSA.align_alphabetsize - 1] = 1.0;
+
+        } else{
+
+            Eigen::VectorXd &fvE_L = vnode->getNodeLeft()->vnode_Fv_empty_operative;
+            Eigen::VectorXd &fvE_R = vnode->getNodeRight()->vnode_Fv_empty_operative;
+
+            vnode->vnode_Fv_empty_operative = (vnode->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(vnode->getNodeRight()->getPr() * (fvE_R));
+
+        }
+
+    }
+
+}
+
+void Likelihood::saveLikelihoodComponents() {
+
+
+    for (auto &vnode:this->tree->listVNodes){
+
+//        std::copy(vnode->vnode_Fv_operative.begin(),
+//                  vnode->vnode_Fv_operative.end(),
+//                  std::back_inserter(vnode->vnode_Fv_backup));
+
+        vnode->vnode_Fv_backup = vnode->vnode_Fv_operative;
+
+        vnode->vnode_Fv_empty_backup = vnode->vnode_Fv_empty_operative;
+
+        vnode->vnode_descCount_backup = vnode->vnode_descCount_operative;
+
+//        std::copy(vnode->vnode_descCount_operative.begin(),
+//                  vnode->vnode_descCount_operative.end(),
+//                  std::back_inserter(vnode->vnode_descCount_backup));
+
+    }
+    if(this->tree->rootnode) {
+
+//        std::copy(this->tree->rootnode->vnode_Fv_operative.begin(),
+//                  this->tree->rootnode->vnode_Fv_operative.end(),
+//                  std::back_inserter(this->tree->rootnode->vnode_Fv_backup));
+
+
+        this->tree->rootnode->vnode_Fv_backup = this->tree->rootnode->vnode_Fv_operative;
+        this->tree->rootnode->vnode_Fv_empty_backup = this->tree->rootnode->vnode_Fv_empty_operative;
+        this->tree->rootnode->vnode_descCount_backup = this->tree->rootnode->vnode_descCount_operative;
+//        std::copy(this->tree->rootnode->vnode_descCount_operative.begin(),
+//                  this->tree->rootnode->vnode_descCount_operative.end(),
+//                  std::back_inserter(this->tree->rootnode->vnode_descCount_backup));
+
+
+    }
+
+
+}
+
+
+
+void Likelihood::setAllIotas(std::vector<VirtualNode *> &listNodes){
+    double T;
+
+    if (fabs(this->mu) < 1e-8) {
+        perror("ERROR in set_iota: mu too small");
+    }
+
+    T = this->tau + 1 / this->mu;
+
+    if (fabs(T) < 1e-8) {
+        perror("ERROR in set_iota: T too small");
+    }
+
+
+    for(auto &vnode:listNodes){
+
+        if(vnode->isRootNode()){
+
+            vnode->vnode_iota=(1/this->mu)/T;
+
+        }else{
+
+            vnode->vnode_iota = vnode->vnode_branchlength / T;
+        }
+
+    }
+}
+
+
+void Likelihood::setAllBetas(std::vector<VirtualNode *> &listNodes){
+
+    if (fabs(this->mu) < 1e-8) {
+        perror("ERROR in set_iota: mu too small");
+    }
+
+
+    for(auto &vnode:listNodes){
+
+        if(vnode->isRootNode()){
+
+            vnode->vnode_beta=1.0;
+
+        }else{
+
+            vnode->vnode_beta = (1.0 - exp(-this->mu * vnode->vnode_branchlength)) / (this->mu * vnode->vnode_branchlength);
+        }
+
+    }
+
+
+
 }
 
 

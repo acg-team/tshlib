@@ -90,7 +90,7 @@ namespace fasta_parser {
     }
 
 
-    Alignment *createAlignment(std::string in_fastafile) {
+    Alignment *createAlignment(std::string in_fastafile, AlignmentAlphabet alphabet) {
 
         auto *alignment = new Alignment;
         std::vector<std::pair<std::string, std::string>> msa;
@@ -103,6 +103,22 @@ namespace fasta_parser {
         alignment->getAlignmentSize();
 
         alignment->align_num_characters.resize((unsigned long) alignment->align_length);
+        alignment->alphabet = alphabet;
+
+        switch(alphabet){
+            case AlignmentAlphabet::dna:
+                alignment->align_alphabetsize = 5;
+                break;
+            case AlignmentAlphabet::aa:
+                alignment->align_alphabetsize = 21;
+                break;
+            case AlignmentAlphabet::codon:
+                alignment->align_alphabetsize = 65;
+                break;
+            default:
+                LOG(FATAL) << "Alphabet not implemented";
+
+        }
 
         return alignment;
 
@@ -145,13 +161,13 @@ int main(int argc, char **argv) {
 
     //------------------------------------------------------------------------------------------------------------------
     // LOAD MSA FROM FILE
-    Alignment *alignment = fasta_parser::createAlignment(msa_file);
+    Alignment *alignment = fasta_parser::createAlignment(msa_file, AlignmentAlphabet::dna);
 
     num_leaves = alignment->align_dataset.size();
     LOG(INFO) << "[Sequences in MSA] Leaves: " << num_leaves << std::endl;
     alignment->countNumberCharactersinColumn();
     // 1:DNA, 2:AA, 3:Codon
-    is_DNA_AA_Codon = 1;
+
 
     // DNA alphabet
     extended_alphabet_size = 5;
@@ -178,12 +194,13 @@ int main(int argc, char **argv) {
     auto utree = new Utree;
     UtreeUtils::convertUtree(tree, utree);
     LOG(INFO) << "[Initial Utree Topology] " << utree->printTreeNewick(true) << std::endl;
-    utree->prepareSetADesCountOnNodes((int) alignment->getAlignmentSize());
+    utree->prepareSetADesCountOnNodes((int) alignment->getAlignmentSize(), extended_alphabet_size);
     UtreeUtils::associateNode2Alignment(alignment, utree);
 
+    // TODO: refactoring of prepareSetADescCountonNodes + initialiseLikelihoodComponents (one function to rule them all)
     // Add the root
     utree->addVirtualRootNode();
-    utree->rootnode->prepareSetA_DescCount((int) alignment->getAlignmentSize());
+    utree->rootnode->initialiseLikelihoodComponents((int) alignment->getAlignmentSize(), extended_alphabet_size);
 
     //---------------------------------------------------------
     // compute total tree length
@@ -220,31 +237,17 @@ int main(int argc, char **argv) {
 
     auto likelihood = new Likelihood();
 
-    likelihood->Init(utree, pi, Q);
+    likelihood->Init(utree, pi, Q, mu, lambda);
 
     // compute the normalizing Poisson intensity
-    nu = likelihood->compute_nu(tau, lambda, mu);
+    //nu = likelihood->setNu(tau, lambda, mu);
 
-    // set insertion probability to each node
-    //tree->set_iota(tau, mu);
-
+/*
     auto pip_model = new PIP;
     pip_model->lambda = lambda;
     pip_model->mu = mu;
+*/
 
-    utree->setIota(tau, mu);
-    //root->setAllIotas(tau, mu);
-    utree->rootnode->setAllIotas(tau, mu);
-
-    // set survival probability to each node
-    //tree->set_beta(tau, mu);
-    utree->setBeta(tau, mu);
-
-    //root->setAllBetas(mu);
-    utree->rootnode->setAllBetas(mu);
-
-    // set "pseudo" probability matrix
-    likelihood->setPr(utree, extended_alphabet_size);
 
     //root->_traverseVirtualNodeTree();
 
@@ -255,10 +258,8 @@ int main(int argc, char **argv) {
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
 
-    // 1:DNA, 2:AA, 3:Codon
-    is_DNA_AA_Codon = 1;
-
     // DNA alphabet
+    // TODO: extended_alphabet_size to be deleted
     extended_alphabet_size = 5;
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
@@ -266,11 +267,28 @@ int main(int argc, char **argv) {
 
     bool isReferenceRun = true;
 
+
+    std::vector<VirtualNode *> allnodes_postorder;
+    likelihood->fillNodeListComplete_bottomUp(allnodes_postorder, utree->rootnode);
+
+    // set survival probability to each node
+    likelihood->setAllIotas(allnodes_postorder);
+    likelihood->setAllBetas(allnodes_postorder);
+
+    likelihood->setInsertionHistories(allnodes_postorder,*alignment);
+    // set "pseudo" probability matrix
+    likelihood->setPr(utree, extended_alphabet_size);
+
+
+    //TODO: Add weight per column
+    likelihood->computeFV(allnodes_postorder, *alignment);
+    //likelihood->unloadParametersOperative();
+
     // Initialise likelihood components on the tree
-    for (int i = 0; i < alignment->getAlignmentSize(); i++) {
+    //for (int i = 0; i < alignment->getAlignmentSize(); i++) {
 
         // set ancestral flag (1=plausible insertion location, 0=not plausible insertion location)
-        utree->rootnode->setAncestralFlag(*alignment, i, isReferenceRun);
+        //utree->rootnode->setAncestralFlag(*alignment, i, isReferenceRun);
 
         //root->_traverseVirtualNodeTree();
 
@@ -279,13 +297,12 @@ int main(int argc, char **argv) {
         //utree->clearFv();
 
         // Compute column likelihood
-        //TODO: Add weight per column
-        likelihood->computeLikelihoodComponents(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
+        //likelihood->computeLikelihoodComponents(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size, i, *alignment);
 
-    }
+    //}
 
     // compute empty column likelihood
-    likelihood->computeLikelihoodComponents_EmptyColumn(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
+    //likelihood->computeLikelihoodComponents_EmptyColumn(utree->rootnode, likelihood->pi, is_DNA_AA_Codon, extended_alphabet_size);
 
     //p0 = LKFunc::compute_log_lk_empty_col(*tree, pi, is_DNA_AA_Codon, extended_alphabet_size);
     //VLOG(2) << "[Initial LK] p0 = " << p0 << std::endl;
@@ -294,11 +311,10 @@ int main(int argc, char **argv) {
     //VLOG(1) << "[Initial LK] LK = " << logLK << std::endl;
 
     //----------------------------------------------
-    likelihood->loadParametersOperative();
-    std::vector<VirtualNode *> allnodes_postorder;
-    likelihood->fillNodeListComplete_bottomUp(allnodes_postorder, utree->rootnode);
+    //likelihood->loadParametersOperative();
+
     logLK = likelihood->computePartialLK(allnodes_postorder, *alignment, likelihood->pi);
-    likelihood->unloadParametersOperative();
+    likelihood->saveLikelihoodComponents();
 
     VLOG(2) << "[Initial LK] Full Tree from partial lk routines " << logLK;
 
@@ -385,7 +401,7 @@ int main(int argc, char **argv) {
             list_vnode_to_root.clear();
             list_vnode_to_root = utree->computePathBetweenNodes(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode());
             list_vnode_to_root.push_back(utree->rootnode);
-            std::reverse(list_vnode_to_root.begin(), list_vnode_to_root.end());
+            //std::reverse(list_vnode_to_root.begin(), list_vnode_to_root.end());
 
             // Apply the move
             status = rearrangmentList->applyMove(i);
@@ -407,6 +423,7 @@ int main(int argc, char **argv) {
 
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
                 likelihood->recombineAllFv(list_vnode_to_root);
+                likelihood->setInsertionHistories(list_vnode_to_root,*alignment);
                 logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
 
 
@@ -453,7 +470,7 @@ int main(int argc, char **argv) {
                 // Add the root
                 utree->addVirtualRootNode();
                 //if (!rearrangmentList->getMove(i)->move_applied) {
-                likelihood->revertAllFv(list_vnode_to_root); // clear not necessary
+                //likelihood->revertAllFv(list_vnode_to_root); // clear not necessary
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
                 likelihood->recombineAllFv(list_vnode_to_root);
                 logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment, pi);
@@ -518,8 +535,8 @@ void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utre
             //utree->findPseudoRoot()
             // root->setAncestralFlag(s, msa_col, false);
 
-            bool temp = tempnode->vnode_setA_temp.at(msa_col);
-            bool ref = tempnode->vnode_setA.at(msa_col);
+            bool temp = tempnode->vnode_setA_operative.at(msa_col);
+            bool ref = tempnode->vnode_setA_backup.at(msa_col);
 
             if (ref == false && temp == true) {
                 if (find(list_vnode_to_root.begin(), list_vnode_to_root.end(), tempnode) != list_vnode_to_root.end()) {

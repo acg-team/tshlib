@@ -49,6 +49,7 @@
 #include "Alphabet.h"
 #include "Sequence.hpp"
 
+enum class AlignmentAlphabet {dna, aa, codon, undef};
 
 class Alignment {
 
@@ -62,6 +63,7 @@ public:
     std::vector<int> align_weight;
     std::vector<int> align_num_characters;
     long align_length;
+    AlignmentAlphabet alphabet;
 
     Alignment();
 

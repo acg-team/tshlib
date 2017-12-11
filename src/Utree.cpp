@@ -70,8 +70,8 @@ void ::UtreeUtils::_traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *s
             ichild->vnode_name = source->get_children().at(i)->getName();
             ichild->vnode_branchlength = source->get_children().at(i)->getBranchLength();
             // Set all the other directions to null
-            ichild->setNodeLeft(nullptr);
-            ichild->setNodeRight(nullptr);
+            ichild->_setNodeLeft(nullptr);
+            ichild->_setNodeRight(nullptr);
 
             // Set the LEAF flag to true
             ichild->vnode_leaf = true;
@@ -113,8 +113,8 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
     // Collapse multiforcating trees to star tree pointing to the same pseudoroot
     // Pick root node at random within the node-vector
 
-    out_tree->startVNodes.at(0)->setNodeUp(out_tree->startVNodes.at(1));
-    out_tree->startVNodes.at(1)->setNodeUp(out_tree->startVNodes.at(0));
+    out_tree->startVNodes.at(0)->_setNodeUp(out_tree->startVNodes.at(1));
+    out_tree->startVNodes.at(1)->_setNodeUp(out_tree->startVNodes.at(0));
 
 }
 
@@ -220,7 +220,7 @@ VirtualNode::VirtualNode() {
 void VirtualNode::connectNode(VirtualNode *inVNode) {
 
     // Connect this node to the parent node
-    inVNode->setNodeUp(this);
+    inVNode->_setNodeUp(this);
     //inNode->_oneway_connectNode(this);
     this->_oneway_connectNode(inVNode);
 }
@@ -234,7 +234,7 @@ bool VirtualNode::isTerminalNode() {
 
 bool VirtualNode::isRootNode() {
 
-    return this->getNodeUp()->getNodeUp()==this;
+    return this->getNodeUp() == nullptr;
 }
 
 
@@ -244,21 +244,21 @@ void VirtualNode::setNodeName(const std::string s){
 }
 
 
-void VirtualNode::setNodeRight(VirtualNode *inVNode) {
+void VirtualNode::_setNodeRight(VirtualNode *inVNode) {
 
     this->vnode_right = inVNode;
 
 }
 
 
-void VirtualNode::setNodeLeft(VirtualNode *inVNode) {
+void VirtualNode::_setNodeLeft(VirtualNode *inVNode) {
 
     this->vnode_left = inVNode;
 
 }
 
 
-void VirtualNode::setNodeUp(VirtualNode *inVNode) {
+void VirtualNode::_setNodeUp(VirtualNode *inVNode) {
 
     this->vnode_up = inVNode;
 
@@ -274,7 +274,7 @@ void VirtualNode:: setLeafCharacter(char ch) {
 
 
 void VirtualNode::setSetA(bool b) {
-    //this->vnode_setA = b;
+    //this->vnode_setA_backup = b;
 }
 
 
@@ -292,7 +292,7 @@ void VirtualNode::setMSAFv(Eigen::VectorXd &fv) {
 
 bool VirtualNode::getSetA(int colnum) {
 
-    return this->vnode_setA.at(colnum);
+    return this->vnode_setA_backup.at(colnum);
 }
 
 
@@ -323,13 +323,6 @@ void VirtualNode::setBeta(double beta){
 const Eigen::MatrixXd & VirtualNode::getPr() {
 
     return this->vnode_Pr;
-}
-
-
-char VirtualNode::getLeafCharacter(){
-
-
-    //return this->vnode_character;
 }
 
 
@@ -396,7 +389,7 @@ void VirtualNode::_traverseVirtualNodeTree(){
     //    std::cout<<"[Node char] '' "<<std::endl;
     //}
 
-    //std::cout<<"[Node setA_flag] "<<this->vnode_setA<<std::endl;
+    //std::cout<<"[Node setA_flag] "<<this->vnode_setA_backup<<std::endl;
 
     if(this->isTerminalNode()){
         std::cout<<std::endl;
@@ -426,78 +419,46 @@ double VirtualNode::computeTotalTreeLength() {
 }
 
 
-void VirtualNode::setAllIotas(double tau, double mu){
-    double T;
-
-    if (fabs(mu) < 1e-8) {
-        perror("ERROR in set_iota: mu too small");
-    }
-
-    T = tau + 1 / mu;
-
-    if (fabs(T) < 1e-8) {
-        perror("ERROR in set_iota: T too small");
-    }
-
-    if (this->vnode_up==NULL) {
-            this->vnode_iota=(1/mu)/T;
-    } else {
-        this->getNodeLeft()->setAllIotas(tau,mu);
-        this->getNodeRight()->setAllIotas(tau,mu);
-        this->vnode_iota = this->vnode_branchlength / T;
-    }
-
-}
-
-
-void VirtualNode::setAllBetas(double mu){
-
-    if (fabs(mu) < 1e-8) {
-        perror("ERROR in set_iota: mu too small");
-    }
-
-    if (this->vnode_up==NULL) {
-        this->vnode_beta=1.0;
-    } else {
-        this->getNodeLeft()->setAllBetas(mu);
-        this->getNodeRight()->setAllBetas(mu);
-        if (fabs(this->vnode_branchlength) < 1e-8) {
-            perror("ERROR : branch_length too small");
-        }
-        this->vnode_beta= (1.0 - exp(-mu * this->vnode_branchlength)) / (mu * this->vnode_branchlength);
-    }
-
-}
 
 
 void VirtualNode::recombineFv(){
-    unsigned int lL,lR;
 
-    if(this->isTerminalNode()){
+    if(!this->isTerminalNode()){
 
-        for(unsigned int k=0;k<this->vnode_Fv_backup.size();k++){
-            this->vnode_Fv_operative.push_back(this->vnode_Fv_backup.at(k));
+        for (unsigned int k = 0; k < this->vnode_Fv_operative.size(); k++) {
+
+            Eigen::VectorXd &fvL = this->getNodeLeft()->vnode_Fv_operative.at(k);
+            Eigen::VectorXd &fvR = this->getNodeRight()->vnode_Fv_operative.at(k);
+
+
+/*            for(int i=0; i<5; i++){
+                std::cout << fvL[i] <<"\t";
+            }
+            std::cout << std::endl;
+
+            for(int i=0; i<5; i++){
+                std::cout << fvR[i] <<"\t";
+            }
+            std::cout << std::endl;*/
+
+            //Eigen::VectorXd fv0 = ;
+
+            Eigen::VectorXd fvN = this->getNodeLeft()->getPr() * (fvL).cwiseProduct(this->getNodeRight()->getPr() * (fvR));
+           // Eigen::VectorXd fvN =  (fvL).cwiseProduct(fvR);
+            this->vnode_Fv_operative[k] = fvN;
+
+/*            for(int i=0; i<5; i++){
+                std::cout << fvN[i] <<"\t";
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;*/
         }
-        this->vnode_Fv_empty_operative = this->vnode_Fv_empty_backup;
 
-    }else {
+        Eigen::VectorXd &fvE_L = this->getNodeLeft()->vnode_Fv_empty_operative;
+        Eigen::VectorXd &fvE_R = this->getNodeRight()->vnode_Fv_empty_operative;
 
-        lL = this->getNodeLeft()->vnode_Fv_backup.size();
-        lR = this->getNodeRight()->vnode_Fv_backup.size();
-
-        if (lL != lR) {
-            perror("ERROR: left fv size different from right fv size");
-            exit(EXIT_FAILURE);
-        }
-
-        this->vnode_Fv_operative.clear();
-        for (unsigned int k = 0; k < lL; k++) {
-            Eigen::VectorXd &fvL = this->getNodeLeft()->vnode_Fv_backup.at(k);
-            Eigen::VectorXd &fvR = this->getNodeRight()->vnode_Fv_backup.at(k);
-            Eigen::VectorXd fv0 = fvL.cwiseProduct(fvR);
-            this->vnode_Fv_operative.push_back(fv0);
-        }
-        this->vnode_Fv_empty_operative = this->getNodeLeft()->vnode_Fv_empty_backup.cwiseProduct(this->getNodeRight()->vnode_Fv_empty_backup);
+        this->vnode_Fv_empty_operative = (this->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(this->getNodeRight()->getPr() * (fvE_R));
+        //this->vnode_Fv_empty_operative = this->getNodeLeft()->vnode_Fv_empty_operative.cwiseProduct(this->getNodeRight()->vnode_Fv_empty_operative);
     }
 
 }
@@ -528,7 +489,7 @@ void VirtualNode::clearChildren(){
 
 void VirtualNode::printAncestralFlagOnFile(FILE *fid){
 
-    //fprintf(fid,"%s %d\n",this->vnode_name.c_str(),this->vnode_setA);
+    //fprintf(fid,"%s %d\n",this->vnode_name.c_str(),this->vnode_setA_backup);
 
     if(this->isTerminalNode()){
 
@@ -727,7 +688,7 @@ void Utree::_printUtree(){
 //            std::cout<<"[Node char] '' "<<std::endl;
 //        }
 
-        //std::cout<<"[Node setA_flag] "<<vn->vnode_setA<<std::endl;
+        //std::cout<<"[Node setA_flag] "<<vn->vnode_setA_backup<<std::endl;
 
         std::cout<<std::endl;
     }
@@ -1029,22 +990,22 @@ void VirtualNode::disconnectNode() {
     switch (this->indexOf()) {
         case NodePosition::left:
             // The node is connected on the left side
-            this->getNodeUp()->setNodeLeft(nullptr);
+            this->getNodeUp()->_setNodeLeft(nullptr);
             break;
         case NodePosition::right:
             // The node is connected on the right side
-            this->getNodeUp()->setNodeRight(nullptr);
+            this->getNodeUp()->_setNodeRight(nullptr);
             break;
         case NodePosition::up:
             // The node is connect on the up side (pseudoroot)
-            this->getNodeUp()->setNodeUp(nullptr);
+            this->getNodeUp()->_setNodeUp(nullptr);
             break;
         default:
             break;
     }
 
     // 2. Disconnect the parent node
-    this->setNodeUp(nullptr);
+    this->_setNodeUp(nullptr);
 }
 
 
@@ -1052,13 +1013,13 @@ void VirtualNode::_oneway_connectNode(VirtualNode *inVNode) {
 
     // Check which direction is still available (either left or right)
     if (!this->getNodeLeft()) {
-        this->setNodeLeft(inVNode);
+        this->_setNodeLeft(inVNode);
         return;
     } else if (!this->getNodeRight()) {
-        this->setNodeRight(inVNode);
+        this->_setNodeRight(inVNode);
         return;
     } else if (!this->getNodeUp()) {
-        this->setNodeUp(inVNode);
+        this->_setNodeUp(inVNode);
         return;
     } else {
         perror("No direction available in the VirtualNode to add a new child");
@@ -1088,21 +1049,21 @@ bool VirtualNode::isParent(VirtualNode *inVNode) {
 void VirtualNode::_recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum) {
 
     if (this->isTerminalNode()) {
-        //this->vnode_descCount = (this->vnode_character == '-' ? 0 : 1);
+        //this->vnode_descCount_backup = (this->vnode_character == '-' ? 0 : 1);
         if(isReference){
-            this->vnode_descCount.at(colnum) = (MSA.align_dataset.at(this->vnode_seqid)->seq_data.at(colnum) == '-' ? 0 : 1);
+            this->vnode_descCount_backup.at(colnum) = (MSA.align_dataset.at(this->vnode_seqid)->seq_data.at(colnum) == '-' ? 0 : 1);
         } else{
-            this->vnode_descCount_temp.at(colnum) = (MSA.align_dataset.at(this->vnode_seqid)->seq_data.at(colnum) == '-' ? 0 : 1);
+            this->vnode_descCount_operative.at(colnum) = (MSA.align_dataset.at(this->vnode_seqid)->seq_data.at(colnum) == '-' ? 0 : 1);
         }
     } else {
         this->getNodeLeft()->_recursiveSetDescCount(MSA, isReference, colnum);
         this->getNodeRight()->_recursiveSetDescCount(MSA, isReference, colnum);
         if (isReference) {
-            this->vnode_descCount.at(colnum) = this->getNodeLeft()->vnode_descCount.at(colnum) +
-                                               this->getNodeRight()->vnode_descCount.at(colnum);
+            this->vnode_descCount_backup.at(colnum) = this->getNodeLeft()->vnode_descCount_backup.at(colnum) +
+                                               this->getNodeRight()->vnode_descCount_backup.at(colnum);
         }else{
-            this->vnode_descCount_temp.at(colnum) = this->getNodeLeft()->vnode_descCount_temp.at(colnum) +
-                                               this->getNodeRight()->vnode_descCount_temp.at(colnum);
+            this->vnode_descCount_operative.at(colnum) = this->getNodeLeft()->vnode_descCount_operative.at(colnum) +
+                                               this->getNodeRight()->vnode_descCount_operative.at(colnum);
         }
     }
 
@@ -1113,25 +1074,25 @@ void VirtualNode::_recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool is
 
     if (this->isTerminalNode()) {
         if(isReference) {
-            descCount = this->vnode_descCount.at(colnum);
+            descCount = this->vnode_descCount_backup.at(colnum);
             //this->setSetA(descCount == num_gaps);
-            this->vnode_setA.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
+            this->vnode_setA_backup.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
         }else{
-            descCount = this->vnode_descCount_temp.at(colnum);
+            descCount = this->vnode_descCount_operative.at(colnum);
             //this->setSetA(descCount == num_gaps);
-            this->vnode_setA_temp.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
+            this->vnode_setA_operative.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
         }
     } else {
         this->getNodeLeft()->_recursiveSetAncestralFlag(MSA, colnum, isReference);
         this->getNodeRight()->_recursiveSetAncestralFlag(MSA, colnum, isReference);
         if(isReference) {
-            descCount = this->vnode_descCount.at(colnum);
-            this->vnode_setA.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
+            descCount = this->vnode_descCount_backup.at(colnum);
+            this->vnode_setA_backup.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
         }else{
-            descCount = this->vnode_descCount_temp.at(colnum);
-            this->vnode_setA_temp.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
+            descCount = this->vnode_descCount_operative.at(colnum);
+            this->vnode_setA_operative.at(colnum) = (descCount == MSA.align_num_characters.at(colnum));
         }
-        //descCount = this->vnode_descCount;
+        //descCount = this->vnode_descCount_backup;
         //this->setSetA(descCount == num_gaps);
     }
 
@@ -1139,16 +1100,12 @@ void VirtualNode::_recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool is
 
 void VirtualNode::setAncestralFlag(Alignment &MSA, int colnum, bool isReference) {
 
-    int num_gaps;
-    //TODO: replace MSA col string with MSA obj
-    //num_gaps= AlignUtils::countNumCharactersInMSAColumn(MSA);
-
     this->_recursiveSetDescCount(MSA, isReference, colnum);
 
     this->_recursiveSetAncestralFlag(MSA, isReference, false);
 
-
 }
+
 
 void Utree::setLeafState(std::string s){
 
@@ -1160,11 +1117,11 @@ void Utree::setLeafState(std::string s){
 
 }
 
-void Utree::prepareSetADesCountOnNodes(int numcol) {
+void Utree::prepareSetADesCountOnNodes(int numcol, int lengthAlphabet) {
 
     for (auto &node:this->listVNodes){
 
-        node->prepareSetA_DescCount(numcol);
+        node->initialiseLikelihoodComponents(numcol, lengthAlphabet);
 
     }
 
@@ -1205,8 +1162,8 @@ void Utree::removeVirtualRootNode() {
     right->disconnectNode();
 
     // Establish bidirectional connection
-    left->setNodeUp(right);
-    right->setNodeUp(left);
+    left->_setNodeUp(right);
+    right->_setNodeUp(left);
 
     // Clear residual connection with virtual root node
     this->rootnode->clearChildren();
@@ -1218,7 +1175,10 @@ std::vector<VirtualNode *> Utree::computePathBetweenNodes(VirtualNode *vnode_1, 
     std::vector<VirtualNode *> path2root_1 = this->findPseudoRoot(vnode_1, false);
     std::vector<VirtualNode *> path2root_2 = this->findPseudoRoot(vnode_2, false);
 
-    std::vector<VirtualNode *> list_vnode_to_root = this->_unique(path2root_1, path2root_2);
+    std::reverse(path2root_1.begin(), path2root_1.end());
+    std::reverse(path2root_2.begin(), path2root_2.end());
+
+    std::vector<VirtualNode *> list_vnode_to_root = this->_unique(path2root_1,path2root_2);
 
     //delete(path2root_1);
     //delete(path2root_2);
@@ -1308,9 +1268,9 @@ void VirtualNode::_recursive_cw_rotation(VirtualNode *vnode, bool revertRotation
         curr_vn_left = vnode->getNodeLeft();
         curr_vn_right = vnode->getNodeRight();
 
-        vnode->setNodeUp(curr_vn_right);
-        vnode->setNodeLeft(curr_vn_up);
-        vnode->setNodeRight(curr_vn_left);
+        vnode->_setNodeUp(curr_vn_right);
+        vnode->_setNodeLeft(curr_vn_up);
+        vnode->_setNodeRight(curr_vn_left);
 
         // Store the information about the rotation
         if (vnode->vnode_rotated != NodeRotation::undef) {
@@ -1399,9 +1359,9 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
         curr_vn_right = vnode->getNodeRight();
 
         // Revert pointers
-        vnode->setNodeUp(curr_vn_left);
-        vnode->setNodeLeft(curr_vn_right);
-        vnode->setNodeRight(curr_vn_up);
+        vnode->_setNodeUp(curr_vn_left);
+        vnode->_setNodeLeft(curr_vn_right);
+        vnode->_setNodeRight(curr_vn_up);
 
         // Store the information about the rotation
         if (vnode->vnode_rotated != NodeRotation::undef) {
@@ -1454,13 +1414,28 @@ void VirtualNode::_recursive_ccw_rotation(VirtualNode *vnode, bool revertRotatio
 
 }
 
-void VirtualNode::prepareSetA_DescCount(int numcol) {
+void VirtualNode::initialiseLikelihoodComponents(int numcol, int lengthAlphabet) {
 
-    this->vnode_descCount.resize(numcol);
-    this->vnode_descCount_temp.resize(numcol);
-    this->vnode_setA.resize(numcol);
-    this->vnode_setA_temp.resize(numcol);
+    this->vnode_descCount_backup.resize(numcol);
+    this->vnode_descCount_operative.resize(numcol);
+    this->vnode_descCount_best.resize(numcol);
 
+    this->vnode_setA_backup.resize(numcol);
+    this->vnode_setA_operative.resize(numcol);
+    this->vnode_setA_best.resize(numcol);
+
+    //this->vnode_Fv_empty_backup.resize(lengthAlphabet);
+    //this->vnode_Fv_empty_operative.resize(lengthAlphabet);
+    //this->vnode_Fv_empty_best.resize(lengthAlphabet);
+
+    this->vnode_Fv_backup.resize(numcol);
+    this->vnode_Fv_operative.resize(numcol);
+    this->vnode_Fv_best.resize(numcol);
+
+}
+
+bool VirtualNode::isPseudoRootNode() {
+    return this->getNodeUp()->getNodeUp()==this;
 }
 
 

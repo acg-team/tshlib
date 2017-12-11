@@ -84,24 +84,24 @@ public:
     double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
     double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
     Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
-    double vnode_tau;                               /* Tau value up to this node */
-    double vnode_nu;                                /* Nu value associated to this node */
     std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
     std::vector<Eigen::VectorXd> vnode_Fv_operative;
     std::vector<Eigen::VectorXd> vnode_Fv_best;
     Eigen::VectorXd vnode_Fv_empty_backup;
     Eigen::VectorXd vnode_Fv_empty_operative;
     Eigen::VectorXd vnode_Fv_empty_best;
-    std::vector<bool> vnode_setA;                                   /* Flag: Include node in computing the set A -- might be not necessary */
-    std::vector<int> vnode_descCount;                            /* Counter of the characters associated    */
-    std::vector<bool> vnode_setA_temp;                                /* Flag: Include node in computing the set A -- might be not necessary */
-    std::vector<int> vnode_descCount_temp;                            /* Counter of the characters associated    */
-    //char vnode_character;                           /* Character associated to this node (only if terminal node) */
+    std::vector<bool> vnode_setA_backup;                   /* Flag: Include node in computing the set A -- might be not necessary */
+    std::vector<int> vnode_descCount_backup;               /* Counter of the characters associated    */
+    std::vector<bool> vnode_setA_operative;              /* Flag: Include node in computing the set A -- might be not necessary */
+    std::vector<int> vnode_descCount_operative;          /* Counter of the characters associated    */
+    std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
+    std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
+    //char vnode_character;                         /* Character associated to this node (only if terminal node) */
     int vnode_seqid;                                /* Seq id on alignment vector */
     int vnode_depth;                                /* Depth level of the node in the tree */
     bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
     int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
-    NodeRotation vnode_rotated;                              /* Flag: if node was rotaded during a tree rearrangement move */
+    NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
 
     /*!
      *  Standard constructor
@@ -153,19 +153,13 @@ public:
 
     void setNodeName(const std::string s);
 
-    virtual void setNodeRight(VirtualNode *inVNode);
-
-    virtual void setNodeLeft(VirtualNode *inVNode);
-
-    virtual void setNodeUp(VirtualNode *inVNode);
+    std::string getNodeName();
 
     virtual void setLeafCharacter(char ch);
 
     void setMSAFv(Eigen::VectorXd &fv);
 
     virtual void setSetA(bool b);
-
-    std::string getNodeName();
 
     bool getSetA(int colnum);
 
@@ -176,8 +170,6 @@ public:
     double getBeta();
 
     void setBeta(double beta);
-
-    char getLeafCharacter();
 
     const Eigen::MatrixXd &getPr();
 
@@ -191,11 +183,9 @@ public:
 
     double computeTotalTreeLength();
 
-    void setAllIotas(double tau, double mu);
 
-    void setAllBetas(double mu);
 
-    void prepareSetA_DescCount(int numcol);
+    void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
 
     void recombineFv();
 
@@ -206,7 +196,6 @@ public:
     void clearChildren();
 
     void printAncestralFlagOnFile(FILE *fid);
-
 
     /*!
      * @brief This function returns true if the node is terminal
@@ -219,6 +208,12 @@ public:
      * @return boolean value (true or false)
      */
     bool isRootNode();
+
+    /*!
+     * @brief This function returns true if the node is pseudoroot
+     * @return boolean value (true or false)
+     */
+    bool isPseudoRootNode();
 
     /*!
      * @brief This function return the index of node as seen from the parent immediate above it.
@@ -244,10 +239,18 @@ public:
 
     void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
+    virtual void _setNodeRight(VirtualNode *inVNode);
+
+    virtual void _setNodeLeft(VirtualNode *inVNode);
+
+    virtual void _setNodeUp(VirtualNode *inVNode);
+
+
 protected:
     VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
     VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
     VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
+
 
     virtual void _oneway_connectNode(VirtualNode *inVNode);
 
@@ -331,7 +334,7 @@ public:
 
     virtual void setLeafState(std::string s);
 
-    virtual void prepareSetADesCountOnNodes(int numcol);
+    virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
 
     virtual void _printUtree();
 
