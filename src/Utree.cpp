@@ -423,42 +423,27 @@ double VirtualNode::computeTotalTreeLength() {
 
 void VirtualNode::recombineFv(){
 
+    // For each internal node
     if(!this->isTerminalNode()){
 
+        // For each column of the alignment
         for (unsigned int k = 0; k < this->vnode_Fv_operative.size(); k++) {
 
             Eigen::VectorXd &fvL = this->getNodeLeft()->vnode_Fv_operative.at(k);
             Eigen::VectorXd &fvR = this->getNodeRight()->vnode_Fv_operative.at(k);
 
-
-/*            for(int i=0; i<5; i++){
-                std::cout << fvL[i] <<"\t";
-            }
-            std::cout << std::endl;
-
-            for(int i=0; i<5; i++){
-                std::cout << fvR[i] <<"\t";
-            }
-            std::cout << std::endl;*/
-
-            //Eigen::VectorXd fv0 = ;
-
             Eigen::VectorXd fvN = this->getNodeLeft()->getPr() * (fvL).cwiseProduct(this->getNodeRight()->getPr() * (fvR));
-           // Eigen::VectorXd fvN =  (fvL).cwiseProduct(fvR);
+
             this->vnode_Fv_operative[k] = fvN;
 
-/*            for(int i=0; i<5; i++){
-                std::cout << fvN[i] <<"\t";
-            }
-            std::cout << std::endl;
-            std::cout << std::endl;*/
         }
 
+        // Before moving to the next node, recompute the empty column fv quantities
         Eigen::VectorXd &fvE_L = this->getNodeLeft()->vnode_Fv_empty_operative;
         Eigen::VectorXd &fvE_R = this->getNodeRight()->vnode_Fv_empty_operative;
 
         this->vnode_Fv_empty_operative = (this->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(this->getNodeRight()->getPr() * (fvE_R));
-        //this->vnode_Fv_empty_operative = this->getNodeLeft()->vnode_Fv_empty_operative.cwiseProduct(this->getNodeRight()->vnode_Fv_empty_operative);
+
     }
 
 }
@@ -467,7 +452,6 @@ void VirtualNode::recombineFv(){
 void VirtualNode::revertFv(){
 
     this->vnode_Fv_operative.clear();
-
 }
 
 
@@ -476,7 +460,6 @@ void VirtualNode::keepFv(){
     this->vnode_Fv_best.clear();
     this->vnode_Fv_best=this->vnode_Fv_operative;
     this->vnode_Fv_empty_best = this->vnode_Fv_empty_operative;
-
 
 }
 
@@ -694,8 +677,6 @@ void Utree::_printUtree(){
     }
 
 }
-
-
 
 
 void Utree::clearFv() {
@@ -1069,6 +1050,7 @@ void VirtualNode::_recursiveSetDescCount(Alignment &MSA, bool isReference, int c
 
 }
 
+
 void VirtualNode::_recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference) {
     int descCount;
 
@@ -1097,6 +1079,7 @@ void VirtualNode::_recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool is
     }
 
 }
+
 
 void VirtualNode::setAncestralFlag(Alignment &MSA, int colnum, bool isReference) {
 

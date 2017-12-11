@@ -150,9 +150,6 @@ int main(int argc, char **argv) {
     PhyTree *tree = nullptr;
     double mu;
     double lambda;
-    double tau;
-    double nu;
-    int is_DNA_AA_Codon;
     int extended_alphabet_size;
     unsigned long num_leaves;
     double logLK;
@@ -199,15 +196,7 @@ int main(int argc, char **argv) {
     utree->rootnode->initialiseLikelihoodComponents((int) alignment->getAlignmentSize(), extended_alphabet_size);
 
     //---------------------------------------------------------
-    // compute total tree length
-
-    //tau = tree->computeLength();
-    //VLOG(2) << "[PhyTree length] " << tau;
-    //tau = utree->computeTotalTreeLength();
-    //VLOG(2) << "[Utree length] " << tau;
-    //tau = root->computeTotalTreeLength();
-    //tau = utree->rootnode->computeTotalTreeLength();
-    //VLOG(2) << "[Tree length (from root)] " << tau;
+    // SET MODEL PARAMETERS Q, pi,  mu, lambda
 
     mu = 0.1;
     lambda = 0.2;
@@ -231,15 +220,6 @@ int main(int argc, char **argv) {
         Q(r,extended_alphabet_size-1) = mu;
     }
 
-
-
-    auto likelihood = new Likelihood();
-
-    likelihood->Init(utree, pi, Q, mu, lambda);
-
-    // compute the normalizing Poisson intensity
-    //nu = likelihood->setNu(tau, lambda, mu);
-
 /*
     auto pip_model = new PIP;
     pip_model->lambda = lambda;
@@ -252,19 +232,20 @@ int main(int argc, char **argv) {
     // print newick tree
     //LOG(INFO) << "[Initial PhyTree Topology] " << tree->formatNewick() << std::endl;
 
-
     //----------------------------------------------------------
     // INITIAL LIKELIHOOD COMPUTATION
 
+    auto likelihood = new Likelihood();
+
+    likelihood->Init(utree, pi, Q, mu, lambda);
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;
 
     bool isReferenceRun = true;
 
-
     std::vector<VirtualNode *> allnodes_postorder;
-    likelihood->fillNodeListComplete_bottomUp(allnodes_postorder, utree->rootnode);
+    likelihood->compileNodeList_postorder(allnodes_postorder, utree->rootnode);
 
     // Set survival probability to each node in the list
     likelihood->setAllIotas(allnodes_postorder);
@@ -280,14 +261,14 @@ int main(int argc, char **argv) {
     // Initialise likelihood components on the tree
     likelihood->computeFV(allnodes_postorder, *alignment);
 
-    //likelihood->unloadParametersOperative();
-
-    //----------------------------------------------
-    //likelihood->loadParametersOperative();
-
-    logLK = likelihood->computePartialLK(allnodes_postorder, *alignment);
+    // Make a backup of the newly computed components
     likelihood->saveLikelihoodComponents();
 
+    //likelihood->loadParametersOperative();
+    //likelihood->unloadParametersOperative();
+
+    // Compute the model likelihood
+    logLK = likelihood->computePartialLK(allnodes_postorder, *alignment);
     VLOG(2) << "[Initial LK] Full Tree from partial lk routines " << logLK;
 
     //------------------------------------------------------------------------------------------------------------------
@@ -396,7 +377,6 @@ int main(int argc, char **argv) {
                 likelihood->recombineAllFv(list_vnode_to_root);
                 likelihood->setInsertionHistories(list_vnode_to_root,*alignment);
                 logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
-
 
                 //VLOG(2) << "[Tree LK] Before Brent: " << logLK;
                 double max_lenght = pi[1] * 1.1;

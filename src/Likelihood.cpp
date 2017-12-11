@@ -49,6 +49,7 @@
 #include "Likelihood.hpp"
 
 namespace LKFunc {
+    /*
     Eigen::VectorXd
     compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
         Eigen::VectorXd fv;
@@ -150,10 +151,10 @@ namespace LKFunc {
     }
 
 
-
+*/
 }
 
-
+/*
 double Likelihood::computeLikelihoodComponents_EmptyColumn(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
 
     _computeLikelihoodComponentsEmptyColumn_recursive(root, pi, is_DNA_AA_Codon, dim_extended_alphabet);
@@ -239,7 +240,7 @@ Likelihood::_computeLikelihoodComponents_recursive(VirtualNode *vnode, Eigen::Ve
 double Likelihood::computeLikelihoodComponents(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA) {
     _computeLikelihoodComponents_recursive(root, pi, is_DNA_AA_Codon, alphabet_size, colnum, MSA);
 }
-
+*/
 void Likelihood::setNu() {
 
     if (fabs(this->mu) < 1e-8) {
@@ -351,6 +352,7 @@ double Likelihood::computePartialLK(std::vector<VirtualNode *> &list_vnode_to_ro
 
 
 }
+/*
 
 double Likelihood::computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet) {
 
@@ -447,6 +449,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 
 
 }
+*/
 
 void Likelihood::Init(Utree *tree, Eigen::VectorXd &pi, Eigen::MatrixXd &Q, double mu, double lambda) {
 
@@ -483,12 +486,12 @@ void Likelihood::computePr(std::vector<VirtualNode *> &listNodes, int extended_a
     }
 }
 
-void Likelihood::fillNodeListComplete_bottomUp(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode) {
+void Likelihood::compileNodeList_postorder(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode) {
 
     if(!vnode->isTerminalNode()){
 
-        fillNodeListComplete_bottomUp(nodelist, vnode->getNodeLeft());
-        fillNodeListComplete_bottomUp(nodelist, vnode->getNodeRight());
+        compileNodeList_postorder(nodelist, vnode->getNodeLeft());
+        compileNodeList_postorder(nodelist, vnode->getNodeRight());
         nodelist.push_back(vnode);
 
     }else{
@@ -707,9 +710,8 @@ void Likelihood::setAllBetas(std::vector<VirtualNode *> &listNodes){
 
 
 Likelihood::Likelihood() = default;
+
 Likelihood::~Likelihood() = default;
-
-
 
 
 
@@ -718,10 +720,18 @@ double LKFunc::LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Ali
 
 }
 
-PIP::PIP() = default;
+modelPIP::modelPIP() = default;
 
-PIP::~PIP() = default;
+modelPIP::~modelPIP() = default;
 
 Model::Model() = default;
 
 Model::~Model() = default;
+
+Parameters::Parameters() = default;
+
+Parameters::~Parameters() = default;
+
+parametersPIP::parametersPIP() = default;
+
+parametersPIP::~parametersPIP() = default;
