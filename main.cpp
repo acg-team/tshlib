@@ -348,11 +348,14 @@ int main(int argc, char **argv) {
         for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
             logLK = 0;
 
+            VirtualNode *pnode = rearrangmentList->getSourceNode();
+            VirtualNode *qnode = rearrangmentList->getMove(i)->getTargetNode();
+
             // ------------------------------------
             // Prepare the list of nodes involved in the move
             // TODO: This list belongs specifically to the tree-rearrangement definition -> move to TreeRearrangment class
             list_vnode_to_root.clear();
-            list_vnode_to_root = utree->computePathBetweenNodes(rearrangmentList->getSourceNode(), rearrangmentList->getMove(i)->getTargetNode());
+            list_vnode_to_root = utree->computePathBetweenNodes(pnode, qnode);
             list_vnode_to_root.push_back(utree->rootnode);
 
             // ------------------------------------
@@ -432,7 +435,7 @@ int main(int argc, char **argv) {
             // Prepare the list of nodes involved in the move
             // TODO: This list belongs specifically to the tree-rearrangement definition -> move to TreeRearrangment class
             list_vnode_to_root.clear();
-            list_vnode_to_root = utree->computePathBetweenNodes(rearrangmentList->getMove(i)->getTargetNode(), rearrangmentList->getSourceNode());
+            list_vnode_to_root = utree->computePathBetweenNodes(qnode, pnode);
             list_vnode_to_root.push_back(utree->rootnode);
 
             // ------------------------------------
@@ -453,6 +456,7 @@ int main(int argc, char **argv) {
                 // ------------------------------------
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
                 likelihood->recombineAllFv(allnodes_postorder);
+                likelihood->setInsertionHistories(allnodes_postorder,*alignment);
                 logLK = likelihood->computePartialLK(allnodes_postorder, *alignment);
 
                 // ------------------------------------
