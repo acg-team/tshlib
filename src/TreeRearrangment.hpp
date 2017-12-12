@@ -151,8 +151,6 @@ public:
 
     virtual void selectBestMove(unsigned long moveID);
 
-    virtual void generateNodeList(ModelParameters_PIP parameter);
-
 protected:
 
     /*!

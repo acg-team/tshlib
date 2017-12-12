@@ -719,18 +719,3 @@ double LKFunc::LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Ali
 
 }
 
-modelPIP::modelPIP() = default;
-
-modelPIP::~modelPIP() = default;
-
-Model::Model() = default;
-
-Model::~Model() = default;
-
-Parameters::Parameters() = default;
-
-Parameters::~Parameters() = default;
-
-parametersPIP::parametersPIP() = default;
-
-parametersPIP::~parametersPIP() = default;

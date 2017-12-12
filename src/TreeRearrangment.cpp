@@ -286,11 +286,6 @@ void TreeRearrangment::selectBestMove(unsigned long moveID) {
 
 }
 
-void TreeRearrangment::generateNodeList(ModelParameters_PIP parameter) {
-
-
-
-}
 
 
 Move::~Move() = default;

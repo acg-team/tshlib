@@ -53,7 +53,6 @@
 #include "Utree.hpp"
 #include "Alignment.hpp"
 
-enum class ModelParameters_PIP{lamda, mu, tau, branch, qmatrix, pi, undef};
 
 const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
                            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -86,69 +85,6 @@ const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
                              -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                              -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                              -1, -1, -1, -1, -1, -1, -1, -1, -1};
-
-class Model {
-protected:
-    Utree *tree;
-    Alignment *alignment;
-
-public:
-    double lk;
-
-    Model();
-    virtual ~Model();
-
-/*
-    virtual double computeLikelihood();
-    virtual void setTree();
-    virtual Utree* getTree();
-    virtual void setAlignment();
-    virtual Alignment *getAlignment();
-*/
-
-};
-
-class modelPIP : public Model{
-
-public:
-
-    double lambda;
-    double mu;
-    Eigen::VectorXd pi;
-    Eigen::MatrixXd Q;
-    double nu;
-    double tau;
-    double phi;
-    Eigen::MatrixXd V;
-    Eigen::MatrixXd Vi;
-
-    modelPIP();
-    virtual ~modelPIP();
-
-    /*virtual double computeLikelihood();*/
-
-};
-
-class Parameters{
-
-public:
-    Parameters();
-    virtual ~Parameters();
-
-};
-
-
-class parametersPIP: public Parameters{
-
-public:
-    Eigen::VectorXd Fv_empty;
-    Eigen::MatrixXd Fv;
-    Eigen::MatrixXd Pr;
-
-    parametersPIP();
-    virtual ~parametersPIP();
-
-};
 
 
 class Likelihood {
