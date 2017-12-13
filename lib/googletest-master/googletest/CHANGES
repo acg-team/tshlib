@@ -35,7 +35,7 @@ Changes for 1.6.0:
   the XML report now.
 * A gtest_disable_pthreads CMake option.
 * Colored output works in GNU Screen sessions now.
-* Parameters of value-parameterized tests are now printed in the
+* NodeParameters of value-parameterized tests are now printed in the
   textual output.
 * Failures from ad hoc test assertions run before RUN_ALL_TESTS() are
   now correctly reported.

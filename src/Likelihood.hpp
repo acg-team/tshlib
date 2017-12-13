@@ -152,6 +152,8 @@ public:
 
     void setAllBetas(std::vector<VirtualNode *> &listNodes);
 
+    void optimiseLambda(int m, double p0);
+
 //    double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
 //    double computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet );
 //    void recombineEmptyFv(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet);

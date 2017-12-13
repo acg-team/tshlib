@@ -508,7 +508,7 @@ $$   // show up in the generated code.
 //   ...
 //   Expected: not (in closed range (2, 4))
 //
-// Types of Matcher Parameters
+// Types of Matcher NodeParameters
 // ===========================
 //
 // For the purpose of typing, you can view

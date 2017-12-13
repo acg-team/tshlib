@@ -97,7 +97,7 @@ g <- ggplot(tgc, aes(x=nodes, y=time, colour=opt, group = opt)) +
   geom_line(position=pd) +
   geom_point(position=pd, size=1.5, aes(fill=opt), shape=21) + # 21 is filled circle
   geom_smooth(se=FALSE) +
-  #geom_smooth(method="lm", aes(color="Exp Model"), formula= (y ~ exp(x)), se=FALSE, linetype = 1) +
+  #geom_smooth(method="lm", aes(color="Exp SubstitutionModel"), formula= (y ~ exp(x)), se=FALSE, linetype = 1) +
   #geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3), se = FALSE) +
   labs(title="TSHLIB - Benchmark 2: Full network optimisation (d>3, n=10)",
        subtitle="Benchmark performed on 2.9 GHz Intel Core i5 with 8 GB 2133 MHz LPDDR3 using a random generated set of hierarchical binary networks",

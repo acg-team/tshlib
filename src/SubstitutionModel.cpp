@@ -41,20 +41,44 @@
  *
  * @see For more information visit: http://www.lorenzogatti.me
  */
-#include "Model.hpp"
+#include "SubstitutionModel.hpp"
 
-modelPIP::modelPIP() = default;
+/*template<class RevSubModel>
+template <class parType>
+Model_PIP<RevSubModel<parType>>::Model_PIP() = default;
 
-modelPIP::~modelPIP() = default;
+template<class RevSubModel>
+template <class parType>
+Model_PIP<RevSubModel>::~Model_PIP() = default;*/
 
-Model::Model() = default;
+/*
+template<class RevSubModel>
+Model_PIP<RevSubModel>::Model_PIP() = default;
 
-Model::~Model() = default;
+template<class RevSubModel>
+Model_PIP<RevSubModel>::~Model_PIP() = default;
 
-Parameters::Parameters() = default;
 
-Parameters::~Parameters() = default;
+SubstitutionModel::SubstitutionModel() = default;
 
-parametersPIP::parametersPIP() = default;
+SubstitutionModel::~SubstitutionModel() = default;
 
-parametersPIP::~parametersPIP() = default;
+NodeParameters_PIP::NodeParameters_PIP() = default;
+
+NodeParameters_PIP::~NodeParameters_PIP() = default;
+
+Model_JC69::Model_JC69(double valScalingFactor){
+
+    std::string parName = "alpha";
+    double parValue = valScalingFactor;
+    bool parOptimisable = true;
+    bool availableOnNodes = false;
+
+    auto alpha = new Parameter(parName, parValue, parOptimisable, availableOnNodes);
+
+    this->submod_parameters.push_back(alpha);
+
+}
+
+Model_JC69::~Model_JC69() = default;
+*/

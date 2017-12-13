@@ -67,7 +67,7 @@ Optimiser<modelType>::Optimiser(Utree *tree, Alignment *alignment, modelType *mo
     this->model = model;
     this->currScore = 0;
     this->initScore = initialScore;
-    this->limit_type = Optimiser::score;
+    this->limit_type = Optimiser::LimitType::score;
     this->limit_value = 0;
     this->nodeList.clear();
 

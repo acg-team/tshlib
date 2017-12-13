@@ -43,6 +43,7 @@
  */
 #include <fstream>
 #include <random>
+#include <iomanip>
 #include <glog/logging.h>
 #include <glog/logging.h>
 #include <gflags/gflags.h>
@@ -261,6 +262,8 @@ double Likelihood::phi(int m, double p0) {
         log_factorial_m += log(i);
     }
 
+
+
     p = -log_factorial_m + m * log(this->nu) + (this->nu * (p0 - 1));
 
     return p;
@@ -289,6 +292,7 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
 void Likelihood::recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root){
 
     for(auto &vnode:list_vnode_to_root){
+        //std::cout << "[RecombineFV]" << vnode->printNeighbours() << std::endl;
         vnode->recombineFv();
     }
 
@@ -535,8 +539,17 @@ void Likelihood::unloadLikelihoodComponents_Operative() {
 }
 
 void Likelihood::setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA) {
+    //std::cout<<"\t";
+    //for (auto &vnode:listNodes) {
+
+    //    std::cout << "\t"<< vnode->vnode_name;
+    //}
+
+    //std::cout << std::endl;
 
     for(int i=0; i<MSA.getAlignmentSize(); i++) {
+        //std::cout << "["<<std::setfill('0') << std::setw(2)<<i<< "]\t";
+
         for (auto &vnode:listNodes) {
 
             if (vnode->isTerminalNode()) {
@@ -551,10 +564,10 @@ void Likelihood::setInsertionHistories(std::vector<VirtualNode *> &listNodes, Al
             }
 
             vnode->vnode_setA_operative.at(i) = (vnode->vnode_descCount_operative.at(i) == MSA.align_num_characters.at(i));
-
+          //  std::cout << vnode->vnode_setA_operative.at(i) << "\t";
         }
+        //std::cout << std::endl;
     }
-
 
 }
 
@@ -581,30 +594,52 @@ void Likelihood::computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA
                 idx = idx < 0 ? MSA.align_alphabetsize - 1 : idx;
                 fv[idx] = 1.0;
 
-                vnode->vnode_Fv_operative.at(i) = fv;
-                vnode->vnode_Fv_empty_operative = Eigen::VectorXd::Zero(MSA.align_alphabetsize);
-                vnode->vnode_Fv_empty_operative(MSA.align_alphabetsize - 1) = 1;
+                vnode->vnode_Fv_operative.at(i) = vnode->getPr() * fv;
 
             } else {
 
                 Eigen::VectorXd &fvL = vnode->getNodeLeft()->vnode_Fv_operative.at(i);
                 Eigen::VectorXd &fvR = vnode->getNodeRight()->vnode_Fv_operative.at(i);
 
-                vnode->vnode_Fv_operative[i] = (vnode->getNodeLeft()->getPr() * (fvL)).cwiseProduct(vnode->getNodeRight()->getPr() * (fvR));
+                //vnode->vnode_Fv_operative[i] = (vnode->getNodeLeft()->getPr() * (fvL)).cwiseProduct(vnode->getNodeRight()->getPr() * (fvR));
+
+                if(vnode->isRootNode()){
+
+                    vnode->vnode_Fv_operative[i] = (fvL).cwiseProduct(fvR);
+
+                }else{
+
+                    vnode->vnode_Fv_operative[i] = vnode->getPr() * (fvL).cwiseProduct(fvR);
+                }
+
             }
+
         }
 
         if(vnode->isTerminalNode()){
 
-            vnode->vnode_Fv_empty_operative = Eigen::VectorXd::Zero(MSA.align_alphabetsize);
-            vnode->vnode_Fv_empty_operative[MSA.align_alphabetsize - 1] = 1.0;
+                vnode->vnode_Fv_empty_operative = Eigen::VectorXd::Zero(MSA.align_alphabetsize);
+                vnode->vnode_Fv_empty_operative(MSA.align_alphabetsize - 1) = 1.0;
+
+                vnode->vnode_Fv_empty_operative =  vnode->getPr()*vnode->vnode_Fv_empty_operative;
 
         } else{
 
-            Eigen::VectorXd &fvE_L = vnode->getNodeLeft()->vnode_Fv_empty_operative;
-            Eigen::VectorXd &fvE_R = vnode->getNodeRight()->vnode_Fv_empty_operative;
 
-            vnode->vnode_Fv_empty_operative = (vnode->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(vnode->getNodeRight()->getPr() * (fvE_R));
+                Eigen::VectorXd &fvE_L = vnode->getNodeLeft()->vnode_Fv_empty_operative;
+                Eigen::VectorXd &fvE_R = vnode->getNodeRight()->vnode_Fv_empty_operative;
+
+                if(vnode->isRootNode()){
+
+                    vnode->vnode_Fv_empty_operative = (fvE_L).cwiseProduct(fvE_R);
+
+                }else{
+
+                    vnode->vnode_Fv_empty_operative = vnode->getPr() * (fvE_L).cwiseProduct(fvE_R);
+                }
+
+
+                //vnode->vnode_Fv_empty_operative = (vnode->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(vnode->getNodeRight()->getPr() * (fvE_R));
 
         }
 
@@ -707,6 +742,12 @@ void Likelihood::setAllBetas(std::vector<VirtualNode *> &listNodes){
 
 }
 
+void Likelihood::optimiseLambda(int m, double p0) {
+
+
+    this->lambda = exp(phi(m-1, p0))/exp(phi(m, p0)) - 1;
+
+}
 
 Likelihood::Likelihood() = default;
 

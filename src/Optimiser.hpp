@@ -50,7 +50,7 @@
 
 template <class modelType>
 class Optimiser {
-    enum LimitType {score, iterations};
+    enum class LimitType {score, iterations};
 
 private:
 

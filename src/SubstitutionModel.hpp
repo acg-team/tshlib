@@ -50,73 +50,102 @@
 
 #include "Utree.hpp"
 
+/*
+template <class parType>
+class Parameter{
 
-class Model {
+public:
+    std::string par_name;
+    parType par_value;
+    bool par_optimisable;
+    bool par_nodetype;
+
+    Parameter(const std::string &par_name, parType par_value, bool par_optimisable, bool par_nodetype) : par_name(par_name),
+                                                                                                         par_value(par_value),
+                                                                                                         par_optimisable(par_optimisable),
+                                                                                                         par_nodetype(par_nodetype) {}
+
+    virtual ~Parameter() = default;
+
+};
+
+template <typename parType>
+class SubstitutionModel {
 protected:
     Utree *tree;
     Alignment *alignment;
+    
+    Parameter<Eigen::VectorXd> pi;
+    Parameter<Eigen::VectorXd> Q;
+    Parameter<Eigen::MatrixXd> V;
+    Parameter<Eigen::MatrixXd> Vi;
+
+    std::vector<std::unique_ptr<Parameter<parType>>> submod_parameters;
+    //std::vector<Parameter *> submod_parameters;
 
 public:
+
     double lk;
 
-    Model();
-    virtual ~Model();
+    SubstitutionModel();
+    virtual ~SubstitutionModel();
 
-/*
+
+
+
     virtual double computeLikelihood();
     virtual void setTree();
     virtual Utree* getTree();
     virtual void setAlignment();
     virtual Alignment *getAlignment();
-*/
+
 
 };
 
-class modelPIP : public Model{
+class Model_JC69 : public SubstitutionModel{
 
 public:
 
-    double lambda;
-    double mu;
-    Eigen::VectorXd pi;
-    Eigen::MatrixXd Q;
-    double nu;
-    double tau;
-    double phi;
-    Eigen::MatrixXd V;
-    Eigen::MatrixXd Vi;
+    Model_JC69(double valScalingFactor);
 
-    modelPIP();
-    virtual ~modelPIP();
-
-    /*virtual double computeLikelihood();*/
+    virtual ~Model_JC69();
 
 };
 
-class Parameters{
+
+template <class RevSubModel>
+class Model_PIP : public SubstitutionModel, public RevSubModel{
+
+    enum class param{lamda, mu, tau, branch, qmatrix, pi, undef};
 
 public:
-    Parameters();
-    virtual ~Parameters();
+
+    Parameter<double> lambda;
+    Parameter<double> mu;
+    Parameter<double> nu;
+    Parameter<double> tau;
+    Parameter<double> phi;
+
+    Model_PIP();
+    virtual ~Model_PIP();
 
 };
 
 
-class parametersPIP: public Parameters{
-
-    enum parameters{lamda, mu, tau, branch, qmatrix, pi, undef};
+class NodeParameters_PIP{
 
 public:
     Eigen::VectorXd Fv_empty;
     Eigen::MatrixXd Fv;
     Eigen::MatrixXd Pr;
 
-    parametersPIP();
-    virtual ~parametersPIP();
+
+    NodeParameters_PIP();
+    virtual ~NodeParameters_PIP();
 
 };
 
 
-
+*/
 
 #endif //TSHEXE_MODEL_HPP

@@ -432,9 +432,14 @@ void VirtualNode::recombineFv(){
             Eigen::VectorXd &fvL = this->getNodeLeft()->vnode_Fv_operative.at(k);
             Eigen::VectorXd &fvR = this->getNodeRight()->vnode_Fv_operative.at(k);
 
-            Eigen::VectorXd fvN = this->getNodeLeft()->getPr() * (fvL).cwiseProduct(this->getNodeRight()->getPr() * (fvR));
-
+            //Eigen::VectorXd fvN = this->getNodeLeft()->getPr() * (fvL).cwiseProduct(this->getNodeRight()->getPr() * (fvR));
+            Eigen::VectorXd fvN = (fvL).cwiseProduct(fvR);
             this->vnode_Fv_operative[k] = fvN;
+
+            if(k==15){
+            //    std::cout << this->vnode_name << std::endl;
+            //    std::cout << this->vnode_Fv_operative[k] << std::endl;
+            }
 
         }
 
@@ -442,7 +447,9 @@ void VirtualNode::recombineFv(){
         Eigen::VectorXd &fvE_L = this->getNodeLeft()->vnode_Fv_empty_operative;
         Eigen::VectorXd &fvE_R = this->getNodeRight()->vnode_Fv_empty_operative;
 
-        this->vnode_Fv_empty_operative = (this->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(this->getNodeRight()->getPr() * (fvE_R));
+        //this->vnode_Fv_empty_operative = (this->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(this->getNodeRight()->getPr() * (fvE_R));
+        this->vnode_Fv_empty_operative = (fvE_L).cwiseProduct(fvE_R);
+
 
     }
 
@@ -788,12 +795,16 @@ std::string VirtualNode::printNeighbours() {
 
     if (!this->isTerminalNode()) {
 
-        description << this->vnode_name << " (^" << this->getNodeUp()->vnode_name << ";";
+        if(this->getNodeUp()){
+            description << this->vnode_name << " (^" << this->getNodeUp()->vnode_name << ";";
+        }else{
+            description << this->vnode_name << " (^NULL;";
+        }
+
         description << "<" << this->getNodeLeft()->vnode_name << ";";
         description << this->getNodeRight()->vnode_name << ">)";
 
     } else {
-
         description << this->vnode_name << " (^" << this->getNodeUp()->vnode_name << "; ";
         description << "<-;->)";
     }
