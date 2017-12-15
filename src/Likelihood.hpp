@@ -136,7 +136,11 @@ public:
 
     void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
-    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
+    double computePartialLK_WholeAlignment(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
+
+    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, int alignment_column);
+
+    double computePartialEmptyLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
 
     void computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size);
 
@@ -172,6 +176,8 @@ protected:
 namespace LKFunc {
 
     double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment);
+
+    double LKRearrangment(Likelihood &lk, std::vector<VirtualNode *> &list_node_complete, Alignment &alignment);
 
     // Eigen::VectorXd compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 

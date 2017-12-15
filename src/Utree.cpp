@@ -45,6 +45,7 @@
 #include <string>
 #include <random>
 #include <fstream>
+#include <iomanip>
 #include <glog/logging.h>
 
 #include "Utree.hpp"
@@ -432,14 +433,7 @@ void VirtualNode::recombineFv(){
             Eigen::VectorXd &fvL = this->getNodeLeft()->vnode_Fv_operative.at(k);
             Eigen::VectorXd &fvR = this->getNodeRight()->vnode_Fv_operative.at(k);
 
-            //Eigen::VectorXd fvN = this->getNodeLeft()->getPr() * (fvL).cwiseProduct(this->getNodeRight()->getPr() * (fvR));
-            Eigen::VectorXd fvN = (fvL).cwiseProduct(fvR);
-            this->vnode_Fv_operative[k] = fvN;
-
-            if(k==15){
-            //    std::cout << this->vnode_name << std::endl;
-            //    std::cout << this->vnode_Fv_operative[k] << std::endl;
-            }
+            this->vnode_Fv_operative.at(k) = this->getPr() * (fvL).cwiseProduct(fvR);
 
         }
 
@@ -447,8 +441,7 @@ void VirtualNode::recombineFv(){
         Eigen::VectorXd &fvE_L = this->getNodeLeft()->vnode_Fv_empty_operative;
         Eigen::VectorXd &fvE_R = this->getNodeRight()->vnode_Fv_empty_operative;
 
-        //this->vnode_Fv_empty_operative = (this->getNodeLeft()->getPr() * (fvE_L)).cwiseProduct(this->getNodeRight()->getPr() * (fvE_R));
-        this->vnode_Fv_empty_operative = (fvE_L).cwiseProduct(fvE_R);
+        this->vnode_Fv_empty_operative =this->getPr() *  (fvE_L).cwiseProduct(fvE_R);
 
 
     }
@@ -1421,15 +1414,63 @@ void VirtualNode::initialiseLikelihoodComponents(int numcol, int lengthAlphabet)
     //this->vnode_Fv_empty_backup.resize(lengthAlphabet);
     //this->vnode_Fv_empty_operative.resize(lengthAlphabet);
     //this->vnode_Fv_empty_best.resize(lengthAlphabet);
-
+    this->vnode_Fv_terminal.resize(numcol);
     this->vnode_Fv_backup.resize(numcol);
     this->vnode_Fv_operative.resize(numcol);
+    this->vnode_Fv_partial_operative.resize(numcol);
     this->vnode_Fv_best.resize(numcol);
 
 }
 
 bool VirtualNode::isPseudoRootNode() {
     return this->getNodeUp()->getNodeUp()==this;
+}
+
+void VirtualNode::_printFV() {
+
+    std::string line;
+    std::ostringstream sout;
+
+    double rows = this->vnode_Fv_operative.at(0).size();
+    double cols = this->vnode_Fv_operative.size();
+
+    // Initialization of the 2D vector
+    std::vector<std::vector<double> > array2D;
+    array2D.resize(rows);
+    for (int i = 0; i < rows; ++i) {
+        array2D[i].resize(cols);
+    }
+
+    for(int c=0; c<this->vnode_Fv_operative.size(); c++){
+        for(int a=0; a<this->vnode_Fv_operative.at(c).size(); a++){
+            array2D[a][c] = this->vnode_Fv_operative.at(c)(a);
+        }
+    }
+    VLOG(3) << "-----------------------------------------------------";
+    VLOG(3) << "Node: " << this->vnode_name;
+
+
+    for (int i = 0; i < rows; ++i) {
+        line = "";
+        for (int c=0; c<cols; c++){
+
+            if(i==0) {
+                sout << std::setfill('0') << std::setw(3) << c << "      | ";
+            }
+
+            line += std::to_string(array2D[i][c]);
+            line += " | ";
+
+        }
+        if(i==0) {
+            VLOG(3) << sout.str();
+        }
+        VLOG(3) << line;
+    }
+
+
+
+
 }
 
 

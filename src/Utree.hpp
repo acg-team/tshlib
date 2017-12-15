@@ -84,9 +84,16 @@ public:
     double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
     double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
     Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
+
+
+    std::vector<double> vnode_Fv_terminal;
+
     std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
     std::vector<Eigen::VectorXd> vnode_Fv_operative;
+    std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
     std::vector<Eigen::VectorXd> vnode_Fv_best;
+
+
     Eigen::VectorXd vnode_Fv_empty_backup;
     Eigen::VectorXd vnode_Fv_empty_operative;
     Eigen::VectorXd vnode_Fv_empty_best;
@@ -244,6 +251,8 @@ public:
     virtual void _setNodeLeft(VirtualNode *inVNode);
 
     virtual void _setNodeUp(VirtualNode *inVNode);
+
+    virtual void _printFV();
 
 
 protected:

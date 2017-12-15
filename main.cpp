@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
 
     // set Pi, steady state frequencies
     pi = Eigen::VectorXd::Zero(extended_alphabet_size);
-    pi << 0.25, 0.25, 0.25, 0.25, 0.25;
+    pi << 0.25, 0.25, 0.25, 0.25, 0;
 
     // Fill Q matrix as for JC69
     Q = Eigen::MatrixXd::Zero(extended_alphabet_size,extended_alphabet_size);
@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
     //likelihood->unloadParametersOperative();
 
     // Compute the model likelihood
-    logLK = likelihood->computePartialLK(allnodes_postorder, *alignment);
+    logLK = likelihood->computePartialLK_WholeAlignment(allnodes_postorder, *alignment);
     VLOG(1) << "[Tree likelihood] -- full traversal -- " << logLK;
 
     //----------------------------------------------
@@ -384,9 +384,16 @@ int main(int argc, char **argv) {
 
                 // ------------------------------------
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
+                allnodes_postorder.clear();
+                likelihood->compileNodeList_postorder(allnodes_postorder, utree->rootnode);
+
+
                 likelihood->recombineAllFv(list_vnode_to_root);
                 likelihood->setInsertionHistories(list_vnode_to_root,*alignment);
-                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
+
+                logLK = LKFunc::LKRearrangment(*likelihood, allnodes_postorder, *alignment);
+
+                //logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
 
                 // ------------------------------------
                 // Apply brent -- test only
@@ -449,7 +456,10 @@ int main(int argc, char **argv) {
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
                 likelihood->recombineAllFv(list_vnode_to_root);
                 likelihood->setInsertionHistories(list_vnode_to_root,*alignment);
-                logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
+
+                logLK = LKFunc::LKRearrangment(*likelihood, allnodes_postorder, *alignment);
+
+                //logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
 
                 // ------------------------------------
                 // Store likelihood of the move
