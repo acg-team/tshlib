@@ -485,7 +485,7 @@ int main(int argc, char **argv) {
                 end_col_line = "";
 
             }
-
+            // Added comment to remove later
             // Move exection details
             VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                     << " | (" << isLKImproved <<") " << start_col_line<< logLK <<end_col_line << "\t"
