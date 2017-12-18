@@ -532,6 +532,30 @@ void Likelihood::compileNodeList_postorder(std::vector<VirtualNode *> &nodelist,
 
 }
 
+
+void Likelihood::restoreLikelihoodComponents(){
+
+    for (auto &vnode:this->tree->listVNodes) {
+
+        vnode->vnode_Fv_operative = vnode->vnode_Fv_backup;
+        vnode->vnode_Fv_empty_operative = vnode->vnode_Fv_empty_backup;
+        vnode->vnode_descCount_operative = vnode->vnode_descCount_backup;
+        vnode->vnode_setA_operative =  vnode->vnode_setA_backup;
+
+
+    }
+
+    if (this->tree->rootnode) {
+
+        this->tree->rootnode->vnode_Fv_operative = this->tree->rootnode->vnode_Fv_backup;
+        this->tree->rootnode->vnode_Fv_empty_operative = this->tree->rootnode->vnode_Fv_empty_backup;
+        this->tree->rootnode->vnode_descCount_operative = this->tree->rootnode->vnode_descCount_backup;
+        this->tree->rootnode->vnode_setA_operative = this->tree->rootnode->vnode_setA_backup;
+
+
+    }
+}
+
 void Likelihood::loadLikelihoodComponents_Operative() {
 
     for (auto &vnode:this->tree->listVNodes) {
@@ -673,41 +697,24 @@ void Likelihood::computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA
 
 void Likelihood::saveLikelihoodComponents() {
 
-
     for (auto &vnode:this->tree->listVNodes) {
 
-//        std::copy(vnode->vnode_Fv_operative.begin(),
-//                  vnode->vnode_Fv_operative.end(),
-//                  std::back_inserter(vnode->vnode_Fv_backup));
-
         vnode->vnode_Fv_backup = vnode->vnode_Fv_operative;
-
         vnode->vnode_Fv_empty_backup = vnode->vnode_Fv_empty_operative;
-
         vnode->vnode_descCount_backup = vnode->vnode_descCount_operative;
+        vnode->vnode_setA_backup = vnode->vnode_setA_operative;
 
-//        std::copy(vnode->vnode_descCount_operative.begin(),
-//                  vnode->vnode_descCount_operative.end(),
-//                  std::back_inserter(vnode->vnode_descCount_backup));
 
     }
+
     if (this->tree->rootnode) {
-
-//        std::copy(this->tree->rootnode->vnode_Fv_operative.begin(),
-//                  this->tree->rootnode->vnode_Fv_operative.end(),
-//                  std::back_inserter(this->tree->rootnode->vnode_Fv_backup));
-
 
         this->tree->rootnode->vnode_Fv_backup = this->tree->rootnode->vnode_Fv_operative;
         this->tree->rootnode->vnode_Fv_empty_backup = this->tree->rootnode->vnode_Fv_empty_operative;
         this->tree->rootnode->vnode_descCount_backup = this->tree->rootnode->vnode_descCount_operative;
-//        std::copy(this->tree->rootnode->vnode_descCount_operative.begin(),
-//                  this->tree->rootnode->vnode_descCount_operative.end(),
-//                  std::back_inserter(this->tree->rootnode->vnode_descCount_backup));
-
+        this->tree->rootnode->vnode_setA_backup = this->tree->rootnode->vnode_setA_operative;
 
     }
-
 
 }
 

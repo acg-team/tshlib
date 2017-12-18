@@ -148,6 +148,8 @@ public:
 
     void unloadLikelihoodComponents_Operative();
 
+    void restoreLikelihoodComponents();
+
     void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
 
     void saveLikelihoodComponents();

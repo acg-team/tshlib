@@ -370,7 +370,7 @@ int main(int argc, char **argv) {
             // Print tree on file
             //utree->saveTreeOnFile("../data/test.txt");
             bool isLKImproved = false;
-
+            computeMoveLikelihood = true;
             // ------------------------------------
             if (computeMoveLikelihood) {
 
@@ -446,11 +446,12 @@ int main(int argc, char **argv) {
             //utree->saveTreeOnFile("../data/test.txt");
 
             // ------------------------------------
-            if (computeMoveLikelihood) {
+            // Add the root
+            utree->addVirtualRootNode();
 
-                // ------------------------------------
-                // Add the root
-                utree->addVirtualRootNode();
+            computeMoveLikelihood = false;
+            // ------------------------------------
+            if (computeMoveLikelihood) {
 
                 // ------------------------------------
                 // Compute the full likelihood from the list of nodes involved in the rearrangment
@@ -459,21 +460,22 @@ int main(int argc, char **argv) {
 
                 logLK = LKFunc::LKRearrangment(*likelihood, allnodes_postorder, *alignment);
 
-                //logLK = likelihood->computePartialLK(list_vnode_to_root, *alignment);
-
                 // ------------------------------------
                 // Store likelihood of the move
                 rearrangmentList->getMove(i)->move_lk = logLK;
 
-                // ------------------------------------
-                // Remove virtual root
-                utree->removeVirtualRootNode();
+            }else{
 
+                likelihood->restoreLikelihoodComponents();
+                //likelihood->setInsertionHistories(allnodes_postorder,*alignment);
+                logLK = LKFunc::LKRearrangment(*likelihood, allnodes_postorder, *alignment);
             }
-
+            // ------------------------------------
+            // Remove virtual root
+            utree->removeVirtualRootNode();
             // ------------------------------------
             // Some abbellishments for the console output
-            if(rearrangmentList->getMove(i)->move_lk>0){
+            if(logLK>0){
                 start_col_line = "\033[1;34m";
                 end_col_line = "\033[0m";
             }else{
@@ -484,7 +486,7 @@ int main(int argc, char **argv) {
 
             // Move exection details
             VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
-                    << " | (" << isLKImproved <<") " << start_col_line<< rearrangmentList->getMove(i)->move_lk<<end_col_line << "\t"
+                    << " | (" << isLKImproved <<") " << start_col_line<< logLK <<end_col_line << "\t"
                     << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
                     << "\t[" << rearrangmentList->getMove(i)->move_radius << "] | "
                     << utree->printTreeNewick(true) << std::endl;
