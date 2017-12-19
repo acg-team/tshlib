@@ -1,5 +1,5 @@
 
-#include "Alphabet.h"
+#include "Alphabet.hpp"
 
 //#define GAP_CHAR '-'
 

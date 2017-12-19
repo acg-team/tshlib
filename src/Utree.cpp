@@ -41,7 +41,6 @@
  *
  */
 
-#include "Likelihood.hpp"
 #include <string>
 #include <random>
 #include <fstream>
@@ -50,6 +49,7 @@
 
 #include "Utree.hpp"
 #include "Alignment.hpp"
+#include "Likelihood.hpp"
 
 void ::UtreeUtils::_traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source) {
 
