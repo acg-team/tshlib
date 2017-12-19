@@ -22,13 +22,15 @@
 
 cmake_minimum_required(VERSION 3.5.1)
 
-project(tshlib)
-set(THSLIB_MAJOR_VERSION 0)
-set(THSLIB_MINOR_VERSION 1)
-set(THSLIB_PATCH_VERSION 0)
-set(THSLIB_VERSION ${THSLIB_MAJOR_VERSION}.${THSLIB_MINOR_VERSION}.${THSLIB_PATCH_VERSION})
 
-#project(tshlib THSLIB_VERSION DESCRIPTION "Tree Search Heuristic Library")
+set(THSLIB_MAJOR_VERSION 1)
+set(THSLIB_MINOR_VERSION 1)
+set(THSLIB_PATCH_VERSION 1)
+set(THSLIB_VERSION ${THSLIB_MAJOR_VERSION}.${THSLIB_MINOR_VERSION}.${THSLIB_PATCH_VERSION})
+project(tshlib VERSION ${THSLIB_VERSION}
+        DESCRIPTION "Tree Search Heuristic Library"
+        LANGUAGES "CXX")
+
 
 # Offer the user the choice of overriding the installation directories
 set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
@@ -58,10 +60,7 @@ message("Project binary is in ${PROJECT_BINARY_DIR}")
 
 
 # set up include-directories
-include_directories(
-        "${PROJECT_SOURCE_DIR}"   # to find
-        "${PROJECT_BINARY_DIR}")  # to find
-
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
 
 
 # The interesting stuff goes here
@@ -105,7 +104,7 @@ file(GLOB SOURCES src/*.cpp )
 file(GLOB HEADERS include/*.hpp )
 
 add_library(tshlib SHARED ${SOURCES} ${HEADERS})
-target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
+#target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
 target_link_libraries(tshlib glog)
 target_link_libraries(tshlib gflags)
 
@@ -147,8 +146,8 @@ install(FILES
 # Install the export set for use with the install-tree
 install(EXPORT TshLibTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-#set_target_properties(tshlib PROPERTIES
-#        VERSION ${PROJECT_VERSION}
-#        SOVERSION 1
-#        PUBLIC_HEADER ${HEADERS})
-
+# Add target for CLION installation
+add_custom_target(install_${PROJECT_NAME}
+        "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}" --target install
+        DEPENDS ${PROJECT_NAME}
+        COMMENT "Installing ${PROJECT_NAME}")
