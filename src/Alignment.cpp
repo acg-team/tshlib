@@ -48,18 +48,16 @@
 
 
 Alignment::Alignment(bool compressed) {
-
+    this->align_alphabetsize = 0;
     this->align_compressed = compressed;
     this->align_alphabetsize = 0;
 }
-
 
 Alignment::Alignment() {
     this->align_compressed = false;
     this->align_alphabetsize = 0;
 
 }
-
 
 Alignment::~Alignment() = default;
 
@@ -144,15 +142,14 @@ void Alignment::countNumberCharactersinColumn() {
 
 }
 
-//int AlignUtils::countNumCharactersInMSAColumn(const std::string MSA_col){
-//    int num_gaps;
-//
-//    num_gaps=0;
-//    for (int i = 0; i < MSA_col.size(); i++) {
-//        num_gaps += (MSA_col[i] != '-');
-//    }
-//
-//    return num_gaps;
-//}
-//
-//
+
+Alignment_AA::Alignment_AA() {
+
+    this->align_alphabetsize = DIM;
+
+
+}
+
+Alignment_AA::~Alignment_AA() {
+
+}

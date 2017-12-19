@@ -51,6 +51,8 @@
 
 enum class AlignmentAlphabet {dna, aa, codon, undef};
 
+
+
 class Alignment {
 
 private:
@@ -88,6 +90,20 @@ protected:
 
 
 };
+
+
+class Alignment_AA : public Alignment, AA{
+
+public:
+
+    Alignment_AA();
+
+    virtual ~Alignment_AA();
+
+
+};
+
+
 
 namespace AlignUtils {
     //int countNumCharactersInMSAColumn(const std::string MSA_col);
