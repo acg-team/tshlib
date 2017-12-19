@@ -1,7 +1,48 @@
+/*******************************************************************************
+ * Licensed Materials - Property of Lorenzo Gatti
+ *
+ *
+ * Copyright (C) 2015-2017 by Lorenzo Gatti
+ *******************************************************************************
+ *
+ * This file is part of tshlib
+ *
+ * tshlib is a free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * tshlib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with tshlib. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+/**
+ * @file Alphabet.cpp
+ * @author Lorenzo Gatti
+ * @author Massimo Maiolo
+ * @date 19 12 2017
+ * @version 1.0
+ * @maintainer Lorenzo Gatti
+ * @maintainer Massimo Maiolo
+ * @email lg@lorenzogatti.me
+ * @email massimo.maiolo@zhaw.ch
+ * @status Development
+ *
+ * @brief
+ * @details
+ * @pre
+ * @bug
+ * @warning
+ *
+ * @see For more information visit:
+ */
 
 #include "Alphabet.hpp"
-
-//#define GAP_CHAR '-'
 
 const char aa_translation_table[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
                                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -233,149 +274,3 @@ std::string DNA::asString() const {
 char DNA::asChar() const {
     return this->data;
 }
-
-//
-//sequence_t<AA> translateCodons(const sequence_t<Codon> &seq) {
-//    sequence_t<AA> aaseq;
-//    aaseq.reserve(seq.length());
-//
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        aaseq += AA(seq[i].asChar());
-//    }
-//
-//    return aaseq;
-//}
-
-//=======================================================================================================
-//DP-PIP
-//template<>
-//std::string stringFromSequence<char>(const sequence_t<char> &seq) {
-//    std::string str;
-//    str.reserve(seq.length());
-//
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        str += seq[i];
-//    }
-//
-//    return str;
-//}
-//
-//template<>
-//std::string stringFromSequence<AA>(const sequence_t<AA> &seq) {
-//    std::string str;
-//    str.reserve(seq.length());
-//
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        str += seq[i].asChar();
-//    }
-//
-//    return str;
-//}
-//
-//template<>
-//std::string stringFromSequence<DNA>(const sequence_t<DNA> &seq) {
-//    std::string str;
-//    str.reserve(seq.length());
-//
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        str += seq[i].asChar();
-//    }
-//
-//    return str;
-//}
-//
-//template<>
-//std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq) {
-//    std::string str;
-//    str.reserve(3 * seq.length());
-//
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        str += seq[i].asString();
-//    }
-//
-//    return str;
-//}
-////=======================================================================================================
-//
-////=======================================================================================================
-////DP-PIP
-///*
-//template<> std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq) {
-//	std::string str;
-//	str.reserve(3*seq.length());
-//
-//	for(index_t i=0; i<seq.length(); ++i) {
-//		str += seq[i].asString();
-//	}
-//
-//	return str;
-//}
-//*/
-////=======================================================================================================
-//
-//template<>
-//std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq, const std::string &orig) {
-//    std::string str;
-//    str.reserve(orig.length());
-//
-//    index_t k = 0;
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        if (seq[i].isGap()) {
-//            str += seq[i].asString();
-//        } else {
-//            for (index_t j = k; j < k + 3 && j < orig.length(); ++j) {
-//                str += orig[j];
-//            }
-//            k += 3;
-//        }
-//    }
-//
-//    assert(k == orig.length());
-//
-//    return str;
-//}
-//
-//template<>
-//sequence_t<Codon> sequenceFromString<Codon>(const std::string &str) {
-//    sequence_t<Codon> seq;
-//    seq.reserve((str.length() + 2) / 3);
-//
-//    for (index_t i = 0; i + 2 < str.length(); i += 3) {
-//        Codon c = Codon(str[i], str[i + 1], str[i + 2]);
-//        if (c == Codon::GAP) {
-//            error("No support for gapped sequences (yet)");
-//        }
-//        seq += c;
-//    }
-//
-//    if (str.length() % 3 != 0) {
-//        seq += Codon(-1, -1, -1);
-//    }
-//
-//    return seq;
-//}
-//
-////=======================================================================================================
-////DP-PIP
-//template<>
-//sequence_t<Codon> sequenceFromStringPIP<Codon>(const std::string &str) {
-//    sequence_t<Codon> seq;
-//    seq.reserve((str.length() + 2) / 3);
-//
-//    for (index_t i = 0; i + 2 < str.length(); i += 3) {
-//        Codon c = Codon(str[i], str[i + 1], str[i + 2]);
-//        /*
-//        if(c == Codon::GAP) {
-//            error("No support for gapped sequences (yet)");
-//        }
-//        */
-//        seq += c;
-//    }
-//
-//    if (str.length() % 3 != 0) {
-//        seq += Codon(-1, -1, -1);
-//    }
-//
-//    return seq;
-//}
-////=======================================================================================================

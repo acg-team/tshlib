@@ -1,14 +1,55 @@
-#ifndef ALPHABET_H
-#define ALPHABET_H
+/*******************************************************************************
+ * Licensed Materials - Property of Lorenzo Gatti
+ *
+ *
+ * Copyright (C) 2015-2017 by Lorenzo Gatti
+ *******************************************************************************
+ *
+ * This file is part of tshlib
+ *
+ * tshlib is a free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * tshlib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with tshlib. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 
+/**
+ * @file Alphabet.hpp
+ * @author Lorenzo Gatti
+ * @author Massimo Maiolo
+ * @date 19 12 2017
+ * @version 1.0
+ * @maintainer Lorenzo Gatti
+ * @maintainer Massimo Maiolo
+ * @email lg@lorenzogatti.me
+ * @email massimo.maiolo@zhaw.ch
+ * @status Development
+ *
+ * @brief
+ * @details
+ * @pre
+ * @bug
+ * @warning
+ *
+ * @see For more information visit:
+ */
+
+#ifndef TSHLIB_ALPHABET_HPP
+#define TSHLIB_ALPHABET_HPP
 
 #include <string>
 #include <cassert>
 #include <iostream>
 
 #define GAP_CHAR '-'
-#define GAP_STR "-"
-
 
 //=======================================================
 //DP-PIP
@@ -16,22 +57,18 @@
 #define GAPX   '2'
 #define GAPY   '3'
 #define UNKNOW '4'
-//=======================================================
-//DP-PIP
 // for gamma distribution
 #define MODELPAREPS   1.E-4
 //=======================================================
-typedef double score_t;
-typedef float dp_score_t;
-typedef unsigned int index_t;
-typedef double distance_t;
+
 
 class Alphabet {
+
 protected:
-    Alphabet() {
-        data = -1;
-    };
     char data;
+
+    Alphabet() { data = -1; };
+
 public:
     enum {
         DIM = 0
@@ -63,8 +100,6 @@ public:
 
     bool isUnknown() const;
 
-//	operator char() const;
-//	operator int() const;
     bool operator==(const Alphabet &other) const;
 
     bool operator!=(const Alphabet &other) const;
@@ -111,8 +146,6 @@ public:
 
     bool isUnknown() const { return this->data == this->X.data; }
 
-//	operator char() const { return this->asChar(); }
-//	operator int() const { return this->value(); }
     bool operator==(const AA &other) const { return this->data == other.data; }
 
     bool operator!=(const AA &other) const { return this->data != other.data; }
@@ -161,8 +194,6 @@ public:
 
     bool isUnknown() const { return this->data == this->X.data; }
 
-//	operator char() const { return this->asChar(); }
-//	operator int() const { return this->value(); }
     bool operator==(const Codon &other) const { return this->data == other.data; }
 
     bool operator!=(const Codon &other) const { return this->data != other.data; }
@@ -209,8 +240,6 @@ public:
 
     bool isUnknown() const { return this->data == this->X.data; }
 
-//	operator char() const { return this->asChar(); }
-//	operator int() const { return this->value(); }
     bool operator==(const DNA &other) const { return this->data == other.data; }
 
     bool operator!=(const DNA &other) const { return this->data != other.data; }
@@ -219,107 +248,4 @@ public:
 };
 
 
-#define sequence_t std::string
-
-//template<class T>
-//sequence_t<T> sequenceFromString(const std::string &str) {
-//    sequence_t<T> seq;
-//    seq.reserve(str.length());
-//
-//    for (index_t i = 0; i < str.length(); ++i) {
-//        T c = T(str[i]);
-//        if (c == T::GAP) {
-//            perror("No support for gapped sequences (yet)");
-//        }
-//        seq += c;
-//    }
-//
-//    return seq;
-//}
-//
-//template<>
-//sequence_t<Codon> sequenceFromString<Codon>(const std::string &str);
-//
-////=======================================================================================================
-////DP-PIP
-//template<class T>
-//sequence_t<T> sequenceFromStringPIP(const std::string &str) {
-//    sequence_t<T> seq;
-//    seq.reserve(str.length());
-//
-//    for (index_t i = 0; i < str.length(); ++i) {
-//        T c = T(str[i]);
-//        /*
-//        if(c == T::GAP) {
-//            error("No support for gapped sequences (yet)");
-//        }
-//        */
-//        seq += c;
-//    }
-//
-//    return seq;
-//}
-////=======================================================================================================
-//
-////=======================================================================================================
-////DP-PIP
-//
-//template<class T>
-//std::string stringFromSequence(const sequence_t<T> &seq) {
-//    std::string str;
-//    str.reserve(seq.length());
-//
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//
-//        //str +=seq[i].asChar();
-//        //==================================
-//        //DP-PIP
-//        std::cerr << "ERROR in stringFromSequence\n";
-//        //==================================
-//    }
-//
-//    return str;
-//}
-//
-//template<>
-//std::string stringFromSequence<char>(const sequence_t<char> &seq);
-//
-//template<>
-//std::string stringFromSequence<AA>(const sequence_t<AA> &seq);
-//
-//template<>
-//std::string stringFromSequence<DNA>(const sequence_t<DNA> &seq);
-//
-//template<>
-//std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq);
-////=======================================================================================================
-//
-//template<class T>
-//std::string stringFromSequence(const sequence_t<T> &seq, const std::string &orig) {
-//    std::string str;
-//    str.reserve(orig.length());
-//
-//    index_t j = 0;
-//    for (index_t i = 0; i < seq.length(); ++i) {
-//        if (seq[i].isGap()) {
-//            str += seq[i].asChar();
-//        } else {
-//            str += orig[j++];
-//        }
-//    }
-//
-//    assert(j == orig.length());
-//
-//    return str;
-//}
-////=======================================================================================================
-////DP-PIP
-////template<> std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq);
-////=======================================================================================================
-//
-//template<>
-//std::string stringFromSequence<Codon>(const sequence_t<Codon> &seq, const std::string &orig);
-
-//sequence_t<AA> translateCodons(const sequence_t<Codon> &seq);
-
-#endif /* ALPHABET_H */
+#endif // TSHLIB_ALPHABET_HPP

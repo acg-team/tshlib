@@ -146,10 +146,20 @@ void Alignment::countNumberCharactersinColumn() {
 Alignment_AA::Alignment_AA() {
 
     this->align_alphabetsize = DIM;
-
+    this->alphabet = AlignmentAlphabet::aa;
 
 }
 
-Alignment_AA::~Alignment_AA() {
+Alignment_DNA::Alignment_DNA() {
+
+    this->align_alphabetsize = DIM;
+    this->alphabet = AlignmentAlphabet::dna;
+
+}
+
+Alignment_Codon::Alignment_Codon() {
+
+    this->align_alphabetsize = DIM;
+    this->alphabet = AlignmentAlphabet::codon;
 
 }

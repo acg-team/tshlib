@@ -69,25 +69,21 @@ public:
 
     Alignment();
 
-    Alignment(bool compressed);
+    virtual ~Alignment();
 
-    void addSequence(std::string label, std::string data);
+    explicit Alignment(bool compressed);
 
-    void addWeight(std::vector<int> column_weight);
+    virtual void addSequence(std::string label, std::string data);
 
-    void countNumberCharactersinColumn();
+    virtual void addWeight(std::vector<int> column_weight);
 
-    long int getAlignmentSize();
+    virtual void countNumberCharactersinColumn();
 
-
-
+    virtual long int getAlignmentSize();
 
     std::string extractColumn(int index);
 
-    ~Alignment();
-
 protected:
-
 
 };
 
@@ -98,18 +94,32 @@ public:
 
     Alignment_AA();
 
-    virtual ~Alignment_AA();
+    ~Alignment_AA() override = default;
 
 
 };
 
+class Alignment_DNA : public Alignment, DNA{
+
+public:
+
+    Alignment_DNA();
+
+    ~Alignment_DNA() override = default;
 
 
-namespace AlignUtils {
-    //int countNumCharactersInMSAColumn(const std::string MSA_col);
+};
+
+class Alignment_Codon : public Alignment, Codon{
+
+public:
+
+    Alignment_Codon();
+
+    ~Alignment_Codon() override = default;
 
 
-}
+};
 
 
 #endif //TSHLIB_ALIGNMENT_HPP
