@@ -55,6 +55,8 @@
 #include <Likelihood.hpp>
 #include <newick.hpp>
 #include <Optimization_Brent.hpp>
+#include <Model_JC69.hpp>
+#include <Model_PIP.hpp>
 
 void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utree, std::vector<VirtualNode *> &list_vnode_to_root);
 
@@ -152,7 +154,7 @@ int main(int argc, char **argv) {
     unsigned long num_leaves;
     double logLK;
     Eigen::VectorXd pi;
-    Eigen::MatrixXd Q;
+    Eigen::MatrixXd Qmat;
 
     //------------------------------------------------------------------------------------------------------------------
     // LOAD MSA FROM FILE
@@ -204,25 +206,30 @@ int main(int argc, char **argv) {
     pi << 0.25, 0.25, 0.25, 0.25, 0;
 
     // Fill Q matrix as for JC69
-    Q = Eigen::MatrixXd::Zero(extended_alphabet_size,extended_alphabet_size);
-    for(int r = 0; r<Q.rows()-1; r++){
-        for(int c=0; c<Q.cols()-1; c++ ){
+    Qmat = Eigen::MatrixXd::Zero(extended_alphabet_size,extended_alphabet_size);
+    for(int r = 0; r<Qmat.rows()-1; r++){
+        for(int c=0; c<Qmat.cols()-1; c++ ){
 
             if(r==c){
-                Q(r,c) =  -3.0/4.0-mu;
+                Qmat(r,c) =  -3.0/4.0-mu;
             }else{
-                Q(r,c) =  1.0/4.0;
+                Qmat(r,c) =  1.0/4.0;
             }
 
         }
-        Q(r,extended_alphabet_size-1) = mu;
+        Qmat(r,extended_alphabet_size-1) = mu;
     }
 
-/*
-    auto pip_model = new PIP;
-    pip_model->lambda = lambda;
-    pip_model->mu = mu;
-*/
+    auto modelJC69 = new JC69(1);
+    Q* extQ = dynamic_cast<Q *>(modelJC69->parameters["Q"]);
+    std::cout << extQ->value << std::endl;
+
+    auto modelPIP = new PIP(modelJC69, mu, lambda);
+    std::cout << extQ->value << std::endl;
+
+    //TODO: Is there another way to access derived attributes of a class?
+    //pip_Lambda* ext_lambda;
+    //ext_lambda = dynamic_cast<pip_Lambda *>(modelPIP->parameters["pip_lambda"]);
 
 
     //root->_traverseVirtualNodeTree();
@@ -235,7 +242,7 @@ int main(int argc, char **argv) {
 
     auto likelihood = new Likelihood();
 
-    likelihood->Init(utree, pi, Q, mu, lambda);
+    likelihood->Init(utree, pi, Qmat, mu, lambda);
 
     // COMPUTE LK GIVEN TREE TOPOLOGY AND MSA
     logLK = 0.0;

@@ -41,44 +41,27 @@
  *
  * @see For more information visit: http://www.lorenzogatti.me
  */
-#include "SubstitutionModel.hpp"
-
-/*template<class RevSubModel>
-template <class parType>
-Model_PIP<RevSubModel<parType>>::Model_PIP() = default;
-
-template<class RevSubModel>
-template <class parType>
-Model_PIP<RevSubModel>::~Model_PIP() = default;*/
-
-/*
-template<class RevSubModel>
-Model_PIP<RevSubModel>::Model_PIP() = default;
-
-template<class RevSubModel>
-Model_PIP<RevSubModel>::~Model_PIP() = default;
+#include "ModelFactory.hpp"
 
 
-SubstitutionModel::SubstitutionModel() = default;
+void Parameter::Optimise() {}
 
-SubstitutionModel::~SubstitutionModel() = default;
+void Parameter::UpdateList() {}
 
-NodeParameters_PIP::NodeParameters_PIP() = default;
+Parameter::Parameter() = default;
 
-NodeParameters_PIP::~NodeParameters_PIP() = default;
+Parameter::Parameter(bool optimisable) : optimisable(optimisable) {}
 
-Model_JC69::Model_JC69(double valScalingFactor){
+Parameter::~Parameter() = default;
 
-    std::string parName = "alpha";
-    double parValue = valScalingFactor;
-    bool parOptimisable = true;
-    bool availableOnNodes = false;
+topology::topology(bool optimisable, Utree *tree) : Parameter(optimisable), value(tree) {name = "topology";}
 
-    auto alpha = new Parameter(parName, parValue, parOptimisable, availableOnNodes);
+msa::msa(bool optimisable, Alignment *alignment) : Parameter(optimisable), value(alignment) {name = "msa";}
 
-    this->submod_parameters.push_back(alpha);
+Vi::Vi(bool optimisable, const Eigen::MatrixXd &Vi) : Parameter(optimisable), value(Vi) {name = "vi";}
 
-}
+pi::pi(bool optimisable, const Eigen::VectorXd &pi) : Parameter(optimisable), value(pi) {name = "pi";}
 
-Model_JC69::~Model_JC69() = default;
-*/
+Q::Q(bool optimisable, const Eigen::MatrixXd &Q) : Parameter(optimisable), value(Q) {name = "Q";}
+
+V::V(bool optimisable, const Eigen::MatrixXd &V) : Parameter(optimisable), value(V) {name = "V";}

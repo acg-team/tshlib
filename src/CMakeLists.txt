@@ -80,7 +80,15 @@ SET(SOURCES
         Utree.hpp
         Utilities.hpp
         Optimization_Brent.cpp
-        Optimization_Brent.hpp Optimiser.cpp Optimiser.hpp SubstitutionModel.cpp SubstitutionModel.hpp)
+        Optimization_Brent.hpp
+        Optimiser.cpp
+        Optimiser.hpp
+        ModelFactory.cpp
+        ModelFactory.hpp
+        Model_PIP.cpp
+        Model_PIP.hpp
+        Model_JC69.cpp
+        Model_JC69.hpp Model_K80.cpp Model_K80.hpp)
 
 add_library(tshlib STATIC ${SOURCES})
 target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
