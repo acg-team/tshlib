@@ -50,6 +50,8 @@
 #include <gflags/gflags.h>
 
 
+#include <chrono>
+
 #include <Utree.hpp>
 #include <TreeRearrangment.hpp>
 #include <Likelihood.hpp>
@@ -490,7 +492,6 @@ int main(int argc, char **argv) {
                 end_col_line = "";
 
             }
-
             // Move exection details
             VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->move_class << "." << std::setfill('0') << std::setw(3) << i
                     << " | (" << isLKImproved <<") " << start_col_line<< logLK <<end_col_line << "\t"
@@ -532,7 +533,7 @@ void testSetAinRootPath(unsigned long MSA_len, Alignment *alignment, Utree *utre
 
         for (int msa_col = 0; msa_col < MSA_len; msa_col++) {
 
-            std::__1::string s = alignment->extractColumn(msa_col);
+            std::string s = alignment->extractColumn(msa_col);
             utree->setLeafState(s);
 
             utree->findPseudoRoot(tempnode, false).back()->setAncestralFlag(*alignment, msa_col, false);
