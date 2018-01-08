@@ -55,6 +55,7 @@
 #include "Utilities.hpp"
 #include "Alignment.hpp"
 
+namespace tshlib {
 
 /*
  * VirtualNode contains the virtual directions for traversing the tree. Each VirtualNode represents
@@ -73,299 +74,299 @@
  * [VN]            [VN]
  */
 
-class VirtualNode {
-private:
+    class VirtualNode {
+    private:
 
-public:
+    public:
 
-    int vnode_id;                                   /* Node ID - Useful in case of parallel independent executions */
-    std::string vnode_name;                         /* Node Name - Useful in case of parallel independent executions */
-    double vnode_branchlength;                      /* Branch length connecting the node the parent node */
-    double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
-    double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
-    Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
+        int vnode_id;                                   /* Node ID - Useful in case of parallel independent executions */
+        std::string vnode_name;                         /* Node Name - Useful in case of parallel independent executions */
+        double vnode_branchlength;                      /* Branch length connecting the node the parent node */
+        double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
+        double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
+        Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
 
 
-    std::vector<double> vnode_Fv_terminal;
+        std::vector<double> vnode_Fv_terminal;
 
-    std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
-    std::vector<Eigen::VectorXd> vnode_Fv_operative;
-    std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
-    std::vector<Eigen::VectorXd> vnode_Fv_best;
+        std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
+        std::vector<Eigen::VectorXd> vnode_Fv_operative;
+        std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
+        std::vector<Eigen::VectorXd> vnode_Fv_best;
 
 
-    Eigen::VectorXd vnode_Fv_empty_backup;
-    Eigen::VectorXd vnode_Fv_empty_operative;
-    Eigen::VectorXd vnode_Fv_empty_best;
-    std::vector<bool> vnode_setA_backup;                   /* Flag: Include node in computing the set A -- might be not necessary */
-    std::vector<int> vnode_descCount_backup;               /* Counter of the characters associated    */
-    std::vector<bool> vnode_setA_operative;              /* Flag: Include node in computing the set A -- might be not necessary */
-    std::vector<int> vnode_descCount_operative;          /* Counter of the characters associated    */
-    std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
-    std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
-    //char vnode_character;                         /* Character associated to this node (only if terminal node) */
-    int vnode_seqid;                                /* Seq id on alignment vector */
-    int vnode_depth;                                /* Depth level of the node in the tree */
-    bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
-    int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
-    NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
+        Eigen::VectorXd vnode_Fv_empty_backup;
+        Eigen::VectorXd vnode_Fv_empty_operative;
+        Eigen::VectorXd vnode_Fv_empty_best;
+        std::vector<bool> vnode_setA_backup;                   /* Flag: Include node in computing the set A -- might be not necessary */
+        std::vector<int> vnode_descCount_backup;               /* Counter of the characters associated    */
+        std::vector<bool> vnode_setA_operative;              /* Flag: Include node in computing the set A -- might be not necessary */
+        std::vector<int> vnode_descCount_operative;          /* Counter of the characters associated    */
+        std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
+        std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
+        //char vnode_character;                         /* Character associated to this node (only if terminal node) */
+        int vnode_seqid;                                /* Seq id on alignment vector */
+        int vnode_depth;                                /* Depth level of the node in the tree */
+        bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
+        int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
+        NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
 
-    /*!
-     *  Standard constructor
-     */
-    VirtualNode();
+        /*!
+         *  Standard constructor
+         */
+        VirtualNode();
 
-    /*!
-     * Virtual deconstructor
-     */
-    virtual ~VirtualNode();
+        /*!
+         * Virtual deconstructor
+         */
+        virtual ~VirtualNode();
 
-    /*!
-     * @brief This function connects the current node to another one. It automatically performs a bidirectional connection
-     * @param inVNode Target node to apply the connection to
-     */
-    virtual void connectNode(VirtualNode *inVNode);
+        /*!
+         * @brief This function connects the current node to another one. It automatically performs a bidirectional connection
+         * @param inVNode Target node to apply the connection to
+         */
+        virtual void connectNode(VirtualNode *inVNode);
 
-    /*!
-     * @brief This function disconnect the current node from any other one above it. The function is bidirectional.
-     */
-    virtual void disconnectNode();
+        /*!
+         * @brief This function disconnect the current node from any other one above it. The function is bidirectional.
+         */
+        virtual void disconnectNode();
 
-    /*!
-     * @brief This function perfomrms a one-step clockwise rotation of the virtualnode pointers
-     */
-    virtual void rotateClockwise();
+        /*!
+         * @brief This function perfomrms a one-step clockwise rotation of the virtualnode pointers
+         */
+        virtual void rotateClockwise();
 
-    virtual void rotateClockwise(bool revertRotations);
+        virtual void rotateClockwise(bool revertRotations);
 
-    /*!
-     * @brief This function perfomrms a one-step counter-clockwise rotation of the virtualnode pointers
-     */
-    virtual void rotateCounterClockwise();
+        /*!
+         * @brief This function perfomrms a one-step counter-clockwise rotation of the virtualnode pointers
+         */
+        virtual void rotateCounterClockwise();
 
-    virtual void rotateCounterClockwise(bool revertRotations);
+        virtual void rotateCounterClockwise(bool revertRotations);
 
-    /*!
-     * @brief This function resets any rotation previously performed on the node
-     */
-    virtual void resetNodeDirections(bool revertRotations);
+        /*!
+         * @brief This function resets any rotation previously performed on the node
+         */
+        virtual void resetNodeDirections(bool revertRotations);
 
-    //void getMemberNeighbors(int radius);
+        //void getMemberNeighbors(int radius);
 
-    /*!
-     * @brief The function prints the neighborhood of the node in the format <^nodeUp;nodeLeft;nodeRight >
-     * @return std::string with the node neighborhood
-     */
-    std::string printNeighbours();
+        /*!
+         * @brief The function prints the neighborhood of the node in the format <^nodeUp;nodeLeft;nodeRight >
+         * @return std::string with the node neighborhood
+         */
+        std::string printNeighbours();
 
-    void setNodeName(const std::string s);
+        void setNodeName(const std::string s);
 
-    std::string getNodeName();
+        std::string getNodeName();
 
-    virtual void setLeafCharacter(char ch);
+        virtual void setLeafCharacter(char ch);
 
-    void setMSAFv(Eigen::VectorXd &fv);
+        void setMSAFv(Eigen::VectorXd &fv);
 
-    virtual void setSetA(bool b);
+        virtual void setSetA(bool b);
 
-    bool getSetA(int colnum);
+        bool getSetA(int colnum);
 
-    double getIota();
+        double getIota();
 
-    void setIota(double iota);
+        void setIota(double iota);
 
-    double getBeta();
+        double getBeta();
 
-    void setBeta(double beta);
+        void setBeta(double beta);
 
-    const Eigen::MatrixXd &getPr();
+        const Eigen::MatrixXd &getPr();
 
-    VirtualNode *getNodeUp();
+        VirtualNode *getNodeUp();
 
-    VirtualNode *getNodeLeft();
+        VirtualNode *getNodeLeft();
 
-    VirtualNode *getNodeRight();
+        VirtualNode *getNodeRight();
 
-    void _traverseVirtualNodeTree();
+        void _traverseVirtualNodeTree();
 
-    double computeTotalTreeLength();
+        double computeTotalTreeLength();
 
 
+        void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
 
-    void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
+        void recombineFv();
 
-    void recombineFv();
+        void revertFv();
 
-    void revertFv();
+        void keepFv();
 
-    void keepFv();
+        void clearChildren();
 
-    void clearChildren();
+        void printAncestralFlagOnFile(FILE *fid);
 
-    void printAncestralFlagOnFile(FILE *fid);
+        /*!
+         * @brief This function returns true if the node is terminal
+         * @return boolean value (true or false)
+         */
+        bool isTerminalNode();
 
-    /*!
-     * @brief This function returns true if the node is terminal
-     * @return boolean value (true or false)
-     */
-    bool isTerminalNode();
+        /*!
+         * @brief This function returns true if the node is root
+         * @return boolean value (true or false)
+         */
+        bool isRootNode();
 
-    /*!
-     * @brief This function returns true if the node is root
-     * @return boolean value (true or false)
-     */
-    bool isRootNode();
+        /*!
+         * @brief This function returns true if the node is pseudoroot
+         * @return boolean value (true or false)
+         */
+        bool isPseudoRootNode();
 
-    /*!
-     * @brief This function returns true if the node is pseudoroot
-     * @return boolean value (true or false)
-     */
-    bool isPseudoRootNode();
+        /*!
+         * @brief This function return the index of node as seen from the parent immediate above it.
+         * @return
+         */
+        NodePosition indexOf();
 
-    /*!
-     * @brief This function return the index of node as seen from the parent immediate above it.
-     * @return
-     */
-    NodePosition indexOf();
+        /*!
+         * @brief This function swaps the current node and another one passed in the argument. The swap takes in consideration the topology of the tree.
+         * @param targetNode
+         * @return boolean value if the execution was performed correctly.
+         */
+        bool swapNode(VirtualNode *targetNode, MoveDirections move_direction, bool revertRotations);
 
-    /*!
-     * @brief This function swaps the current node and another one passed in the argument. The swap takes in consideration the topology of the tree.
-     * @param targetNode
-     * @return boolean value if the execution was performed correctly.
-     */
-    bool swapNode(VirtualNode *targetNode, MoveDirections move_direction, bool revertRotations);
+        /*!
+         * @brief The function checks if the current node is a parent of another node using a recursive structure
+         * @param inVNode VirtualNode pointer
+         * @return False if the node passed is not parent of the current one, True otherwise
+         * @deprecated
+         */
+        bool isParent(VirtualNode *inVNode);
 
-    /*!
-     * @brief The function checks if the current node is a parent of another node using a recursive structure
-     * @param inVNode VirtualNode pointer
-     * @return False if the node passed is not parent of the current one, True otherwise
-     * @deprecated
-     */
-    bool isParent(VirtualNode *inVNode);
 
+        void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
-    void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
+        virtual void _setNodeRight(VirtualNode *inVNode);
 
-    virtual void _setNodeRight(VirtualNode *inVNode);
+        virtual void _setNodeLeft(VirtualNode *inVNode);
 
-    virtual void _setNodeLeft(VirtualNode *inVNode);
+        virtual void _setNodeUp(VirtualNode *inVNode);
 
-    virtual void _setNodeUp(VirtualNode *inVNode);
+        virtual void _printFV();
 
-    virtual void _printFV();
 
+    protected:
+        VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
+        VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
+        VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
 
-protected:
-    VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
-    VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
-    VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
 
+        virtual void _oneway_connectNode(VirtualNode *inVNode);
 
-    virtual void _oneway_connectNode(VirtualNode *inVNode);
+        virtual void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
 
-    virtual void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
+        virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
-    virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
+        void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
-    void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
+        void _recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum);
 
-    void _recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum);
+    };
 
-};
 
+    class Utree {
+    public:
 
-class Utree {
-public:
+        std::vector<VirtualNode *> listVNodes;
+        std::vector<VirtualNode *> startVNodes;
+        VirtualNode *rootnode;
 
-    std::vector<VirtualNode *> listVNodes;
-    std::vector<VirtualNode *> startVNodes;
-    VirtualNode *rootnode;
+        Utree();
 
-    Utree();
+        virtual ~Utree();
 
-    virtual ~Utree();
+        /*!
+         * @brief This function finds the pseudoroot traversing the tree from starting node until a bidirectional connection is found
+         * @param inVNode starting node
+         * @return std::vector of VirtualNode pointers from the starting point until the pseudoroot
+         */
+        std::vector<VirtualNode *> findPseudoRoot(VirtualNode *inVNode, bool fixPseudoRootOnNextSubtree = false);
 
-    /*!
-     * @brief This function finds the pseudoroot traversing the tree from starting node until a bidirectional connection is found
-     * @param inVNode starting node
-     * @return std::vector of VirtualNode pointers from the starting point until the pseudoroot
-     */
-    std::vector<VirtualNode *> findPseudoRoot(VirtualNode *inVNode, bool fixPseudoRootOnNextSubtree = false);
+        /*!
+         * @brief This function adds a complete VirtualNode to the listVNodes attribute of the class Utree
+         * @param inVNode       Pointer to the VirtualNode to add
+         * @param isStartNode
+         */
+        virtual void addMember(VirtualNode *inVNode, bool isStartNode = false);
 
-    /*!
-     * @brief This function adds a complete VirtualNode to the listVNodes attribute of the class Utree
-     * @param inVNode       Pointer to the VirtualNode to add
-     * @param isStartNode
-     */
-    virtual void addMember(VirtualNode *inVNode, bool isStartNode = false);
-    /*!
-     * @brief
-     * @param showInternalNodeNames
-     * @return
-     */
-    std::string printTreeNewick(bool showInternalNodeNames);
-    /*!
-     * @brief
-     * @return
-     */
-    int getMaxNodeDistance();
+        /*!
+         * @brief
+         * @param showInternalNodeNames
+         * @return
+         */
+        std::string printTreeNewick(bool showInternalNodeNames);
 
-    /*!
-     * @brief
-     * @param outfilepath
-     */
-    virtual void saveTreeOnFile(std::string outfilepath);
+        /*!
+         * @brief
+         * @return
+         */
+        int getMaxNodeDistance();
 
-    /*!
-     * @brief
-     */
-    virtual void printAllNodesNeighbors();
+        /*!
+         * @brief
+         * @param outfilepath
+         */
+        virtual void saveTreeOnFile(std::string outfilepath);
 
-    /*!
-     * @brief This function create a virtual root on the utree object. It breaks the link between two pseudoroot virtualnodes
-     */
-    virtual void addVirtualRootNode();
+        /*!
+         * @brief
+         */
+        virtual void printAllNodesNeighbors();
 
-    /*!
-     * @brief This function remove the virtual root node added with the companion function addVirtualRootNode()
-     */
-    virtual void removeVirtualRootNode();
+        /*!
+         * @brief This function create a virtual root on the utree object. It breaks the link between two pseudoroot virtualnodes
+         */
+        virtual void addVirtualRootNode();
 
-    virtual void _testReachingPseudoRoot();
+        /*!
+         * @brief This function remove the virtual root node added with the companion function addVirtualRootNode()
+         */
+        virtual void removeVirtualRootNode();
 
-    virtual double computeTotalTreeLength();
+        virtual void _testReachingPseudoRoot();
 
-    virtual void setIota(double tau, double mu);
+        virtual double computeTotalTreeLength();
 
-    virtual void setBeta(double tau, double mu);
+        virtual void setIota(double tau, double mu);
 
-    virtual void clearFv();
+        virtual void setBeta(double tau, double mu);
 
-    virtual void setLeafState(std::string s);
+        virtual void clearFv();
 
-    virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
+        virtual void setLeafState(std::string s);
 
-    virtual void _printUtree();
+        virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
 
-    std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
+        virtual void _printUtree();
 
+        std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
 
 
+    protected:
+        std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
-protected:
-    std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
+        std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
 
-    std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+        virtual void _updateStartNodes();
 
-    virtual void _updateStartNodes();
+    private:
 
-private:
+    };
 
-};
-
-
+}
 
 namespace UtreeUtils {
+    using namespace tshlib;
 
     void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
 

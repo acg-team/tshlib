@@ -43,25 +43,28 @@
  */
 #include "ModelFactory.hpp"
 
+namespace tshlib {
 
-void Parameter::Optimise() {}
+    void Parameter::Optimise() {}
 
-void Parameter::UpdateList() {}
+    void Parameter::UpdateList() {}
 
-Parameter::Parameter() = default;
+    Parameter::Parameter() = default;
 
-Parameter::Parameter(bool optimisable) : optimisable(optimisable) {}
+    Parameter::Parameter(bool optimisable) : optimisable(optimisable) {}
 
-Parameter::~Parameter() = default;
+    Parameter::~Parameter() = default;
 
-topology::topology(bool optimisable, Utree *tree) : Parameter(optimisable), value(tree) {name = "topology";}
+    topology::topology(bool optimisable, Utree *tree) : Parameter(optimisable), value(tree) { name = "topology"; }
 
-msa::msa(bool optimisable, Alignment *alignment) : Parameter(optimisable), value(alignment) {name = "msa";}
+    msa::msa(bool optimisable, Alignment *alignment) : Parameter(optimisable), value(alignment) { name = "msa"; }
 
-Vi::Vi(bool optimisable, const Eigen::MatrixXd &Vi) : Parameter(optimisable), value(Vi) {name = "vi";}
+    Vi::Vi(bool optimisable, const Eigen::MatrixXd &Vi) : Parameter(optimisable), value(Vi) { name = "vi"; }
 
-pi::pi(bool optimisable, const Eigen::VectorXd &pi) : Parameter(optimisable), value(pi) {name = "pi";}
+    pi::pi(bool optimisable, const Eigen::VectorXd &pi) : Parameter(optimisable), value(pi) { name = "pi"; }
 
-Q::Q(bool optimisable, const Eigen::MatrixXd &Q) : Parameter(optimisable), value(Q) {name = "Q";}
+    Q::Q(bool optimisable, const Eigen::MatrixXd &Q) : Parameter(optimisable), value(Q) { name = "Q"; }
 
-V::V(bool optimisable, const Eigen::MatrixXd &V) : Parameter(optimisable), value(V) {name = "V";}
+    V::V(bool optimisable, const Eigen::MatrixXd &V) : Parameter(optimisable), value(V) { name = "V"; }
+
+}

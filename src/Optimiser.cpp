@@ -44,26 +44,26 @@
 #include "Optimiser.hpp"
 
 
+namespace tshlib {
 
+    template<class Model>
+    void Optimiser<Model>::computeSteps() {
 
-template<class Model>
-void Optimiser<Model>::computeSteps() {
+    }
+
+    template<class Model>
+    Optimiser<Model>::~Optimiser() {
+
+    }
+
+    template<class Model>
+    void Optimiser<Model>::executeOptimisation() {
+
+    }
+
+    template<class Model>
+    Optimiser<Model>::Optimiser(Model *model):model(model) {}
 
 }
-
-template<class Model>
-Optimiser<Model>::~Optimiser() {
-
-}
-
-template<class Model>
-void Optimiser<Model>::executeOptimisation() {
-
-}
-
-template<class Model>
-Optimiser<Model>::Optimiser(Model *model):model(model) {}
-
-
 
 

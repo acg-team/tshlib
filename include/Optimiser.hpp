@@ -60,34 +60,37 @@
 //
 //};
 
-template <class Model>
-class Optimiser {
-    enum class LimitType {score, iterations};
 
-private:
+namespace tshlib {
+    template<class Model>
+    class Optimiser {
+        enum class LimitType {
+            score, iterations
+        };
 
-    Optimiser::LimitType limit_type;
-    double limit_value;
-    std::vector<VirtualNode *> nodeList;
+    private:
 
-public:
+        Optimiser::LimitType limit_type;
+        double limit_value;
+        std::vector<VirtualNode *> nodeList;
 
-    Model *model;
+    public:
 
-    Optimiser(Model *model);
+        Model *model;
 
-    virtual ~Optimiser();
+        Optimiser(Model *model);
 
-    virtual void computeSteps();
+        virtual ~Optimiser();
 
-    virtual void executeOptimisation();
+        virtual void computeSteps();
 
-
-
-protected:
-
-
-};
+        virtual void executeOptimisation();
 
 
+    protected:
+
+
+    };
+
+}
 #endif //TSHEXE_OPTIMISER_HPP

@@ -45,26 +45,27 @@
 
 using namespace std;
 
+namespace tshlib {
 
-class TreeSearch {
+    class TreeSearch {
 
-private:
-    string test_field;
+    private:
+        string test_field;
 
-public:
+    public:
 
-    TreeSearch(string name);
+        TreeSearch(string name);
 
-    TreeSearch(const TreeSearch &copy_from);
+        TreeSearch(const TreeSearch &copy_from);
 
-    TreeSearch &operator=(const TreeSearch &copy_from);
+        TreeSearch &operator=(const TreeSearch &copy_from);
 
-    ~TreeSearch();
+        ~TreeSearch();
 
-    void setString(string input);
+        void setString(string input);
 
-    int getLength();
+        int getLength();
 
-};
-
+    };
+}
 #endif //TSHLIB_TREESEARCH_HPP

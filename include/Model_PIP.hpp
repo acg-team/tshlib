@@ -47,114 +47,122 @@
 #include <glog/logging.h>
 #include "ModelFactory.hpp"
 
+namespace tshlib {
+    class pip_Nu : public Parameter {
+    public:
+        double value;
 
-class pip_Nu: public Parameter{
-public:
-    double value;
+        pip_Nu(bool optimisable, double value);
 
-    pip_Nu(bool optimisable, double value);
-
-    ~pip_Nu() override = default;
-
-};
-class pip_Tau: public Parameter{
-public:
-    double value;
-
-    pip_Tau(bool optimisable, double value);
-
-    ~pip_Tau() override = default;
-};
-class pip_Phi: public Parameter{
-public:
-    double value;
-
-    pip_Phi(bool optimisable, double value);
-
-    ~pip_Phi() override = default;
-};
-
-class pip_Lambda: public Parameter{
-public:
-    double value;
-
-    pip_Lambda(bool optimisable, double value);
-
-    ~pip_Lambda() override = default;
-
-    void Optimise() override {};
-    void UpdateList() override {};
-};
-
-class pip_Mu: public Parameter{
-
-public:
-    double value;
-
-    pip_Mu(bool optimisable, double value);
-
-    ~pip_Mu() override = default;
-
-    void Optimise() override {};
-    void UpdateList() override {};
-};
-
-class PIP: public ModelFactory {
-public:
-    // TODO: Check for better ways to extend a derived class using template
-    PIP(ModelFactory *model, double lambda_value, double mu_value) {
-
-        params = model->params;
-
-        // Extend model parameters
-        parameters = model->parameters;
-
-        // Initialise model parameters
-        auto lambda = new pip_Lambda(true, lambda_value);
-        auto mu = new pip_Mu(true, mu_value);
-
-        Q *qmatrix = dynamic_cast<Q *>(parameters["Q"]);
-
-        long rows = qmatrix->value.rows();
-        long cols = qmatrix->value.cols();
-
-        (qmatrix->value).conservativeResize(rows+1, cols+1);
-
-        rows = qmatrix->value.rows();
-        cols = qmatrix->value.cols();
-
-        // Fill Q matrix as for JC69
-        for(int r = 0; r<rows-1; r++){
-            for(int c=0; c<cols-1; c++ ){
-
-                if(r==c){
-                    qmatrix->value(r,c) = qmatrix->value(r,c)-mu->value;
-                }else{
-                    qmatrix->value(r,c) =  qmatrix->value(r,c);
-                }
-
-            }
-            qmatrix->value(r,cols-1) = mu->value;
-        }
-
-        // Store new parameters
-        parameters[lambda->name]  = lambda;
-        parameters[mu->name] = mu;
-
-        params.push_back(lambda);
-        params.push_back(mu);
-
+        ~pip_Nu() override = default;
 
     };
 
-    void setLambda();
-    void setMu();
-    void computeNu();
-    void computeTau();
-    void computePhi();
+    class pip_Tau : public Parameter {
+    public:
+        double value;
 
-};
+        pip_Tau(bool optimisable, double value);
+
+        ~pip_Tau() override = default;
+    };
+
+    class pip_Phi : public Parameter {
+    public:
+        double value;
+
+        pip_Phi(bool optimisable, double value);
+
+        ~pip_Phi() override = default;
+    };
+
+    class pip_Lambda : public Parameter {
+    public:
+        double value;
+
+        pip_Lambda(bool optimisable, double value);
+
+        ~pip_Lambda() override = default;
+
+        void Optimise() override {};
+
+        void UpdateList() override {};
+    };
+
+    class pip_Mu : public Parameter {
+
+    public:
+        double value;
+
+        pip_Mu(bool optimisable, double value);
+
+        ~pip_Mu() override = default;
+
+        void Optimise() override {};
+
+        void UpdateList() override {};
+    };
+
+    class PIP : public ModelFactory {
+    public:
+        // TODO: Check for better ways to extend a derived class using template
+        PIP(ModelFactory *model, double lambda_value, double mu_value) {
+
+            params = model->params;
+
+            // Extend model parameters
+            parameters = model->parameters;
+
+            // Initialise model parameters
+            auto lambda = new pip_Lambda(true, lambda_value);
+            auto mu = new pip_Mu(true, mu_value);
+
+            Q *qmatrix = dynamic_cast<Q *>(parameters["Q"]);
+
+            long rows = qmatrix->value.rows();
+            long cols = qmatrix->value.cols();
+
+            (qmatrix->value).conservativeResize(rows + 1, cols + 1);
+
+            rows = qmatrix->value.rows();
+            cols = qmatrix->value.cols();
+
+            // Fill Q matrix as for JC69
+            for (int r = 0; r < rows - 1; r++) {
+                for (int c = 0; c < cols - 1; c++) {
+
+                    if (r == c) {
+                        qmatrix->value(r, c) = qmatrix->value(r, c) - mu->value;
+                    } else {
+                        qmatrix->value(r, c) = qmatrix->value(r, c);
+                    }
+
+                }
+                qmatrix->value(r, cols - 1) = mu->value;
+            }
+
+            // Store new parameters
+            parameters[lambda->name] = lambda;
+            parameters[mu->name] = mu;
+
+            params.push_back(lambda);
+            params.push_back(mu);
 
 
+        };
 
+        void setLambda();
+
+        void setMu();
+
+        void computeNu();
+
+        void computeTau();
+
+        void computePhi();
+
+    };
+
+
+}
 #endif //TSHEXE_MODEL_PIP_HPP

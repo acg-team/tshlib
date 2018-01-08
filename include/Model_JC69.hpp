@@ -45,25 +45,27 @@
 #define TSHEXE_MODEL_JC69_HPP
 #include "ModelFactory.hpp"
 
-class jc69_Alpha: public Parameter{
-public:
-    double value;
+namespace tshlib {
+    class jc69_Alpha : public Parameter {
+    public:
+        double value;
 
-    jc69_Alpha(bool optimisable, double value);
+        jc69_Alpha(bool optimisable, double value);
 
-    ~jc69_Alpha() override = default;
+        ~jc69_Alpha() override = default;
 
-    void Optimise() override {};
-    void UpdateList() override {};
-};
+        void Optimise() override {};
 
-class JC69: public ModelFactory{
-public:
-    explicit JC69(double alpha_value);
+        void UpdateList() override {};
+    };
 
-    virtual ~JC69();
+    class JC69 : public ModelFactory {
+    public:
+        explicit JC69(double alpha_value);
 
-};
+        virtual ~JC69();
 
+    };
+}
 
 #endif //TSHEXE_MODEL_JC69_HPP

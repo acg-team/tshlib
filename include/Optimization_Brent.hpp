@@ -52,10 +52,11 @@
 #define SMALL DBL_MIN
 #define  UNLIKELY          -1.e10
 
-int sgn(double d);
+namespace tshlib {
+    int sgn(double d);
 
-bool Generic_Brent_Lk(double *param, double ax, double cx, double tol,
-                        int n_iter_max, double (*obj_func)(Likelihood &, std::vector<VirtualNode *> &, Alignment &),
-                        Likelihood &likelihood, std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, double &start_LK);
-
+    bool Generic_Brent_Lk(double *param, double ax, double cx, double tol,
+                          int n_iter_max, double (*obj_func)(Likelihood &, std::vector<VirtualNode *> &, Alignment &),
+                          Likelihood &likelihood, std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, double &start_LK);
+}
 #endif //TSHEXE_OPTIMIZATION_BRENT_HPP

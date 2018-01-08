@@ -40,14 +40,15 @@
  */
 #include "Model_K80.hpp"
 
-K80::K80(double value_kappa) {
+namespace tshlib {
+    K80::K80(double value_kappa) {
 
-    params.push_back(new k80_kappa(true, value_kappa));
+        params.push_back(new k80_kappa(true, value_kappa));
+
+    }
+
+    K80::~K80() = default;
+
+    k80_kappa::k80_kappa(bool optimisable, double value) : Parameter(optimisable), value(value) { name = "k80_kappa"; }
 
 }
-
-K80::~K80() = default;
-
-k80_kappa::k80_kappa(bool optimisable, double value) : Parameter(optimisable), value(value) { name = "k80_kappa";}
-
-

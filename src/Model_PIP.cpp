@@ -44,14 +44,17 @@
 #include "ModelFactory.hpp"
 #include "Model_PIP.hpp"
 
-pip_Lambda::pip_Lambda(bool optimisable, double value) : Parameter(optimisable), value(value) { name = "pip_lambda";}
+namespace tshlib {
 
-pip_Mu::pip_Mu(bool optimisable, double value) : Parameter(optimisable), value(value) {name = "pip_mu";}
+    pip_Lambda::pip_Lambda(bool optimisable, double value) : Parameter(optimisable), value(value) { this->name = "pip_lambda"; }
 
-pip_Phi::pip_Phi(bool optimisable, double value) : Parameter(optimisable), value(value) {name = "pip_phi";}
+    pip_Mu::pip_Mu(bool optimisable, double value) : Parameter(optimisable), value(value) { this->name = "pip_mu"; }
 
-pip_Tau::pip_Tau(bool optimisable, double value) : Parameter(optimisable), value(value) {name = "pip_Tau";}
+    pip_Phi::pip_Phi(bool optimisable, double value) : Parameter(optimisable), value(value) { this->name = "pip_phi"; }
 
-pip_Nu::pip_Nu(bool optimisable, double value) : Parameter(optimisable), value(value) {name = "pip_Nu";}
+    pip_Tau::pip_Tau(bool optimisable, double value) : Parameter(optimisable), value(value) { this->name = "pip_Tau"; }
+
+    pip_Nu::pip_Nu(bool optimisable, double value) : Parameter(optimisable), value(value) { this->name = "pip_Nu"; }
 
 
+}

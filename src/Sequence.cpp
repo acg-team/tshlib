@@ -48,25 +48,28 @@
 
 #include "Sequence.hpp"
 
-Sequence::~Sequence() = default;
 
-Sequence::Sequence(std::string label, std::string data) {
+namespace tshlib {
+    Sequence::~Sequence() = default;
 
-    this->seq_name = label;
-    this->seq_data = data;
-    this->seq_compressed = false;
+    Sequence::Sequence(std::string label, std::string data) {
 
-    for (std::vector<int>::size_type i = 0; i != this->seq_data.size(); i++) {
-        this->seq_weight.push_back(1);
+        this->seq_name = label;
+        this->seq_data = data;
+        this->seq_compressed = false;
+
+        for (std::vector<int>::size_type i = 0; i != this->seq_data.size(); i++) {
+            this->seq_weight.push_back(1);
+        }
+
     }
 
-}
+    Sequence::Sequence(std::string label, std::string data, std::vector<unsigned int> weight) {
 
-Sequence::Sequence(std::string label, std::string data, std::vector<unsigned int> weight) {
+        this->seq_name = label;
+        this->seq_data = data;
+        this->seq_compressed = true;
+        this->seq_weight = weight;
 
-    this->seq_name = label;
-    this->seq_data = data;
-    this->seq_compressed = true;
-    this->seq_weight = weight;
-
+    }
 }

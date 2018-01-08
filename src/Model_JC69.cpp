@@ -40,35 +40,37 @@
  */
 #include "Model_JC69.hpp"
 
-jc69_Alpha::jc69_Alpha(bool optimisable, double value) : Parameter(optimisable), value(value) {name="jc69_Alpha";}
+namespace tshlib {
+    jc69_Alpha::jc69_Alpha(bool optimisable, double value) : Parameter(optimisable), value(value) {name="jc69_Alpha";}
 
-JC69::JC69(double aplha_value) {
+    JC69::JC69(double aplha_value) {
 
-    // Initialise parameters
-    auto alpha = new jc69_Alpha(true, aplha_value);
+        // Initialise parameters
+        auto alpha = new jc69_Alpha(true, aplha_value);
 
-    Eigen::MatrixXd Qmatrix = Eigen::MatrixXd::Zero(4,4);
+        Eigen::MatrixXd Qmatrix = Eigen::MatrixXd::Zero(4,4);
 
-    // Fill Q matrix as for JC69
-    for(int r = 0; r<Qmatrix.rows(); r++){
-        for(int c=0; c<Qmatrix.cols(); c++ ){
+        // Fill Q matrix as for JC69
+        for(int r = 0; r<Qmatrix.rows(); r++){
+            for(int c=0; c<Qmatrix.cols(); c++ ){
 
-            if(r==c){
-                Qmatrix(r,c) =  -3*alpha->value/4.0;
-            }else{
-                Qmatrix(r,c) =  alpha->value/4.0;
+                if(r==c){
+                    Qmatrix(r,c) =  -3*alpha->value/4.0;
+                }else{
+                    Qmatrix(r,c) =  alpha->value/4.0;
+                }
+
             }
-
         }
+        auto Qval = new Q(true, Qmatrix);
+
+        parameters[alpha->name] = alpha;
+        parameters[Qval->name] = Qval;
+
+        // Save parameters in the model parameter vector
+        params.push_back(alpha);
+        params.push_back(Qval);
     }
-    auto Qval = new Q(true, Qmatrix);
 
-    parameters[alpha->name] = alpha;
-    parameters[Qval->name] = Qval;
-
-    // Save parameters in the model parameter vector
-    params.push_back(alpha);
-    params.push_back(Qval);
+    JC69::~JC69() = default;
 }
-
-JC69::~JC69() = default;

@@ -48,23 +48,23 @@
 #include <string>
 #include <vector>
 
+namespace tshlib {
+    class Sequence {
+    private:
+    public:
+        std::string seq_name;
+        std::string seq_data;
+        std::vector<unsigned int> seq_weight;
+        bool seq_compressed;
 
-class Sequence {
-private:
-public:
-    std::string seq_name;
-    std::string seq_data;
-    std::vector<unsigned int> seq_weight;
-    bool seq_compressed;
+        Sequence(std::string label, std::string data);
 
-    Sequence(std::string label, std::string data);
+        Sequence(std::string label, std::string data, std::vector<unsigned int> weight);
 
-    Sequence(std::string label, std::string data, std::vector<unsigned int> weight);
+        ~Sequence();
 
-    ~Sequence();
+    protected:
 
-protected:
-
-};
-
+    };
+}
 #endif //TSHEXE_SEQUENCE_HPP

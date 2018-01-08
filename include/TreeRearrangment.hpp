@@ -49,145 +49,149 @@
 #include "Utilities.hpp"
 #include "Likelihood.hpp"
 
-enum class TreeSearchHeuristics{classic_NNI, classic_SPR, classic_Mixed, particle_swarm};
+namespace tshlib {
+    enum class TreeSearchHeuristics {
+        classic_NNI, classic_SPR, classic_Mixed, particle_swarm
+    };
 
-class Move {
+    class Move {
 
-private:
+    private:
 
-protected:
-    VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
+    protected:
+        VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
 
-public:
-    int move_id;                            /* Move ID - Useful in case of parallel independent executions*/
-    std::string move_name;                  /* Move Name - Unused */
-    int move_radius;                        /* Move Radius */
-    MoveDirections move_direction;          /* Move Direction for applying a rotation to the VirtualNode pointers */
-    double move_lk;                         /* Likelihood of the move if applied */
-    bool move_applied;                      /* Indicator is set to true if the move is applied to the tree */
-    std::string move_class;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-    MoveType move_type;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-    std::vector<VirtualNode *> move_nodesinvolved;      /* list of nodes involved in the rearrangement under the move spefications */
+    public:
+        int move_id;                            /* Move ID - Useful in case of parallel independent executions*/
+        std::string move_name;                  /* Move Name - Unused */
+        int move_radius;                        /* Move Radius */
+        MoveDirections move_direction;          /* Move Direction for applying a rotation to the VirtualNode pointers */
+        double move_lk;                         /* Likelihood of the move if applied */
+        bool move_applied;                      /* Indicator is set to true if the move is applied to the tree */
+        std::string move_class;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+        MoveType move_type;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+        std::vector<VirtualNode *> move_nodesinvolved;      /* list of nodes involved in the rearrangement under the move spefications */
 
-    /*!
-     * @brief Standard constructor
-     */
-    Move();
+        /*!
+         * @brief Standard constructor
+         */
+        Move();
 
-    /*!
-    * @brief Standard deconstructor
-    */
-    ~Move();
+        /*!
+        * @brief Standard deconstructor
+        */
+        ~Move();
 
-    /*!
-     * @brief Reset the protected move_targetnode field
-     */
-    void deleteTargetNode();
+        /*!
+         * @brief Reset the protected move_targetnode field
+         */
+        void deleteTargetNode();
 
-    /*!
-     * @brief Returns the target node pointer
-     * @return PhyTree pointer of the node
-     */
-    VirtualNode *getTargetNode();
+        /*!
+         * @brief Returns the target node pointer
+         * @return PhyTree pointer of the node
+         */
+        VirtualNode *getTargetNode();
 
-    /*!
-     * @brief Set the protected move_targetnode field
-     * @param target_node PhyTree Pointer to the target node
-     */
-    void setTargetNode(VirtualNode *target_node);
+        /*!
+         * @brief Set the protected move_targetnode field
+         * @param target_node PhyTree Pointer to the target node
+         */
+        void setTargetNode(VirtualNode *target_node);
 
-    void setMoveClass(int Value);
+        void setMoveClass(int Value);
 
-    void setRadius(int radius);
+        void setRadius(int radius);
 
-    void setDirection(MoveDirections direction);
+        void setDirection(MoveDirections direction);
 
-    void recomputeLikelihood();
+        void recomputeLikelihood();
 
-    void initMove();
-};
-
-
-class TreeRearrangment {
-private:
-
-    Utree *tree;
-    std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-    int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
-    int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
-    bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
-    std::vector<Move *> mset_moves;     /* Vector containing the pre-computed moves */
-
-    VirtualNode *mset_sourcenode;       /* Starting node from which starting the tree exploration */
-
-public:
-    std::string mset_strategy;          /* Description of the node search strategy */
-
-    TreeRearrangment();
-
-    virtual void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
-
-    virtual void initTreeRearrangment(Utree *ref_tree, int min_radius, int max_radius, bool preserve_blengths, VirtualNode *node_source);
-
-    virtual ~TreeRearrangment();
-
-    VirtualNode *getSourceNode();
-
-    /*!
-     * @brief Perform a complete node search and fill the vector containing the candidate moves.
-     * @param includeSelf bool ?
-     */
-    virtual void defineMoves(bool includeSelf);
-
-    virtual bool applyMove(unsigned long moveID);
-
-    Move *getMove(unsigned long moveID);
-
-    virtual bool revertMove(unsigned long moveID);
-
-    virtual void printMoves();
-
-    unsigned long getNumberOfMoves();
-
-    virtual void selectBestMove(unsigned long moveID);
-
-protected:
-
-    /*!
-     * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
-     * @param node_source   VirtualNode pointer to the starting node
-     * @param radius_min    int Radius of the search (NNI = 1, SPR > 1)
-     * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
-     * @param includeSelf bool ?
-     */
-    virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction);
+        void initMove();
+    };
 
 
-    /*!
-     * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
-     * @param node_source   PhyTree Pointer to the starting node
-     * @param radius_min    int Radius of the search (NNI = 3, SPR > 3)
-     * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
-     * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
-     */
-    void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction);
+    class TreeRearrangment {
+    private:
 
-    /*!
-     * @brief Append candidate move to the mset_moves vector
-     * @param move Move Pointer to the candidate move object
-     */
-    void addMove(Move *move);
+        Utree *tree;
+        std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
+        int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
+        int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
+        bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
+        std::vector<Move *> mset_moves;     /* Vector containing the pre-computed moves */
 
-};
+        VirtualNode *mset_sourcenode;       /* Starting node from which starting the tree exploration */
 
-namespace treesearchheuristics{
+    public:
+        std::string mset_strategy;          /* Description of the node search strategy */
+
+        TreeRearrangment();
+
+        virtual void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
+
+        virtual void initTreeRearrangment(Utree *ref_tree, int min_radius, int max_radius, bool preserve_blengths, VirtualNode *node_source);
+
+        virtual ~TreeRearrangment();
+
+        VirtualNode *getSourceNode();
+
+        /*!
+         * @brief Perform a complete node search and fill the vector containing the candidate moves.
+         * @param includeSelf bool ?
+         */
+        virtual void defineMoves(bool includeSelf);
+
+        virtual bool applyMove(unsigned long moveID);
+
+        Move *getMove(unsigned long moveID);
+
+        virtual bool revertMove(unsigned long moveID);
+
+        virtual void printMoves();
+
+        unsigned long getNumberOfMoves();
+
+        virtual void selectBestMove(unsigned long moveID);
+
+    protected:
+
+        /*!
+         * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
+         * @param node_source   VirtualNode pointer to the starting node
+         * @param radius_min    int Radius of the search (NNI = 1, SPR > 1)
+         * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
+         * @param includeSelf bool ?
+         */
+        virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction);
+
+
+        /*!
+         * @brief Recursive function to retrieve all the nodes within a fixed radius from a starting node
+         * @param node_source   PhyTree Pointer to the starting node
+         * @param radius_min    int Radius of the search (NNI = 3, SPR > 3)
+         * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
+         * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
+         */
+        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction);
+
+        /*!
+         * @brief Append candidate move to the mset_moves vector
+         * @param move Move Pointer to the candidate move object
+         */
+        void addMove(Move *move);
+
+    };
+
+
+}
+
+namespace treesearchheuristics {
+    using namespace tshlib;
 
     void testTSH(Utree *input_tree, TreeSearchHeuristics tsh_strategy);
 
 }
-
-
-
 
 
 #endif //TSHLIB_TREEREARRANGEMENT_HPP

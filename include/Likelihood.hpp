@@ -52,113 +52,113 @@
 #include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Alignment.hpp"
+namespace tshlib {
+
+    const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, 2, -1, 1, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, 0, 0, -1, -1, 5, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, 1,
+                               -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,
+                               -1, -1, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                               -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+
+    const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, 0, 20, 1, 2, 3, 4, 5, 6, 7, 20, 8, 9, 10, 11, 20, 12, 13, 14,
+                                 15, 16, 20, 17, 18, 20, 19, 20, -1, -1, -1, -1, -1, -1, 0, 20, 1, 2, 3,
+                                 4, 5, 6, 7, 20, 8, 9, 10, 11, 20, 12, 13, 14, 15, 16, 20, 17, 18, 20,
+                                 19, 20, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                 -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 
-const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, 2, -1, 1, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, 0, 0, -1, -1, 5, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, 1,
-                           -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,
-                           -1, -1, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                           -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    class Likelihood {
 
-const char mytableAA[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, 0, 20, 1, 2, 3, 4, 5, 6, 7, 20, 8, 9, 10, 11, 20, 12, 13, 14,
-                             15, 16, 20, 17, 18, 20, 19, 20, -1, -1, -1, -1, -1, -1, 0, 20, 1, 2, 3,
-                             4, 5, 6, 7, 20, 8, 9, 10, 11, 20, 12, 13, 14, 15, 16, 20, 17, 18, 20,
-                             19, 20, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                             -1, -1, -1, -1, -1, -1, -1, -1, -1};
+        typedef Eigen::Matrix<double, 5, 5> MatrixExtended;
+        typedef Eigen::Matrix<double, 5, 1> VectorExtended;
+
+    private:
 
 
-class Likelihood {
+    public:
+        //PhyTree *link_node;
+        Utree *tree;
+        Eigen::VectorXd pi;
+        MatrixExtended Q;
+        double mu;
+        double tau;
+        double lambda;
+        double nu;
+        MatrixExtended V;
+        MatrixExtended Vi;
+        VectorExtended sigma;
 
-    typedef Eigen::Matrix<double,  5, 5> MatrixExtended;
-    typedef Eigen::Matrix<double,  5, 1> VectorExtended;
+        Likelihood();
 
-private:
-
-
-public:
-    //PhyTree *link_node;
-    Utree *tree;
-    Eigen::VectorXd pi;
-    MatrixExtended Q;
-    double mu;
-    double tau;
-    double lambda;
-    double nu;
-    MatrixExtended V;
-    MatrixExtended Vi;
-    VectorExtended sigma;
-
-    Likelihood();
-
-     ~Likelihood();
+        ~Likelihood();
 
 
-    void Init(Utree *inUtree, Eigen::VectorXd &valPi, Eigen::MatrixXd &valQ, double valMu, double valLambda);
+        void Init(Utree *inUtree, Eigen::VectorXd &valPi, Eigen::MatrixXd &valQ, double valMu, double valLambda);
 
-    void computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
+        void computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
 
-    /*!
-     * @brief compute the normalizing Poisson intensity
-     * @param tau
-     * @param lambda
-     * @param mu
-     * @return
-     */
-    void setNu();
+        /*!
+         * @brief compute the normalizing Poisson intensity
+         * @param tau
+         * @param lambda
+         * @param mu
+         * @return
+         */
+        void setNu();
 
-    double phi(int m, double p0);
+        double phi(int m, double p0);
 
-    void compileNodeList_postorder(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode);
+        void compileNodeList_postorder(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode);
 
-    void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+        void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
-    void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+        void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
-    void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+        void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
-    double computePartialLK_WholeAlignment(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
+        double computePartialLK_WholeAlignment(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
 
-    double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, int alignment_column);
+        double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, int alignment_column);
 
-    double computePartialEmptyLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
+        double computePartialEmptyLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
 
-    void computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size);
+        void computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size);
 
-    void loadLikelihoodComponents_Operative();
+        void loadLikelihoodComponents_Operative();
 
-    void unloadLikelihoodComponents_Operative();
+        void unloadLikelihoodComponents_Operative();
 
-    void restoreLikelihoodComponents();
+        void restoreLikelihoodComponents();
 
-    void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
+        void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
 
-    void saveLikelihoodComponents();
+        void saveLikelihoodComponents();
 
-    void setAllIotas(std::vector<VirtualNode *> &listNodes);
+        void setAllIotas(std::vector<VirtualNode *> &listNodes);
 
-    void setAllBetas(std::vector<VirtualNode *> &listNodes);
+        void setAllBetas(std::vector<VirtualNode *> &listNodes);
 
-    void optimiseLambda(int m, double p0);
+        void optimiseLambda(int m, double p0);
 
 //    double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
 //    double computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet );
@@ -169,13 +169,14 @@ public:
 //    Eigen::VectorXd _computeLikelihoodComponents_recursive(VirtualNode *vn, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet, int colnum, Alignment &MSA);
 //    double computeLikelihoodComponents(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int alphabet_size, int colnum, Alignment &MSA);
 
-protected:
+    protected:
 
-};
-
+    };
+}
 
 
 namespace LKFunc {
+    using namespace tshlib;
 
     double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment);
 

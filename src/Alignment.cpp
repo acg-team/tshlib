@@ -45,121 +45,123 @@
 #include <string>
 #include <vector>
 #include "Alignment.hpp"
+namespace tshlib {
 
-
-Alignment::Alignment(bool compressed) {
-    this->align_alphabetsize = 0;
-    this->align_compressed = compressed;
-    this->align_alphabetsize = 0;
-}
-
-Alignment::Alignment() {
-    this->align_compressed = false;
-    this->align_alphabetsize = 0;
-
-}
-
-Alignment::~Alignment() = default;
-
-
-void Alignment::addWeight(std::vector<int> column_weight) {
-    if (this->align_compressed) {
-        this->align_weight = column_weight;
-        this->align_compressed = true;
+    Alignment::Alignment(bool compressed) {
+        this->align_alphabetsize = 0;
+        this->align_compressed = compressed;
+        this->align_alphabetsize = 0;
     }
-}
 
-
-std::string Alignment::extractColumn(int index) {
-
-    std::string column;
-
-    for (std::vector<int>::size_type i = 0; i != this->align_dataset.size(); i++) {
-        column.push_back(this->align_dataset.at(i)->seq_data[index]);
+    Alignment::Alignment() {
+        this->align_compressed = false;
+        this->align_alphabetsize = 0;
 
     }
 
-    return column;
-}
+    Alignment::~Alignment() = default;
 
 
-void Alignment::addSequence(std::string label, std::string data) {
-
-    this->align_dataset.emplace_back(new Sequence(label, data));
-
-    // Add automatic weight if the alignment is not compressed
-    if (!this->align_compressed && this->align_weight.size() != data.size()) {
-        this->align_weight.clear();
-        for (std::vector<int>::size_type i = 0; i != data.size(); i++) {
-            this->align_weight.emplace_back(1);
+    void Alignment::addWeight(std::vector<int> column_weight) {
+        if (this->align_compressed) {
+            this->align_weight = column_weight;
+            this->align_compressed = true;
         }
     }
 
 
-}
+    std::string Alignment::extractColumn(int index) {
+
+        std::string column;
+
+        for (std::vector<int>::size_type i = 0; i != this->align_dataset.size(); i++) {
+            column.push_back(this->align_dataset.at(i)->seq_data[index]);
+
+        }
+
+        return column;
+    }
 
 
-long int Alignment::getAlignmentSize() {
+    void Alignment::addSequence(std::string label, std::string data) {
 
-    long length = 0;
+        this->align_dataset.emplace_back(new Sequence(label, data));
 
-    for (std::vector<int>::size_type i = 0; i != this->align_dataset.size(); i++) {
-
-        if (length < this->align_dataset[i]->seq_data.size()) {
-
-            length = this->align_dataset[i]->seq_data.size();
+        // Add automatic weight if the alignment is not compressed
+        if (!this->align_compressed && this->align_weight.size() != data.size()) {
+            this->align_weight.clear();
+            for (std::vector<int>::size_type i = 0; i != data.size(); i++) {
+                this->align_weight.emplace_back(1);
+            }
         }
 
 
     }
 
-    this->align_length = length;
 
-    return length;
-}
+    long int Alignment::getAlignmentSize() {
 
-void Alignment::countNumberCharactersinColumn() {
+        long length = 0;
 
-    int numCharacters;
+        for (std::vector<int>::size_type i = 0; i != this->align_dataset.size(); i++) {
 
-    for(int c=0;c<this->getAlignmentSize();c++){
-        numCharacters=0;
+            if (length < this->align_dataset[i]->seq_data.size()) {
 
-        for (int i = 0; i < this->align_dataset.size(); i++) {
-
-            char ch = this->align_dataset.at(i)->seq_data.at(c);
-            if ( ch != '-'){
-                numCharacters++;
+                length = this->align_dataset[i]->seq_data.size();
             }
 
-            //num_gaps += (int)(this->align_dataset.at(c)->seq_data.at(i) != '-');
+
         }
 
-        this->align_num_characters.at(c) = numCharacters;
+        this->align_length = length;
+
+        return length;
+    }
+
+    void Alignment::countNumberCharactersinColumn() {
+
+        int numCharacters;
+
+        for (int c = 0; c < this->getAlignmentSize(); c++) {
+            numCharacters = 0;
+
+            for (int i = 0; i < this->align_dataset.size(); i++) {
+
+                char ch = this->align_dataset.at(i)->seq_data.at(c);
+                if (ch != '-') {
+                    numCharacters++;
+                }
+
+                //num_gaps += (int)(this->align_dataset.at(c)->seq_data.at(i) != '-');
+            }
+
+            this->align_num_characters.at(c) = numCharacters;
+
+        }
+
 
     }
 
 
-}
+    Alignment_AA::Alignment_AA() {
 
+        this->align_alphabetsize = DIM;
+        this->alphabet = AlignmentAlphabet::aa;
 
-Alignment_AA::Alignment_AA() {
+    }
 
-    this->align_alphabetsize = DIM;
-    this->alphabet = AlignmentAlphabet::aa;
+    Alignment_DNA::Alignment_DNA() {
 
-}
+        this->align_alphabetsize = DIM;
+        this->alphabet = AlignmentAlphabet::dna;
 
-Alignment_DNA::Alignment_DNA() {
+    }
 
-    this->align_alphabetsize = DIM;
-    this->alphabet = AlignmentAlphabet::dna;
+    Alignment_Codon::Alignment_Codon() {
 
-}
+        this->align_alphabetsize = DIM;
+        this->alphabet = AlignmentAlphabet::codon;
 
-Alignment_Codon::Alignment_Codon() {
-
-    this->align_alphabetsize = DIM;
-    this->alphabet = AlignmentAlphabet::codon;
+    }
 
 }

@@ -51,113 +51,122 @@
 
 #include "Utree.hpp"
 
+namespace tshlib {
 
-class Parameter{
-public:
-    std::string name;
-    bool optimisable;
+    class Parameter {
+    public:
+        std::string name;
+        bool optimisable;
 
-    explicit Parameter();
-    explicit Parameter(bool optimisable);
+        explicit Parameter();
 
-    virtual ~Parameter();
+        explicit Parameter(bool optimisable);
 
-    virtual void Optimise();
-    virtual void UpdateList();
-};
+        virtual ~Parameter();
 
+        virtual void Optimise();
 
-class topology: public Parameter{
-    //TODO: include all the methods from tree_rearrangment
-public:
-    Utree *value;
-
-    topology(bool optimisable, Utree *tree);
-    ~topology() override = default;
-
-    void Optimise() override{};
-    void UpdateList() override{};
-
-};
-
-class msa: public Parameter{
-
-public:
-    Alignment *value;
-
-    msa(bool optimisable, Alignment *alignment);
-
-    ~msa() override = default;
-
-    void Optimise() override{};
-    void UpdateList() override{};
-
-};
+        virtual void UpdateList();
+    };
 
 
-class Vi: public Parameter{
+    class topology : public Parameter {
+        //TODO: include all the methods from tree_rearrangment
+    public:
+        Utree *value;
 
-public:
-    Eigen::MatrixXd value;
+        topology(bool optimisable, Utree *tree);
 
-    Vi(bool optimisable, const Eigen::MatrixXd &Vi);
+        ~topology() override = default;
 
-    ~Vi() override = default;
+        void Optimise() override {};
 
-    void Optimise() override{};
-    void UpdateList() override{};
+        void UpdateList() override {};
 
-};
+    };
 
-class pi: public Parameter{
-public:
-    Eigen::VectorXd value;
+    class msa : public Parameter {
 
-    pi(bool optimisable, const Eigen::VectorXd &pi);
+    public:
+        Alignment *value;
 
-    ~pi() override = default;
+        msa(bool optimisable, Alignment *alignment);
 
-    void Optimise() override{};
-    void UpdateList() override{};
+        ~msa() override = default;
 
+        void Optimise() override {};
 
-};
+        void UpdateList() override {};
 
-class Q: public Parameter{
-public:
-    Eigen::MatrixXd value;
-
-    Q(bool optimisable, const  Eigen::MatrixXd &Qmatrix);
-
-    ~Q() override = default;
-
-    void Optimise() override{};
-    void UpdateList() override{};
-
-};
-
-class V: public Parameter{
-
-public:
-    Eigen::MatrixXd value;
-
-    V(bool optimisable, const Eigen::MatrixXd &V);
-
-    ~V() override = default;
-
-    void Optimise() override{};
-    void UpdateList() override{};
-};
-
-class ModelFactory{
-public:
-    std::vector<Parameter *> params;
-    std::map<std::string,Parameter *> parameters;
-
-};
+    };
 
 
+    class Vi : public Parameter {
+
+    public:
+        Eigen::MatrixXd value;
+
+        Vi(bool optimisable, const Eigen::MatrixXd &Vi);
+
+        ~Vi() override = default;
+
+        void Optimise() override {};
+
+        void UpdateList() override {};
+
+    };
+
+    class pi : public Parameter {
+    public:
+        Eigen::VectorXd value;
+
+        pi(bool optimisable, const Eigen::VectorXd &pi);
+
+        ~pi() override = default;
+
+        void Optimise() override {};
+
+        void UpdateList() override {};
 
 
+    };
+
+    class Q : public Parameter {
+    public:
+        Eigen::MatrixXd value;
+
+        Q(bool optimisable, const Eigen::MatrixXd &Qmatrix);
+
+        ~Q() override = default;
+
+        void Optimise() override {};
+
+        void UpdateList() override {};
+
+    };
+
+    class V : public Parameter {
+
+    public:
+        Eigen::MatrixXd value;
+
+        V(bool optimisable, const Eigen::MatrixXd &V);
+
+        ~V() override = default;
+
+        void Optimise() override {};
+
+        void UpdateList() override {};
+    };
+
+    class ModelFactory {
+    public:
+        std::vector<Parameter *> params;
+        std::map<std::string, Parameter *> parameters;
+
+    };
+
+
+}
 
 #endif //TSHEXE_MODEL_HPP

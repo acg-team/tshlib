@@ -49,77 +49,80 @@
 #include "Alphabet.hpp"
 #include "Sequence.hpp"
 
-enum class AlignmentAlphabet {dna, aa, codon, undef};
+
+namespace tshlib {
+    enum class AlignmentAlphabet {
+        dna, aa, codon, undef
+    };
 
 
+    class Alignment {
 
-class Alignment {
+    private:
 
-private:
+    public:
 
-public:
+        int align_alphabetsize;
+        bool align_compressed;
+        std::vector<Sequence *> align_dataset;
+        std::vector<int> align_weight;
+        std::vector<int> align_num_characters;
+        long align_length;
+        AlignmentAlphabet alphabet;
 
-    int align_alphabetsize;
-    bool align_compressed;
-    std::vector<Sequence *> align_dataset;
-    std::vector<int> align_weight;
-    std::vector<int> align_num_characters;
-    long align_length;
-    AlignmentAlphabet alphabet;
+        Alignment();
 
-    Alignment();
+        virtual ~Alignment();
 
-    virtual ~Alignment();
+        explicit Alignment(bool compressed);
 
-    explicit Alignment(bool compressed);
+        virtual void addSequence(std::string label, std::string data);
 
-    virtual void addSequence(std::string label, std::string data);
+        virtual void addWeight(std::vector<int> column_weight);
 
-    virtual void addWeight(std::vector<int> column_weight);
+        virtual void countNumberCharactersinColumn();
 
-    virtual void countNumberCharactersinColumn();
+        virtual long int getAlignmentSize();
 
-    virtual long int getAlignmentSize();
+        std::string extractColumn(int index);
 
-    std::string extractColumn(int index);
+    protected:
 
-protected:
-
-};
-
-
-class Alignment_AA : public Alignment, AA{
-
-public:
-
-    Alignment_AA();
-
-    ~Alignment_AA() override = default;
+    };
 
 
-};
+    class Alignment_AA : public Alignment, AA {
 
-class Alignment_DNA : public Alignment, DNA{
+    public:
 
-public:
+        Alignment_AA();
 
-    Alignment_DNA();
-
-    ~Alignment_DNA() override = default;
+        ~Alignment_AA() override = default;
 
 
-};
+    };
 
-class Alignment_Codon : public Alignment, Codon{
+    class Alignment_DNA : public Alignment, DNA {
 
-public:
+    public:
 
-    Alignment_Codon();
+        Alignment_DNA();
 
-    ~Alignment_Codon() override = default;
+        ~Alignment_DNA() override = default;
 
 
-};
+    };
 
+    class Alignment_Codon : public Alignment, Codon {
+
+    public:
+
+        Alignment_Codon();
+
+        ~Alignment_Codon() override = default;
+
+
+    };
+}
 
 #endif //TSHLIB_ALIGNMENT_HPP

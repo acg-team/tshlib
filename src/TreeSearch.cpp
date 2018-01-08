@@ -42,30 +42,32 @@
 #include <string>
 #include "TreeSearch.hpp"
 
+namespace tshlib {
 
 // constructor of TreeSearchHL,
-TreeSearch::TreeSearch(std::string name) {
-    this->test_field = name;
-}
+    TreeSearch::TreeSearch(std::string name) {
+        this->test_field = name;
+    }
 
 //copy constructor for making a new copy of a TreeSearchHL
-TreeSearch::TreeSearch(const TreeSearch &copy_from) {
+    TreeSearch::TreeSearch(const TreeSearch &copy_from) {
 
-}
+    }
 
 //copy assignment for assigning a value from one TreeSearchHL to another
-TreeSearch &TreeSearch::operator=(const TreeSearch &copy_from) {
-}
+    TreeSearch &TreeSearch::operator=(const TreeSearch &copy_from) {
+    }
 
 // destructor, just an example
-TreeSearch::~TreeSearch() {
-    //delete[] this->test_field ;
-}
+    TreeSearch::~TreeSearch() {
+        //delete[] this->test_field ;
+    }
 
-void TreeSearch::setString(std::string input = "") {
-    this->test_field = input;
-}
+    void TreeSearch::setString(std::string input = "") {
+        this->test_field = input;
+    }
 
-int TreeSearch::getLength() {
-    return (int) this->test_field.length();
+    int TreeSearch::getLength() {
+        return (int) this->test_field.length();
+    }
 }

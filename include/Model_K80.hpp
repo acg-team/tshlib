@@ -43,29 +43,31 @@
 
 #include "ModelFactory.hpp"
 
-class k80_kappa : public Parameter{
+namespace tshlib {
+    class k80_kappa : public Parameter {
 
-public:
-    double value;
+    public:
+        double value;
 
-    k80_kappa(bool optimisable, double value);
+        k80_kappa(bool optimisable, double value);
 
-    ~k80_kappa() override = default;
+        ~k80_kappa() override = default;
 
-    void Optimise() override {};
-    void UpdateList() override {};
+        void Optimise() override {};
 
-};
+        void UpdateList() override {};
+
+    };
 
 
-class K80 : public ModelFactory{
+    class K80 : public ModelFactory {
 
-public:
+    public:
 
-    K80(double value_kappa);
+        K80(double value_kappa);
 
-    virtual ~K80();
+        virtual ~K80();
 
-};
-
+    };
+}
 #endif //TSHEXE_MODEL_K80_HPP
