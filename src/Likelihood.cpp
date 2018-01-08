@@ -44,6 +44,7 @@
 #include <fstream>
 #include <random>
 #include <iomanip>
+#include <utility>
 #include <glog/logging.h>
 #include <gflags/gflags.h>
 #include "Likelihood.hpp"
@@ -153,15 +154,15 @@ namespace LKFunc {
 
 
 */
-    void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i);
+    //void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i);
 
 
-    double LKFunc::LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment) {
+    double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment) {
         return lk.computePartialLK_WholeAlignment(list_node, alignment);
 
     }
 
-    double LKFunc::LKRearrangment(Likelihood &lk, std::vector<VirtualNode *> &list_node_complete, Alignment &alignment) {
+    double LKRearrangment(Likelihood &lk, std::vector<VirtualNode *> &list_node_complete, Alignment &alignment) {
 
         std::vector<VirtualNode *> temp_list;
 
@@ -185,7 +186,7 @@ namespace LKFunc {
 
     }
 
-    void LKFunc::ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i) {
+    void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i) {
         VirtualNode *temp = qnode;
 
         list_node.push_back(temp);

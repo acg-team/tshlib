@@ -182,6 +182,8 @@ namespace LKFunc {
 
     double LKRearrangment(Likelihood &lk, std::vector<VirtualNode *> &list_node_complete, Alignment &alignment);
 
+    void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i);
+
     // Eigen::VectorXd compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
     // double compute_log_lk_empty_col(PhyTree &node, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
