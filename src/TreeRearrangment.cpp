@@ -88,7 +88,19 @@ namespace tshlib {
         this->mset_min_radius = min_radius;
         this->mset_max_radius = max_radius;
         this->mset_preserve_blenghts = preserve_blengths;
-        this->mset_strategy = "mixed (NNI+SPR+TBR)";
+
+        if (min_radius == 3 && max_radius == 3){
+            this->mset_strategy = "standard NNI";
+        }
+
+        if (min_radius == 3 && max_radius > 3){
+            this->mset_strategy = "mixed (NNI+SPR+TBR)";
+        }
+
+        if (min_radius == 4 && (max_radius > 4 && max_radius < 10)){
+            this->mset_strategy = "standard SPR";
+        }
+
 
     }
 
@@ -214,11 +226,12 @@ namespace tshlib {
                 this->getNodesInRadiusDown(vnode->getNodeLeft(), radius_min, radius_curr, radius_max, true, MoveDirections::up);
 
             } else if (traverse_direction == NodePosition::up) {
+
                 // If the traverse_direction is 2, we are moving across the pseudoroot, therefore no need to decrease the radious
                 if (vnode->getNodeUp() != nullptr) {
 
                     // Get the nodes in the radius from the node we reached after crossing the pseudoroot
-                    this->getNodesInRadiusDown(vnode, radius_min, radius_curr, radius_max, false, MoveDirections::up);
+                    this->getNodesInRadiusDown(vnode, radius_min, radius_curr-1, radius_max-1, false, MoveDirections::up);
 
                 }
 
