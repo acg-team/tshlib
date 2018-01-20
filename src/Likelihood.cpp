@@ -391,7 +391,14 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
             lk_log += log(computePartialLK(list_vnode_to_root, alignment, alignment_column));
         }
 
+
+        VLOG(3) << "LK Sites [TSHLIB] " << lk_log;
+
+
         double lk_empty = computePartialEmptyLK(list_vnode_to_root, alignment);
+
+
+        VLOG(3) << "LK Empty [TSHLIB] " << lk_empty;
 
         // compute PHi
         double log_phi_value = phi(alignment.getAlignmentSize(), lk_empty);
@@ -578,6 +585,10 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
             vnode->vnode_Pr.resize(extended_alphabet_size, extended_alphabet_size);
 
             vnode->vnode_Pr = this->V * (this->sigma * vnode->vnode_branchlength).array().exp().matrix().asDiagonal() * this->Vi;
+
+            //std::cerr << vnode->vnode_name << std::endl;
+            //std::cerr << vnode->vnode_Pr << std::endl;
+            //std::cerr << "---------------------------" << std::endl;
 
         }
     }

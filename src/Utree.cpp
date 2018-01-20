@@ -1378,11 +1378,22 @@ namespace tshlib {
 
     void VirtualNode::_printFV() {
 
+        __print2Dmat(this, this->vnode_Fv_operative);
+
+        std::vector<Eigen::VectorXd> temp;
+        temp.push_back(this->vnode_Fv_empty_operative);
+        __print2Dmat(this,temp );
+
+
+
+    }
+
+    void VirtualNode::__print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input){
         std::string line;
         std::ostringstream sout;
 
-        double rows = this->vnode_Fv_operative.at(0).size();
-        double cols = this->vnode_Fv_operative.size();
+        double rows = input.at(0).size();
+        double cols = input.size();
 
         // Initialization of the 2D vector
         std::vector<std::vector<double> > array2D;
@@ -1391,13 +1402,13 @@ namespace tshlib {
             array2D[i].resize(cols);
         }
 
-        for (int c = 0; c < this->vnode_Fv_operative.size(); c++) {
-            for (int a = 0; a < this->vnode_Fv_operative.at(c).size(); a++) {
-                array2D[a][c] = this->vnode_Fv_operative.at(c)(a);
+        for (int c = 0; c < input.size(); c++) {
+            for (int a = 0; a < input.at(c).size(); a++) {
+                array2D[a][c] = input.at(c)(a);
             }
         }
         VLOG(3) << "-----------------------------------------------------";
-        VLOG(3) << "Node: " << this->vnode_name;
+        VLOG(3) << "Node: " << node->vnode_name;
 
 
         for (int i = 0; i < rows; ++i) {
@@ -1417,7 +1428,6 @@ namespace tshlib {
             }
             VLOG(3) << line;
         }
-
 
     }
 

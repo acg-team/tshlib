@@ -254,6 +254,9 @@ namespace tshlib {
 
         virtual void _printFV();
 
+        virtual void __print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input);
+
+
 
     protected:
         VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
