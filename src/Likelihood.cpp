@@ -393,6 +393,10 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
 
         double lk_empty = computePartialEmptyLK(list_vnode_to_root, alignment);
 
+
+        std::cout<<"lk_empty[tshib]:"<<lk_empty<<std::endl;
+
+
         // compute PHi
         double log_phi_value = phi(alignment.getAlignmentSize(), lk_empty);
         lk_log += log_phi_value;
