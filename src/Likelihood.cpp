@@ -410,15 +410,19 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
         double lk_empty = 0;
 
         for (auto &vnode:list_vnode_to_root) {
-
+            double nodelk = 0;
             if (vnode->isTerminalNode()) {
-                lk_empty += vnode->getIota() * (1 - vnode->getBeta());
+                nodelk =  vnode->getIota() * (1 - vnode->getBeta());
+
 
             } else {
                 Eigen::VectorXd &Left = vnode->getNodeLeft()->vnode_Fv_empty_operative;
                 Eigen::VectorXd &Right = vnode->getNodeRight()->vnode_Fv_empty_operative;
-                lk_empty += vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * ((Left).cwiseProduct(Right)).dot(this->pi));
+                nodelk = vnode->getIota() * (1 - vnode->getBeta() + vnode->getBeta() * ((Left).cwiseProduct(Right)).dot(this->pi));
             }
+
+            lk_empty += nodelk;
+            VLOG(3) << "LK Empty for node " << vnode->getNodeName() << " = " << nodelk << " |iota: " <<vnode->getIota() << " beta: "<<vnode->getBeta();
 
         }
 
