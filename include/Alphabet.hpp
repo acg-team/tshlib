@@ -49,6 +49,7 @@
 #include <cassert>
 #include <iostream>
 
+namespace tshlib {
 #define GAP_CHAR '-'
 
 //=======================================================
@@ -62,190 +63,190 @@
 //=======================================================
 
 
-class Alphabet {
+    class Alphabet {
 
-protected:
-    char data;
+    protected:
+        char data;
 
-    Alphabet() { data = -1; };
+        Alphabet() { data = -1; };
 
-public:
-    enum {
-        DIM = 0
+    public:
+        enum {
+            DIM = 0
+        };
+
+        static const Alphabet GAP;
+        static const Alphabet X;
+        static const Alphabet stripStart;
+        static const Alphabet stripEnd;
+
+        //=======================================================
+        //DP-PIP
+        static const Alphabet match;
+        static const Alphabet gapX;
+        static const Alphabet gapY;
+        static const Alphabet unknow;
+        //=======================================================
+
+
+        int value() const;
+
+        std::string asString();
+
+        char asChar() const;
+
+        bool isGap() const;
+
+        bool isValid() const;
+
+        bool isUnknown() const;
+
+        bool operator==(const Alphabet &other) const;
+
+        bool operator!=(const Alphabet &other) const;
+
+        bool operator<(const Alphabet &other) const;
     };
 
-    static const Alphabet GAP;
-    static const Alphabet X;
-    static const Alphabet stripStart;
-    static const Alphabet stripEnd;
+    class AA : Alphabet {
+    public:
+        explicit AA(char c);
 
-    //=======================================================
-    //DP-PIP
-    static const Alphabet match;
-    static const Alphabet gapX;
-    static const Alphabet gapY;
-    static const Alphabet unknow;
-    //=======================================================
+        explicit AA(int i);
+
+        AA() {};
+
+        enum {
+            DIM = 20
+        };
+
+        static const AA GAP;
+        static const AA X;
+        static const AA stripStart;
+        static const AA stripEnd;
 
 
-    int value() const;
+        //=======================================================
+        //DP-PIP
+        static const AA match;
+        static const AA gapX;
+        static const AA gapY;
+        static const AA unknow;
+        //=======================================================
 
-    std::string asString();
 
-    char asChar() const;
+        int value() const;
 
-    bool isGap() const;
+        std::string asString() const;
 
-    bool isValid() const;
+        char asChar() const;
 
-    bool isUnknown() const;
+        bool isGap() const { return this->data == this->GAP.data; }
 
-    bool operator==(const Alphabet &other) const;
+        bool isValid() const { return this->value() >= 0 && this->value() < this->DIM; }
 
-    bool operator!=(const Alphabet &other) const;
+        bool isUnknown() const { return this->data == this->X.data; }
 
-    bool operator<(const Alphabet &other) const;
-};
+        bool operator==(const AA &other) const { return this->data == other.data; }
 
-class AA : Alphabet {
-public:
-    explicit AA(char c);
+        bool operator!=(const AA &other) const { return this->data != other.data; }
 
-    explicit AA(int i);
-
-    AA() {};
-
-    enum {
-        DIM = 20
+        bool operator<(const AA &other) const { return this->data < other.data; }
     };
 
-    static const AA GAP;
-    static const AA X;
-    static const AA stripStart;
-    static const AA stripEnd;
+    class Codon : Alphabet {
+    public:
+        explicit Codon(char c1, char c2, char c3);
+
+        explicit Codon(int i);
+
+        Codon() {};
+
+        enum {
+            DIM = 61
+        };
+
+        static const Codon GAP;
+        static const Codon X;
+        static const Codon stripStart;
+        static const Codon stripEnd;
 
 
-    //=======================================================
-    //DP-PIP
-    static const AA match;
-    static const AA gapX;
-    static const AA gapY;
-    static const AA unknow;
-    //=======================================================
+        //=======================================================
+        //DP-PIP
+        static const Codon match;
+        static const Codon gapX;
+        static const Codon gapY;
+        static const Codon unknow;
+        //=======================================================
 
 
-    int value() const;
+        int value() const;
 
-    std::string asString() const;
+        std::string asString() const;
 
-    char asChar() const;
+        char asChar() const;
 
-    bool isGap() const { return this->data == this->GAP.data; }
+        operator AA() const { return AA(this->asChar()); }
 
-    bool isValid() const { return this->value() >= 0 && this->value() < this->DIM; }
+        bool isGap() const { return this->data == this->GAP.data; }
 
-    bool isUnknown() const { return this->data == this->X.data; }
+        bool isValid() const { return this->value() >= 0 && this->value() < this->DIM; }
 
-    bool operator==(const AA &other) const { return this->data == other.data; }
+        bool isUnknown() const { return this->data == this->X.data; }
 
-    bool operator!=(const AA &other) const { return this->data != other.data; }
+        bool operator==(const Codon &other) const { return this->data == other.data; }
 
-    bool operator<(const AA &other) const { return this->data < other.data; }
-};
+        bool operator!=(const Codon &other) const { return this->data != other.data; }
 
-class Codon : Alphabet {
-public:
-    explicit Codon(char c1, char c2, char c3);
-
-    explicit Codon(int i);
-
-    Codon() {};
-
-    enum {
-        DIM = 61
+        bool operator<(const Codon &other) const { return this->data < other.data; }
     };
 
-    static const Codon GAP;
-    static const Codon X;
-    static const Codon stripStart;
-    static const Codon stripEnd;
+    class DNA : Alphabet {
+    public:
+        explicit DNA(char c);
+
+        explicit DNA(int i);
+
+        DNA() {};
+
+        enum {
+            DIM = 4
+        };
+
+        static const DNA GAP;
+        static const DNA X;
+        static const DNA stripStart;
+        static const DNA stripEnd;
 
 
-    //=======================================================
-    //DP-PIP
-    static const Codon match;
-    static const Codon gapX;
-    static const Codon gapY;
-    static const Codon unknow;
-    //=======================================================
+        //=======================================================
+        //DP-PIP
+        static const DNA match;
+        static const DNA gapX;
+        static const DNA gapY;
+        static const DNA unknow;
+        //=======================================================
 
 
-    int value() const;
+        int value() const;
 
-    std::string asString() const;
+        std::string asString() const;
 
-    char asChar() const;
+        char asChar() const;
 
-    operator AA() const { return AA(this->asChar()); }
+        bool isGap() const { return this->data == this->GAP.data; }
 
-    bool isGap() const { return this->data == this->GAP.data; }
+        bool isValid() const { return this->value() >= 0 && this->value() < this->DIM; }
 
-    bool isValid() const { return this->value() >= 0 && this->value() < this->DIM; }
+        bool isUnknown() const { return this->data == this->X.data; }
 
-    bool isUnknown() const { return this->data == this->X.data; }
+        bool operator==(const DNA &other) const { return this->data == other.data; }
 
-    bool operator==(const Codon &other) const { return this->data == other.data; }
+        bool operator!=(const DNA &other) const { return this->data != other.data; }
 
-    bool operator!=(const Codon &other) const { return this->data != other.data; }
-
-    bool operator<(const Codon &other) const { return this->data < other.data; }
-};
-
-class DNA : Alphabet {
-public:
-    explicit DNA(char c);
-
-    explicit DNA(int i);
-
-    DNA() {};
-
-    enum {
-        DIM = 4
+        bool operator<(const DNA &other) const { return this->data < other.data; }
     };
 
-    static const DNA GAP;
-    static const DNA X;
-    static const DNA stripStart;
-    static const DNA stripEnd;
-
-
-    //=======================================================
-    //DP-PIP
-    static const DNA match;
-    static const DNA gapX;
-    static const DNA gapY;
-    static const DNA unknow;
-    //=======================================================
-
-
-    int value() const;
-
-    std::string asString() const;
-
-    char asChar() const;
-
-    bool isGap() const { return this->data == this->GAP.data; }
-
-    bool isValid() const { return this->value() >= 0 && this->value() < this->DIM; }
-
-    bool isUnknown() const { return this->data == this->X.data; }
-
-    bool operator==(const DNA &other) const { return this->data == other.data; }
-
-    bool operator!=(const DNA &other) const { return this->data != other.data; }
-
-    bool operator<(const DNA &other) const { return this->data < other.data; }
-};
-
-
+}
 #endif // TSHLIB_ALPHABET_HPP
