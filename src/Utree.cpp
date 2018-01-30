@@ -459,14 +459,20 @@ namespace tshlib {
 
         // Add all the other nodes traversing the tree in post-order
         do {
+            if(CurrentNode->getNodeUp() != nullptr){
             CurrentNode = CurrentNode->getNodeUp();
             path2root.push_back(CurrentNode);
+            }else{
+                break;
+            }
 
-        } while (CurrentNode != CurrentNode->getNodeUp()->getNodeUp());
+        } while (CurrentNode->getNodeUp() != nullptr && CurrentNode != CurrentNode->getNodeUp()->getNodeUp());
 
         if (fixPseudoRootOnNextSubtree) {
 
-            path2root.push_back(CurrentNode->getNodeUp());
+            if(CurrentNode->getNodeUp() != nullptr) {
+                path2root.push_back(CurrentNode->getNodeUp());
+            }
 
         }
 

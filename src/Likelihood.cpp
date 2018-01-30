@@ -168,11 +168,16 @@ namespace LKFunc {
 
         double lk_log = 0;
 
-        double lk_empty = lk.computePartialEmptyLK(list_node_complete, alignment);
+        // Compute the likelihood of the empty column for all the nodes in the tree
+        std::vector<VirtualNode *> allnodes_postorder;
+        lk.compileNodeList_postorder(allnodes_postorder, lk.tree->rootnode);
+        double lk_empty = lk.computePartialEmptyLK(allnodes_postorder, alignment);
 
 
         for (int i = 0; i < alignment.getAlignmentSize(); i++) {
             ExtendNodeListonSetA(list_node_complete.back(), temp_list, i);
+
+            //temp_list = lk.extendLikelihoodNodeLists(i);
 
             lk_log += log(lk.computePartialLK(temp_list, alignment, i));
 
@@ -185,6 +190,8 @@ namespace LKFunc {
         return lk_log;
 
     }
+
+
 
     void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i) {
         VirtualNode *temp = qnode;
@@ -859,6 +866,195 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 
     }
 
+    void Likelihood::compileNodeList_postorder_new(VirtualNode *pnode, VirtualNode *qnode) {
+
+        plist = tree->findPseudoRoot(pnode, false);
+        qlist = tree->findPseudoRoot(qnode, false);
+
+        std::vector<VirtualNode *> plist_temp = plist;
+        std::vector<VirtualNode *> qlist_temp = qlist;
+
+        listNodeLikelihood = tree->_unique(plist_temp, qlist_temp);
+        std::reverse(listNodeLikelihood.begin(), listNodeLikelihood.end());
+
+
+    }
+
+
+    std::vector<VirtualNode *> Likelihood::extendLikelihoodNodeLists(unsigned long indexSite){
+
+        auto plist_temp = plist;
+        auto qlist_temp = qlist;
+
+        //std::reverse(plist_temp.begin(), plist_temp.end());
+        //std::reverse(qlist_temp.begin(), qlist_temp.end());
+
+        std::vector<VirtualNode *> list_nodes;
+        list_nodes.reserve((unsigned long) plist.size()+qlist.size());
+        VirtualNode *n1;
+        VirtualNode *n2;
+        VirtualNode *temp;
+
+        //list_nodes.push_back(qlist_temp.at(0));
+
+        while (plist_temp.size() > 0 && qlist_temp.size() > 0) {
+            n1 = plist_temp.at(plist_temp.size() - 1);
+            n2 = qlist_temp.at(qlist_temp.size() - 1);
+            if (n1 == n2) {
+                list_nodes.push_back(n1);
+                plist_temp.pop_back();
+                qlist_temp.pop_back();
+            } else {
+                break;
+            }
+        }
+
+
+        if(qlist_temp.size() == 0) {
+            while (plist_temp.size() > 0) {
+                n1 = plist_temp.at(plist_temp.size() - 1);
+                list_nodes.push_back(n1);
+                plist_temp.pop_back();
+            }
+
+            if (!list_nodes.back()->isTerminalNode()) {
+
+
+                 temp = list_nodes.back();
+
+                do {
+
+                    if (temp->getNodeLeft()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeLeft();
+
+                    } else if (temp->getNodeRight()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeRight();
+
+                    } else {
+
+                        break;
+                    }
+
+                    list_nodes.push_back(temp);
+
+
+                } while (temp->vnode_setA_operative.at(indexSite));
+
+
+            }
+
+        }else if(plist_temp.size() == 0) {
+            while (qlist_temp.size() > 0) {
+                n2 = qlist_temp.at(qlist_temp.size() - 1);
+                list_nodes.push_back(n2);
+                qlist_temp.pop_back();
+            }
+
+            if(!list_nodes.back()->isTerminalNode()){
+
+
+                temp = list_nodes.back();
+
+                do {
+
+                    if (temp->getNodeLeft()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeLeft();
+
+                    } else if (temp->getNodeRight()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeRight();
+
+                    } else {
+
+                        break;
+                    }
+
+                    list_nodes.push_back(temp);
+
+
+                } while (temp->vnode_setA_operative.at(indexSite));
+
+
+            }
+        }else{
+
+            while (plist_temp.size() > 0) {
+                n1 = plist_temp.at(plist_temp.size() - 1);
+                list_nodes.push_back(n1);
+                plist_temp.pop_back();
+            }
+
+            if (!list_nodes.back()->isTerminalNode()) {
+
+
+                temp = list_nodes.back();
+
+                do {
+
+                    if (temp->getNodeLeft()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeLeft();
+
+                    } else if (temp->getNodeRight()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeRight();
+
+                    } else {
+
+                        break;
+                    }
+
+                    list_nodes.push_back(temp);
+
+
+                } while (temp->vnode_setA_operative.at(indexSite));
+
+
+            }
+
+            while (qlist_temp.size() > 0) {
+                n2 = qlist_temp.at(qlist_temp.size() - 1);
+                list_nodes.push_back(n2);
+                qlist_temp.pop_back();
+            }
+
+            if(!list_nodes.back()->isTerminalNode()){
+
+
+                temp = list_nodes.back();
+
+                do {
+
+                    if (temp->getNodeLeft()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeLeft();
+
+                    } else if (temp->getNodeRight()->vnode_setA_operative.at(indexSite)) {
+
+                        temp = temp->getNodeRight();
+
+                    } else {
+
+                        break;
+                    }
+
+                    list_nodes.push_back(temp);
+
+
+                } while (temp->vnode_setA_operative.at(indexSite));
+
+
+            }
+
+        }
+
+        std::reverse(list_nodes.begin(), list_nodes.end());
+        return list_nodes;
+
+    }
 
     Likelihood::Likelihood() = default;
 

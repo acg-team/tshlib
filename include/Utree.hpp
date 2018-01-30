@@ -353,12 +353,13 @@ namespace tshlib {
         virtual void _printUtree();
 
         std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
+        std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+
 
 
     protected:
         std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
-        std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
 
         virtual void _updateStartNodes();
 

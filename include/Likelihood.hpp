@@ -93,7 +93,8 @@ namespace tshlib {
         typedef Eigen::Matrix<double, 5, 1> VectorExtended;
 
     private:
-
+        mutable std::vector<VirtualNode *> qlist;
+        mutable std::vector<VirtualNode *> plist;
 
     public:
         //PhyTree *link_node;
@@ -107,6 +108,8 @@ namespace tshlib {
         MatrixExtended V;
         MatrixExtended Vi;
         VectorExtended sigma;
+
+        mutable std::vector<VirtualNode *> listNodeLikelihood;
 
         Likelihood();
 
@@ -129,6 +132,10 @@ namespace tshlib {
         double phi(int m, double p0);
 
         void compileNodeList_postorder(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode);
+
+        void compileNodeList_postorder_new(VirtualNode *pnode, VirtualNode *qnode);
+
+        std::vector<VirtualNode *> extendLikelihoodNodeLists(unsigned long indexSite);
 
         void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
 
