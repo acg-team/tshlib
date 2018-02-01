@@ -184,6 +184,9 @@ namespace LKFunc {
             temp_list.clear();
         }
 
+        VLOG(3) << "LK Sites [TSHLIB] " << lk_log;
+        VLOG(3) << "LK Empty [TSHLIB] " << lk_empty;
+
         // compute PHi
         double log_phi_value = lk.phi(alignment.getAlignmentSize(), lk_empty);
         lk_log += log_phi_value;
@@ -444,8 +447,7 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
         for (auto &vnode:list_vnode_to_root) {
 
             if (vnode->vnode_setA_operative.at(alignment_column)) {
-
-                VLOG(3) << "Likelhood for setA of  " << vnode->vnode_name;
+                VLOG(3) << "[TSHLIB] Likelhood for setA (" << alignment_column << ") @node " << vnode->vnode_name;
 
                 if (vnode->isTerminalNode()) {
 
@@ -703,6 +705,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 
                 vnode->vnode_setA_operative.at(i) = (vnode->vnode_descCount_operative.at(i) == MSA.align_num_characters.at(i));
                 //  std::cout << vnode->vnode_setA_operative.at(i) << "\t";
+                VLOG(3) << "setInsertionHistories [TSHLIB] (" << std::setfill('0') << std::setw(3) << i << ") @node " << vnode->getNodeName() << "\t" << vnode->vnode_setA_operative.at(i);
             }
             //std::cout << std::endl;
         }
