@@ -60,6 +60,7 @@ namespace tshlib {
 
     protected:
         VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
+        VirtualNode *move_sourcenode;   /* Pointer to the source node  */
 
     public:
         int move_id;                            /* Move ID - Useful in case of parallel independent executions*/
@@ -70,7 +71,6 @@ namespace tshlib {
         bool move_applied;                      /* Indicator is set to true if the move is applied to the tree */
         std::string move_class;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
         MoveType move_type;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-        std::vector<VirtualNode *> move_nodesinvolved;      /* list of nodes involved in the rearrangement under the move spefications */
 
         /*!
          * @brief Standard constructor
@@ -82,6 +82,35 @@ namespace tshlib {
         */
         ~Move();
 
+        Move(const Move& inMove) {
+
+            this->move_id = inMove.move_id;
+            this->move_name = "copy_"+inMove.move_name;
+            this->move_radius = inMove.move_radius;
+            this->move_lk = inMove.move_lk;
+            this->move_applied = inMove.move_applied;
+            this->move_class = inMove.move_class;
+            this->move_type = inMove.move_type;
+            this->move_direction = inMove.move_direction;
+            this->move_targetnode =  inMove.move_targetnode;
+            this->move_sourcenode =  inMove.move_sourcenode;
+
+        }
+
+        void operator=(const Move& inMove) {
+            this->move_id = inMove.move_id;
+            this->move_name = "copy_"+inMove.move_name;
+            this->move_radius = inMove.move_radius;
+            this->move_lk = inMove.move_lk;
+            this->move_applied = inMove.move_applied;
+            this->move_class = inMove.move_class;
+            this->move_type = inMove.move_type;
+            this->move_direction = inMove.move_direction;
+            this->move_targetnode =  inMove.move_targetnode;
+            this->move_sourcenode =  inMove.move_sourcenode;
+        };
+
+
         /*!
          * @brief Reset the protected move_targetnode field
          */
@@ -89,9 +118,15 @@ namespace tshlib {
 
         /*!
          * @brief Returns the target node pointer
-         * @return PhyTree pointer of the node
+         * @return VirtualNode pointer of the target node
          */
         VirtualNode *getTargetNode();
+
+/*!
+        * @brief Returns the source node pointer
+        * @return VirtualNode pointer of the source node
+        */
+        VirtualNode *getSourceNode();
 
         /*!
          * @brief Set the protected move_targetnode field
@@ -99,11 +134,15 @@ namespace tshlib {
          */
         void setTargetNode(VirtualNode *target_node);
 
+        void setSourceNode(VirtualNode *source_node);
+
         void setMoveClass(int Value);
 
         void setRadius(int radius);
 
         void setDirection(MoveDirections direction);
+
+        double getLikelihood() {return move_lk;};
 
         void recomputeLikelihood();
 
@@ -144,6 +183,8 @@ namespace tshlib {
 
         virtual bool applyMove(unsigned long moveID);
 
+        virtual void commitMove(int moveID);
+
         Move *getMove(unsigned long moveID);
 
         virtual bool revertMove(unsigned long moveID);
@@ -152,7 +193,11 @@ namespace tshlib {
 
         unsigned long getNumberOfMoves();
 
-        virtual void selectBestMove(unsigned long moveID);
+        Move *selectBestMove(double value);
+
+        void storeMove(Move *inMove);
+
+        void setTreeTopology(Utree *inTree);
 
     protected:
 
@@ -180,7 +225,6 @@ namespace tshlib {
          * @param move Move Pointer to the candidate move object
          */
         void addMove(Move *move);
-
     };
 
 

@@ -43,20 +43,20 @@
 
 #ifndef TSHLIB_UTILITIES_H
 #define TSHLIB_UTILITIES_H
+namespace tshlib {
+    enum class NodeRotation {
+        undef = 0, clockwise = 1, counterclockwise = 2
+    };
 
-enum class NodeRotation {
-    undef=0, clockwise=1, counterclockwise=2
-};
+    enum class NodePosition {
+        left, right, up, undef
+    };
 
-enum class NodePosition {
-    left, right, up, undef
-};
-
-enum class MoveDirections {
-    left, right, up, up_right, up_left, undef
-};
-enum class MoveType {
-    NNI, SPR, TBR, undef
-};
-
+    enum class MoveDirections {
+        left, right, up, up_right, up_left, undef
+    };
+    enum class MoveType {
+        NNI, SPR, TBR, undef
+    };
+}
 #endif //TSHLIB_UTILITIES_H

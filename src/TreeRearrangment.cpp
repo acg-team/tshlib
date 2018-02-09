@@ -117,7 +117,7 @@ namespace tshlib {
             if (radius_curr <= (radius_max - radius_min)) {
                 auto moveInstance = new Move;
                 moveInstance->initMove();
-
+                moveInstance->setSourceNode(this->mset_sourcenode);
                 moveInstance->setDirection(direction);
                 moveInstance->setRadius(radius_max - radius_curr);
                 moveInstance->setTargetNode(node);
@@ -196,7 +196,7 @@ namespace tshlib {
             }
             auto moveInstance = new Move;
             moveInstance->initMove();
-
+            moveInstance->setSourceNode(this->mset_sourcenode);
             moveInstance->setDirection(moving_direction);
             moveInstance->setRadius(radius_max - radius_curr);
             moveInstance->setTargetNode(vnode);
@@ -262,7 +262,7 @@ namespace tshlib {
 
     bool TreeRearrangment::applyMove(unsigned long moveID) {
 
-        VirtualNode *pnode = this->mset_sourcenode;
+        VirtualNode *pnode = this->mset_moves.at(moveID)->getSourceNode();
         VirtualNode *qnode = this->mset_moves.at(moveID)->getTargetNode();
         bool revertRotations = false;
         // Swap pnode with qnode according to the direction found during the move configuration
@@ -274,7 +274,7 @@ namespace tshlib {
     bool TreeRearrangment::revertMove(unsigned long moveID) {
 
         VirtualNode *pnode = this->mset_moves.at(moveID)->getTargetNode();
-        VirtualNode *qnode = this->mset_sourcenode;
+        VirtualNode *qnode = this->mset_moves.at(moveID)->getSourceNode();
         bool revertRotations = true;
         // Swap pnode with qnode according to the direction found during the move configuration
         // If the swap is performed correctly then the function returns true otherwise false
@@ -295,7 +295,56 @@ namespace tshlib {
     }
 
 
-    void TreeRearrangment::selectBestMove(unsigned long moveID) {
+    Move *TreeRearrangment::selectBestMove(double value=-std::numeric_limits<double>::infinity()) {
+
+        Move *selectedMove = nullptr;
+        for(auto &move:mset_moves){
+            if(move->move_lk>value){
+                selectedMove = move;
+                value = move->move_lk;
+            }
+        }
+
+        return selectedMove;
+
+    }
+
+    void TreeRearrangment::commitMove(int moveID) {
+
+        // apply move
+        applyMove(moveID);
+
+        // reset node rotations
+
+        for (auto &node:tree->listVNodes){
+            node->vnode_rotated = NodeRotation::undef;
+
+        }
+
+
+        //VirtualNode *pnode = this->mset_moves.at(moveID)->getSourceNode();
+        //VirtualNode *qnode = this->mset_moves.at(moveID)->getTargetNode();
+
+
+
+
+        //std::cout << tree->printTreeNewick(true) << std::endl;
+        //pnode->resetNodeDirections(true);
+        //qnode->resetNodeDirections(true);
+        //std::cout << tree->printTreeNewick(true) << std::endl;
+
+    }
+
+    void TreeRearrangment::storeMove(Move *inMove) {
+
+        inMove->move_id = (int) mset_moves.size();
+        this->mset_moves.push_back(inMove);
+
+    }
+
+    void TreeRearrangment::setTreeTopology(Utree *inTree) {
+
+        tree = inTree;
 
     }
 
@@ -324,6 +373,11 @@ namespace tshlib {
 
     }
 
+    void Move::setSourceNode(VirtualNode *source_node) {
+
+        this->move_sourcenode = source_node;
+
+    }
 
     void Move::deleteTargetNode() {
 
@@ -337,6 +391,13 @@ namespace tshlib {
         return this->move_targetnode;
 
     }
+
+    VirtualNode *Move::getSourceNode() {
+
+        return this->move_sourcenode;
+
+    }
+
 
 
     void Move::setMoveClass(int Value) {

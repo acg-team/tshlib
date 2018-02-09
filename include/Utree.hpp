@@ -116,6 +116,8 @@ namespace tshlib {
          */
         VirtualNode();
 
+        VirtualNode(const VirtualNode &inNode);
+
         /*!
          * Virtual deconstructor
          */
@@ -285,6 +287,10 @@ namespace tshlib {
         VirtualNode *rootnode;
 
         Utree();
+
+        Utree(const Utree& rhs) { /* copy construction from rhs*/ }
+
+        Utree& operator=(const Utree& rhs) {};
 
         virtual ~Utree();
 
