@@ -50,8 +50,17 @@
 #include "Likelihood.hpp"
 
 namespace tshlib {
+
+    enum class TreeSearchStopCondition {
+        iterations, convergence
+    };
+
     enum class TreeSearchHeuristics {
-        classic_NNI, classic_SPR, classic_Mixed, particle_swarm
+        classic_NNI, classic_SPR, classic_Mixed, particle_swarm, hillclimbing, greedy, nosearch
+    };
+
+    enum class TreeRearrangmentOperations{
+        classic_NNI, classic_SPR, classic_TBR, classic_Mixed
     };
 
     class Move {
@@ -159,6 +168,7 @@ namespace tshlib {
         int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
         bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
         std::vector<Move *> mset_moves;     /* Vector containing the pre-computed moves */
+        int mset_foundmoves;                /* Number of moves found during the defineMoves call */
 
         VirtualNode *mset_sourcenode;       /* Starting node from which starting the tree exploration */
 
@@ -173,13 +183,27 @@ namespace tshlib {
 
         virtual ~TreeRearrangment();
 
-        VirtualNode *getSourceNode();
+        VirtualNode *getSourceNode() const { return mset_sourcenode ?: nullptr; }
+
+        void setSourceNode(VirtualNode *mset_sourcenode) { TreeRearrangment::mset_sourcenode = mset_sourcenode; }
+
+        int getMinRadius() const { return mset_min_radius; }
+
+        void setMinRadius(int mset_min_radius) { TreeRearrangment::mset_min_radius = mset_min_radius; }
+
+        int getMaxRadius() const { return mset_max_radius; }
+
+        void setMaxRadius(int mset_max_radius) { TreeRearrangment::mset_max_radius = mset_max_radius; }
+
+        Utree *getTree() const { return tree; }
+
+        void setTree(Utree *tree) { TreeRearrangment::tree = tree; }
 
         /*!
          * @brief Perform a complete node search and fill the vector containing the candidate moves.
          * @param includeSelf bool ?
          */
-        virtual void defineMoves(bool includeSelf);
+        virtual void defineMoves(bool includeSelf, bool allowDuplicatedMoves);
 
         virtual bool applyMove(unsigned long moveID);
 
@@ -199,6 +223,8 @@ namespace tshlib {
 
         void setTreeTopology(Utree *inTree);
 
+        void displayRearrangmentStatus(int idMove, bool printTree);
+
     protected:
 
         /*!
@@ -208,7 +234,7 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param includeSelf bool ?
          */
-        virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction);
+        virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves);
 
 
         /*!
@@ -218,13 +244,13 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
          */
-        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction);
+        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction, bool allowDuplicatedMoves);
 
         /*!
          * @brief Append candidate move to the mset_moves vector
          * @param move Move Pointer to the candidate move object
          */
-        void addMove(Move *move);
+        void addMove(Move *move, bool allowDuplicatedMoves=true);
     };
 
 
@@ -233,7 +259,7 @@ namespace tshlib {
 namespace treesearchheuristics {
     using namespace tshlib;
 
-    void testTSH(Utree *input_tree, TreeSearchHeuristics tsh_strategy);
+    void performTestTreeSearch(Utree *input_tree, TreeSearchHeuristics tsh_strategy);
 
 }
 
