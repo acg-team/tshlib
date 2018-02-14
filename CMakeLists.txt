@@ -32,6 +32,7 @@ project(tshlib VERSION ${THSLIB_VERSION}
         LANGUAGES "CXX")
 
 
+
 # Offer the user the choice of overriding the installation directories
 set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
@@ -83,12 +84,21 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(LINUX TRUE)
     message(STATUS "Compilation will be performed under Linux")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
+    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
+    find_package(Boost REQUIRED)
+    find_package(glog 0.3.5 REQUIRED)
+    if(GLOG_FOUND)
+        message(STATUS "Found GLOG in ${GLOG_INCLUDE_DIRS}")
+        include_directories(${GLOG_INCLUDE_DIRS})
+    endif()
+
+    find_package(gflags REQUIRED)
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
     message(STATUS "Compilation will be performed under Apple MacOS")
-    find_package(Boost 1.65.1 REQUIRED COMPONENTS date_time filesystem iostreams)
-    find_package (glog 0.3.5 REQUIRED)
+    find_package(Boost REQUIRED)
+    find_package (glog REQUIRED)
     find_package(gflags REQUIRED)
 endif ()
 
@@ -100,6 +110,10 @@ endif (EIGEN3_FOUND)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+include_directories("/var/www/html/efs/projects/local/include")
+LINK_DIRECTORIES("/var/www/html/efs/projects/local/lib")
+LINK_DIRECTORIES("/var/www/html/efs/projects/local/lib64")
+
 file(GLOB SOURCES src/*.cpp )
 file(GLOB HEADERS include/*.hpp )
 
@@ -107,7 +121,6 @@ add_library(tshlib SHARED ${SOURCES} ${HEADERS})
 #target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
 target_link_libraries(tshlib glog)
 target_link_libraries(tshlib gflags)
-
 set_target_properties(tshlib PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(TARGETS tshlib
