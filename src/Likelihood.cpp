@@ -584,9 +584,19 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
     void Likelihood::computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size) {
 
         // TODO: the following 4 lines have to be computed only when Q changes!!!
-        Eigen::EigenSolver<MatrixExtended> solver(this->Q);
-        this->sigma = solver.eigenvalues().real();
-        this->V = solver.eigenvectors().real();
+
+
+        if(this->Q.rows()==5){
+            Eigen::EigenSolver<MatrixExtended_5> solver(this->Q);
+            this->sigma = solver.eigenvalues().real();
+            this->V = solver.eigenvectors().real();
+
+        }else if(this->Q.rows()==21){
+            Eigen::EigenSolver<MatrixExtended_21> solver(this->Q);
+            this->sigma = solver.eigenvalues().real();
+            this->V = solver.eigenvectors().real();
+        }
+
         this->Vi = this->V.inverse();
 
         for (auto &vnode:listNodes) {

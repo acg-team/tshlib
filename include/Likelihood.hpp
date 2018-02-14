@@ -89,8 +89,10 @@ namespace tshlib {
 
     class Likelihood {
 
-        typedef Eigen::Matrix<double, 5, 5> MatrixExtended;
-        typedef Eigen::Matrix<double, 5, 1> VectorExtended;
+        typedef Eigen::Matrix<double, 5, 5> MatrixExtended_5;
+        typedef Eigen::Matrix<double, 5, 1> VectorExtended_5;
+        typedef Eigen::Matrix<double, 21, 21> MatrixExtended_21;
+        typedef Eigen::Matrix<double, 21, 1> VectorExtended_21;
 
     private:
         mutable std::vector<VirtualNode *> qlist;
@@ -100,14 +102,18 @@ namespace tshlib {
         //PhyTree *link_node;
         Utree *tree;
         Eigen::VectorXd pi;
-        MatrixExtended Q;
+        //MatrixExtended Q;
+        Eigen::MatrixXd Q;
         double mu;
         double tau;
         double lambda;
         double nu;
-        MatrixExtended V;
-        MatrixExtended Vi;
-        VectorExtended sigma;
+        Eigen::MatrixXd V;
+        Eigen::MatrixXd Vi;
+        Eigen::VectorXd sigma;
+        //MatrixExtended V;
+        //MatrixExtended Vi;
+        //VectorExtended sigma;
 
         mutable std::vector<VirtualNode *> listNodeLikelihood;
 
