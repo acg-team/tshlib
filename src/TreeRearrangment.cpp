@@ -115,7 +115,7 @@ namespace tshlib {
 
         } else {
             //if (radius_max == 0 ) {
-            if (radius_curr <= (radius_max - radius_min)) {
+            if (radius_curr <= (radius_max - radius_min) && radius_curr >= 0) {
                 auto moveInstance = new Move;
                 moveInstance->initMove();
                 moveInstance->setSourceNode(this->mset_sourcenode);
@@ -141,56 +141,6 @@ namespace tshlib {
 
     }
 
-
-    void TreeRearrangment::defineMoves(bool includeSelf, bool allowDuplicatedMoves=true) {
-        // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
-        // For each node within the radius extremities, define a move and add it to TreeRearrangment.
-        // Start from the children of the current starting node (if any)
-
-        mset_foundmoves = 0;
-
-        if (!mset_sourcenode->isTerminalNode()) {
-            getNodesInRadiusDown(mset_sourcenode->getNodeLeft(), mset_min_radius, mset_max_radius - 1, mset_max_radius, includeSelf, MoveDirections::left, allowDuplicatedMoves);
-
-            getNodesInRadiusDown(mset_sourcenode->getNodeRight(), mset_min_radius, mset_max_radius - 1, mset_max_radius, includeSelf, MoveDirections::right, allowDuplicatedMoves);
-        }
-        // If the node is a leaf, then go up
-        if (nullptr != mset_sourcenode->getNodeUp()) {
-            getNodesInRadiusUp(mset_sourcenode->getNodeUp(), mset_min_radius, mset_max_radius - 1, mset_max_radius, mset_sourcenode->indexOf(), allowDuplicatedMoves);
-        }
-
-
-        VLOG(1) << "[utree rearrangment] [" << mset_strategy << "] Found " << mset_foundmoves << " candidate moves for node " << mset_sourcenode->getNodeName();
-    }
-
-
-    void TreeRearrangment::addMove(Move *move, bool allowDuplicatedMoves) {
-
-        bool storeMove = true;
-
-        if(!allowDuplicatedMoves) {
-            for (auto &query:mset_moves) {
-
-                if (query->getTargetNode() == move->getTargetNode() && query->getSourceNode() == move->getSourceNode()) {
-                    storeMove = false;
-                }
-
-                if (move->getTargetNode() == query->getSourceNode() && move->getSourceNode() == query->getTargetNode()) {
-                    storeMove = false;
-                }
-
-            }
-        }
-
-        if(storeMove) {
-            move->move_id = (int) mset_moves.size();
-            mset_moves.push_back(move);
-            mset_foundmoves++;
-        }
-
-    }
-
-
     void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction,
                                               bool allowDuplicatedMoves) {
 
@@ -203,7 +153,7 @@ namespace tshlib {
         vnode = node_source;
 
         //TODO: check binary tree condition!
-        if (radius_curr <= (radius_max - radius_min)) {
+        if (radius_curr <= (radius_max - radius_min) && radius_curr >= 0) {
 
             switch (traverse_direction) {
                 case NodePosition::left:
@@ -263,6 +213,56 @@ namespace tshlib {
             }
         }
     }
+
+
+    void TreeRearrangment::defineMoves(bool includeSelf, bool allowDuplicatedMoves=true) {
+        // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
+        // For each node within the radius extremities, define a move and add it to TreeRearrangment.
+        // Start from the children of the current starting node (if any)
+
+        mset_foundmoves = 0;
+
+        if (!mset_sourcenode->isTerminalNode()) {
+            getNodesInRadiusDown(mset_sourcenode->getNodeLeft(), mset_min_radius, mset_max_radius - 1, mset_max_radius, includeSelf, MoveDirections::left, allowDuplicatedMoves);
+
+            getNodesInRadiusDown(mset_sourcenode->getNodeRight(), mset_min_radius, mset_max_radius - 1, mset_max_radius, includeSelf, MoveDirections::right, allowDuplicatedMoves);
+        }
+        // If the node is a leaf, then go up
+        if (nullptr != mset_sourcenode->getNodeUp()) {
+            getNodesInRadiusUp(mset_sourcenode->getNodeUp(), mset_min_radius, mset_max_radius - 1, mset_max_radius, mset_sourcenode->indexOf(), allowDuplicatedMoves);
+        }
+
+
+        VLOG(1) << "[utree rearrangment] [" << mset_strategy << "] Found " << mset_foundmoves << " candidate moves for node " << mset_sourcenode->getNodeName();
+    }
+
+
+    void TreeRearrangment::addMove(Move *move, bool allowDuplicatedMoves) {
+
+        bool storeMove = true;
+
+        if(!allowDuplicatedMoves) {
+            for (auto &query:mset_moves) {
+
+                if (query->getTargetNode() == move->getTargetNode() && query->getSourceNode() == move->getSourceNode()) {
+                    storeMove = false;
+                }
+
+                if (move->getTargetNode() == query->getSourceNode() && move->getSourceNode() == query->getTargetNode()) {
+                    storeMove = false;
+                }
+
+            }
+        }
+
+        if(storeMove) {
+            move->move_id = (int) mset_moves.size();
+            mset_moves.push_back(move);
+            mset_foundmoves++;
+        }
+
+    }
+
 
 
     void TreeRearrangment::printMoves() {

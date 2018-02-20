@@ -49,8 +49,8 @@
 #include <gflags/gflags.h>
 #include "Likelihood.hpp"
 
-namespace LKFunc {
-    using namespace tshlib;
+//namespace LKFunc {
+//    using namespace tshlib;
     /*
     Eigen::VectorXd
     compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
@@ -156,7 +156,7 @@ namespace LKFunc {
 */
     //void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i);
 
-
+/*
     double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment) {
         return lk.computePartialLK_WholeAlignment(list_node, alignment);
 
@@ -227,7 +227,7 @@ namespace LKFunc {
 
 
 }
-
+*/
 /*
 double Likelihood::computeLikelihoodComponents_EmptyColumn(VirtualNode *root, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet) {
 
@@ -319,7 +319,7 @@ double Likelihood::computeLikelihoodComponents(VirtualNode *root, Eigen::VectorX
 
 namespace tshlib {
 
-
+/*
     void Likelihood::setNu() {
 
         if (fabs(this->mu) < 1e-8) {
@@ -346,7 +346,7 @@ namespace tshlib {
         return p;
     }
 
-/*
+
 std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2) {
     std::vector<VirtualNode *> list_nodes_n0;
     std::vector<VirtualNode *> list_nodes_n1;
@@ -364,7 +364,7 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
 
     return list_nodes_n0;
 }
-*/
+
 
     void Likelihood::recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root) {
 
@@ -467,7 +467,7 @@ std::vector<VirtualNode *> UtreeUtils::get_path_from_nodes(VirtualNode *vn1, Vir
 
         return lk_col;
     }
-
+*/
 /*
 
 double Likelihood::computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet) {
@@ -576,7 +576,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
         this->tau = inUtree->computeTotalTreeLength();
         this->mu = valMu;
         this->lambda = valLambda;
-        this->setNu();
+        //this->setNu();
 
     }
 
@@ -631,7 +631,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 
 
     }
-
+/*
 
     void Likelihood::restoreLikelihoodComponents() {
 
@@ -818,7 +818,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
         }
 
     }
-
+*/
 
     void Likelihood::setAllIotas(std::vector<VirtualNode *> &listNodes) {
         double T;
@@ -871,7 +871,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
 
 
     }
-
+/*
     void Likelihood::optimiseLambda(int m, double p0) {
 
 
@@ -1068,7 +1068,7 @@ void Likelihood::recombineAllEmptyFv(VirtualNode *source, VirtualNode *target, E
         return list_nodes;
 
     }
-
+*/
     Likelihood::Likelihood() = default;
 
     Likelihood::~Likelihood() = default;

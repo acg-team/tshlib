@@ -225,18 +225,18 @@ namespace tshlib {
         //this->vnode_character = ch;
     }
 
-
+/*
     void VirtualNode::setSetA(bool b) {
         //this->vnode_setA_backup = b;
     }
 
-
+*/
     std::string VirtualNode::getNodeName() {
 
         return this->vnode_name;
     }
 
-
+/*
     void VirtualNode::setMSAFv(Eigen::VectorXd &fv) {
 
         this->vnode_Fv_backup.push_back(fv);
@@ -247,7 +247,7 @@ namespace tshlib {
 
         return this->vnode_setA_backup.at(colnum);
     }
-
+*/
 
     double VirtualNode::getIota() {
 
@@ -371,7 +371,7 @@ namespace tshlib {
         }
     }
 
-
+/*
     void VirtualNode::recombineFv() {
 
         // For each internal node
@@ -412,14 +412,14 @@ namespace tshlib {
         this->vnode_Fv_empty_best = this->vnode_Fv_empty_operative;
 
     }
-
+*/
 
     void VirtualNode::clearChildren() {
         this->vnode_left = nullptr;
         this->vnode_right = nullptr;
     }
 
-
+/*
     void VirtualNode::printAncestralFlagOnFile(FILE *fid) {
 
         //fprintf(fid,"%s %d\n",this->vnode_name.c_str(),this->vnode_setA_backup);
@@ -432,7 +432,7 @@ namespace tshlib {
         }
 
     }
-
+*/
 
     void Utree::addMember(VirtualNode *inVNode, bool isStartNode) {
 
@@ -634,7 +634,7 @@ namespace tshlib {
 
     }
 
-
+/*
     void Utree::clearFv() {
 
         for (unsigned long i = 0; i < this->listVNodes.size(); i++) {
@@ -642,7 +642,7 @@ namespace tshlib {
         }
     }
 
-
+*/
     Utree::Utree() {
 
         // Added virtual root to utree
@@ -986,7 +986,7 @@ namespace tshlib {
         return status;
     }
 
-
+/*
     void VirtualNode::_recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum) {
 
         if (this->isTerminalNode()) {
@@ -1049,7 +1049,7 @@ namespace tshlib {
 
     }
 
-
+*/
     void Utree::setLeafState(std::string s) {
 
         for (auto &node:this->listVNodes) {
@@ -1059,7 +1059,7 @@ namespace tshlib {
         }
 
     }
-
+/*
     void Utree::prepareSetADesCountOnNodes(int numcol, int lengthAlphabet) {
 
         for (auto &node:this->listVNodes) {
@@ -1069,7 +1069,7 @@ namespace tshlib {
         }
 
     }
-
+*/
     void Utree::printAllNodesNeighbors() {
 
         for (auto &node:this->listVNodes) {
@@ -1356,7 +1356,7 @@ namespace tshlib {
         }
 
     }
-
+/*
     void VirtualNode::initialiseLikelihoodComponents(int numcol, int lengthAlphabet) {
 
         this->vnode_descCount_backup.resize(numcol);
@@ -1377,11 +1377,11 @@ namespace tshlib {
         this->vnode_Fv_best.resize(numcol);
 
     }
-
+*/
     bool VirtualNode::isPseudoRootNode() {
         return this->getNodeUp()->getNodeUp() == this;
     }
-
+/*
     void VirtualNode::_printFV() {
 
         __print2Dmat(this, this->vnode_Fv_operative);
@@ -1393,7 +1393,7 @@ namespace tshlib {
 
 
     }
-
+*/
     void VirtualNode::__print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input){
         std::string line;
         std::ostringstream sout;
