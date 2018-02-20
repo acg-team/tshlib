@@ -89,21 +89,21 @@ namespace tshlib {
 
         std::vector<double> vnode_Fv_terminal;
 
-        std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
-        std::vector<Eigen::VectorXd> vnode_Fv_operative;
-        std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
-        std::vector<Eigen::VectorXd> vnode_Fv_best;
+        //std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
+        //std::vector<Eigen::VectorXd> vnode_Fv_operative;
+        //std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
+        //std::vector<Eigen::VectorXd> vnode_Fv_best;
 
 
-        Eigen::VectorXd vnode_Fv_empty_backup;
-        Eigen::VectorXd vnode_Fv_empty_operative;
-        Eigen::VectorXd vnode_Fv_empty_best;
-        std::vector<bool> vnode_setA_backup;                   /* Flag: Include node in computing the set A -- might be not necessary */
-        std::vector<int> vnode_descCount_backup;               /* Counter of the characters associated    */
-        std::vector<bool> vnode_setA_operative;              /* Flag: Include node in computing the set A -- might be not necessary */
-        std::vector<int> vnode_descCount_operative;          /* Counter of the characters associated    */
-        std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
-        std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
+        //Eigen::VectorXd vnode_Fv_empty_backup;
+        //Eigen::VectorXd vnode_Fv_empty_operative;
+        //Eigen::VectorXd vnode_Fv_empty_best;
+        //std::vector<bool> vnode_setA_backup;                   /* Flag: Include node in computing the set A -- might be not necessary */
+        //std::vector<int> vnode_descCount_backup;               /* Counter of the characters associated    */
+        //std::vector<bool> vnode_setA_operative;              /* Flag: Include node in computing the set A -- might be not necessary */
+        //std::vector<int> vnode_descCount_operative;          /* Counter of the characters associated    */
+        //std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
+        //std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
         //char vnode_character;                         /* Character associated to this node (only if terminal node) */
         int vnode_seqid;                                /* Seq id on alignment vector */
         int vnode_depth;                                /* Depth level of the node in the tree */
@@ -169,9 +169,9 @@ namespace tshlib {
 
         void setMSAFv(Eigen::VectorXd &fv);
 
-        virtual void setSetA(bool b);
+        //virtual void setSetA(bool b);
 
-        bool getSetA(int colnum);
+        //bool getSetA(int colnum);
 
         double getIota();
 
@@ -194,17 +194,17 @@ namespace tshlib {
         double computeTotalTreeLength();
 
 
-        void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
+        //void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
 
-        void recombineFv();
+        //void recombineFv();
 
-        void revertFv();
+        //void revertFv();
 
-        void keepFv();
+        //void keepFv();
 
         void clearChildren();
 
-        void printAncestralFlagOnFile(FILE *fid);
+        //void printAncestralFlagOnFile(FILE *fid);
 
         /*!
          * @brief This function returns true if the node is terminal
@@ -254,7 +254,7 @@ namespace tshlib {
 
         virtual void _setNodeUp(VirtualNode *inVNode);
 
-        virtual void _printFV();
+        //virtual void _printFV();
 
         virtual void __print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input);
 
@@ -272,9 +272,9 @@ namespace tshlib {
 
         virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
-        void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
+        //void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
-        void _recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum);
+        //void _recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum);
 
     };
 
@@ -350,11 +350,11 @@ namespace tshlib {
 
         virtual void setBeta(double tau, double mu);
 
-        virtual void clearFv();
+        //virtual void clearFv();
 
         virtual void setLeafState(std::string s);
 
-        virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
+        //virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
 
         virtual void _printUtree();
 

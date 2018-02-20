@@ -124,7 +124,7 @@ namespace tshlib {
 
         void Init(Utree *inUtree, Eigen::VectorXd &valPi, Eigen::MatrixXd &valQ, double valMu, double valLambda);
 
-        void computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
+        //void computeFV(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
 
         /*!
          * @brief compute the normalizing Poisson intensity
@@ -133,45 +133,45 @@ namespace tshlib {
          * @param mu
          * @return
          */
-        void setNu();
+        //void setNu();
 
-        double phi(int m, double p0);
+        //double phi(int m, double p0);
 
         void compileNodeList_postorder(std::vector<VirtualNode *> &nodelist, VirtualNode *vnode);
 
-        void compileNodeList_postorder_new(VirtualNode *pnode, VirtualNode *qnode);
+        //void compileNodeList_postorder_new(VirtualNode *pnode, VirtualNode *qnode);
 
-        std::vector<VirtualNode *> extendLikelihoodNodeLists(unsigned long indexSite);
+        //std::vector<VirtualNode *> extendLikelihoodNodeLists(unsigned long indexSite);
 
-        void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
-
-        void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
-
-        void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
-
-        double computePartialLK_WholeAlignment(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
-
-        double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, int alignment_column);
-
-        double computePartialEmptyLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
+//        void recombineAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+//
+//        void revertAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+//
+//        void keepAllFv(std::vector<VirtualNode *> list_vnode_to_root);
+//
+//        double computePartialLK_WholeAlignment(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
+//
+//        double computePartialLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment, int alignment_column);
+//
+//        double computePartialEmptyLK(std::vector<VirtualNode *> &list_vnode_to_root, Alignment &alignment);
 
         void computePr(std::vector<VirtualNode *> &listNodes, int extended_alphabet_size);
 
-        void loadLikelihoodComponents_Operative();
-
-        void unloadLikelihoodComponents_Operative();
-
-        void restoreLikelihoodComponents();
-
-        void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
-
-        void saveLikelihoodComponents();
+//        void loadLikelihoodComponents_Operative();
+//
+//        void unloadLikelihoodComponents_Operative();
+//
+//        void restoreLikelihoodComponents();
+//
+//        void setInsertionHistories(std::vector<VirtualNode *> &listNodes, Alignment &MSA);
+//
+//        void saveLikelihoodComponents();
 
         void setAllIotas(std::vector<VirtualNode *> &listNodes);
 
         void setAllBetas(std::vector<VirtualNode *> &listNodes);
 
-        void optimiseLambda(int m, double p0);
+        //void optimiseLambda(int m, double p0);
 
 //    double computeLogLkEmptyColumnBothSides(VirtualNode *source, VirtualNode *target, Eigen::VectorXd &pi, int m, double nu, int dim_extended_alphabet);
 //    double computeLkEmptyColumn(VirtualNode *vnode, Eigen::VectorXd &pi, int dim_extended_alphabet );
@@ -191,11 +191,11 @@ namespace tshlib {
 namespace LKFunc {
     using namespace tshlib;
 
-    double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment);
+    //double LKcore(Likelihood &lk, std::vector<VirtualNode *> &list_node, Alignment &alignment);
 
-    double LKRearrangment(Likelihood &lk, std::vector<VirtualNode *> &list_node_complete, Alignment &alignment);
+    //double LKRearrangment(Likelihood &lk, std::vector<VirtualNode *> &list_node_complete, Alignment &alignment);
 
-    void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i);
+    //void ExtendNodeListonSetA(VirtualNode *qnode, std::vector<VirtualNode *> &list_node, int i);
 
     // Eigen::VectorXd compute_lk_empty_col(PhyTree &node, double &lk, Eigen::VectorXd &pi, int is_DNA_AA_Codon, int dim_extended_alphabet);
 
