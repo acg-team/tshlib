@@ -46,6 +46,7 @@
 #include <fstream>
 #include <iomanip>
 #include <glog/logging.h>
+#include <map>
 
 #include "Utree.hpp"
 #include "Alignment.hpp"
@@ -1115,17 +1116,63 @@ namespace tshlib {
 
     std::vector<VirtualNode *> Utree::computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2) {
 
+        std::vector<VirtualNode *> list_vnode_to_root;
+
         std::vector<VirtualNode *> path2root_1 = this->findPseudoRoot(vnode_1, false);
         std::vector<VirtualNode *> path2root_2 = this->findPseudoRoot(vnode_2, false);
 
         std::reverse(path2root_1.begin(), path2root_1.end());
         std::reverse(path2root_2.begin(), path2root_2.end());
 
-        std::vector<VirtualNode *> list_vnode_to_root = this->_unique(path2root_1, path2root_2);
+        // Test map
+
+        std::map<VirtualNode *,int> tmpMap;
+
+        for(int i=0; i<path2root_1.size(); i++){
+            tmpMap.insert(std::pair<VirtualNode *,int>(path2root_1.at(i), i));
+        }
+
+        for(int i=0; i<path2root_2.size(); i++) {
+
+            if (tmpMap.find(path2root_2.at(i)) == tmpMap.end()){
+
+                tmpMap.insert(std::pair<VirtualNode *,int>(path2root_2.at(i), tmpMap.size()));
+
+            }
+        }
+
+        auto newvector = std::vector<VirtualNode *>(tmpMap.size());
+        // Create a map iterator and point to beginning of map
+        std::map<VirtualNode *,int>::iterator it = tmpMap.begin();
+
+        // Iterate over the map using c++11 range based for loop
+        for (std::pair<VirtualNode *,int> element : tmpMap) {
+
+            // Accessing KEY from element
+            VirtualNode *node = element.first;
+
+            // Accessing VALUE from element.
+            int order = element.second;
+
+            newvector[order] = node;
+
+        }
+
+        std::reverse(newvector.begin(), newvector.end());
+
+
+        //path2root_1.insert( path2root_1.end(), path2root_2.begin(), path2root_2.end() );
+        //auto last = std::unique(path2root_1.begin(), path2root_1.end());
+        // v now holds {1 2 3 4 5 6 7 x x x x x x}, where 'x' is indeterminate
+        //path2root_1.erase(last, path2root_1.end());
+        //list_vnode_to_root = path2root_1;
+
+        //list_vnode_to_root = this->_unique(path2root_1, path2root_2);
+
 
         //delete(path2root_1);
         //delete(path2root_2);
-        return list_vnode_to_root;
+        return newvector;
     }
 
     std::vector<VirtualNode *> Utree::_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2) {
