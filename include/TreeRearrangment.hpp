@@ -44,7 +44,7 @@
 #ifndef TSHLIB_TREEREARRANGEMENT_HPP
 #define TSHLIB_TREEREARRANGEMENT_HPP
 
-#include "PhyTree.hpp"
+//#include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Utilities.hpp"
 #include "Likelihood.hpp"

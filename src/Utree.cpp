@@ -52,6 +52,7 @@
 #include "Alignment.hpp"
 #include "Likelihood.hpp"
 
+/*
 void ::UtreeUtils::_traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source) {
 
     for (unsigned long i = 0; i < source->n_children(); i++) {
@@ -119,7 +120,7 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
     out_tree->startVNodes.at(1)->_setNodeUp(out_tree->startVNodes.at(0));
 
 }
-
+*/
 
 
 void ::UtreeUtils::associateNode2Alignment(Alignment *inMSA, Utree *inTree) {
@@ -1143,7 +1144,7 @@ namespace tshlib {
 
         auto newvector = std::vector<VirtualNode *>(tmpMap.size());
         // Create a map iterator and point to beginning of map
-        std::map<VirtualNode *,int>::iterator it = tmpMap.begin();
+        //std::map<VirtualNode *,int>::iterator it = tmpMap.begin();
 
         // Iterate over the map using c++11 range based for loop
         for (std::pair<VirtualNode *,int> element : tmpMap) {

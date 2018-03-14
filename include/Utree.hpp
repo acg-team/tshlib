@@ -51,7 +51,7 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
 
-#include "PhyTree.hpp"
+//#include "PhyTree.hpp"
 #include "Utilities.hpp"
 #include "Alignment.hpp"
 
@@ -378,9 +378,9 @@ namespace tshlib {
 namespace UtreeUtils {
     using namespace tshlib;
 
-    void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
+    //void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
 
-    void convertUtree(PhyTree *in_tree, Utree *out_tree);
+    //void convertUtree(PhyTree *in_tree, Utree *out_tree);
 
     /*!
      * @brief This function has been ported in Utree::_unique

@@ -92,14 +92,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         include_directories(${GLOG_INCLUDE_DIRS})
     endif()
 
-    find_package(gflags REQUIRED)
+    #find_package(gflags REQUIRED)
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
     message(STATUS "Compilation will be performed under Apple MacOS")
     find_package(Boost REQUIRED)
     find_package (glog REQUIRED)
-    find_package(gflags REQUIRED)
+    #find_package(gflags REQUIRED)
 endif ()
 
 find_package("Eigen3")
@@ -120,7 +120,7 @@ file(GLOB HEADERS include/*.hpp )
 add_library(tshlib SHARED ${SOURCES} ${HEADERS})
 #target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
 target_link_libraries(tshlib glog)
-target_link_libraries(tshlib gflags)
+#target_link_libraries(tshlib gflags)
 set_target_properties(tshlib PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(TARGETS tshlib

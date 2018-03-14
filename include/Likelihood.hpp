@@ -49,9 +49,10 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
-#include "PhyTree.hpp"
+//#include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Alignment.hpp"
+
 namespace tshlib {
 
     const char mytable[256] = {-1, -1, -1, -1, -1, -1, -1, -1, -1,
