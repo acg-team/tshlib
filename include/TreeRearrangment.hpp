@@ -47,7 +47,6 @@
 //#include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Utilities.hpp"
-#include "Likelihood.hpp"
 
 namespace tshlib {
 

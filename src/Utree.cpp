@@ -50,7 +50,6 @@
 
 #include "Utree.hpp"
 #include "Alignment.hpp"
-#include "Likelihood.hpp"
 
 /*
 void ::UtreeUtils::_traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source) {
@@ -1082,37 +1081,42 @@ namespace tshlib {
 
     void Utree::addVirtualRootNode() {
 
-        // Update starting nodes in the startVNodes array
-        this->_updateStartNodes();
 
-        // Clear children nodes in the virtual root
-        this->rootnode->clearChildren();
+        if (rootnode->getNodeRight() == nullptr && rootnode->getNodeLeft() == nullptr) {
+            // Update starting nodes in the startVNodes array
+            this->_updateStartNodes();
 
-        // Disconnect the bidirectional connection in the pseudoroot nodes
-        this->startVNodes.at(0)->disconnectNode();
+            // Clear children nodes in the virtual root
+            this->rootnode->clearChildren();
 
-        // Reconnect nodes to virtual root node
-        this->rootnode->connectNode(this->startVNodes.at(0));
-        this->rootnode->connectNode(this->startVNodes.at(1));
+            // Disconnect the bidirectional connection in the pseudoroot nodes
+            this->startVNodes.at(0)->disconnectNode();
 
+            // Reconnect nodes to virtual root node
+            this->rootnode->connectNode(this->startVNodes.at(0));
+            this->rootnode->connectNode(this->startVNodes.at(1));
+        }
     }
 
     void Utree::removeVirtualRootNode() {
-        // Get reference children nodes from virtual root
-        VirtualNode *left = this->rootnode->getNodeLeft();
-        VirtualNode *right = this->rootnode->getNodeRight();
 
-        // Disconnect nodes from virtual root node
-        left->disconnectNode();
-        right->disconnectNode();
+        if (rootnode->getNodeRight() != nullptr && rootnode->getNodeLeft() != nullptr) {
+            // Get reference children nodes from virtual root
+            VirtualNode *left = this->rootnode->getNodeLeft();
+            VirtualNode *right = this->rootnode->getNodeRight();
 
-        // Establish bidirectional connection
-        left->_setNodeUp(right);
-        right->_setNodeUp(left);
+            // Disconnect nodes from virtual root node
+            left->disconnectNode();
+            right->disconnectNode();
 
-        // Clear residual connection with virtual root node
-        this->rootnode->clearChildren();
+            // Establish bidirectional connection
+            left->_setNodeUp(right);
+            right->_setNodeUp(left);
 
+            // Clear residual connection with virtual root node
+            this->rootnode->clearChildren();
+
+        }
     }
 
     std::vector<VirtualNode *> Utree::computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2) {
@@ -1207,6 +1211,56 @@ namespace tshlib {
         }
 
         return list_nodes;
+    }
+
+    std::vector<VirtualNode *> Utree::getPostOrderNodeList() {
+
+        bool removeRoot = false;
+        std::vector<VirtualNode *> rlist;
+        if (rootnode->getNodeRight() == nullptr && rootnode->getNodeLeft() == nullptr) {
+            addVirtualRootNode();
+            removeRoot = true;
+        }
+        _getPostOrderNodeList(rlist, rootnode);
+
+
+        if(removeRoot) {
+            removeVirtualRootNode();
+        }
+
+        return rlist;
+    }
+
+    std::vector<VirtualNode *> Utree::getPostOrderNodeList(VirtualNode *startNode) {
+
+        bool removeRoot = false;
+        std::vector<VirtualNode *> rlist;
+
+        if (rootnode->getNodeRight() == nullptr && rootnode->getNodeLeft() == nullptr) {
+            addVirtualRootNode();
+            removeRoot = true;
+        }
+        _getPostOrderNodeList(rlist, startNode);
+
+        if(removeRoot) {
+            removeVirtualRootNode();
+        }
+        return rlist;
+    }
+
+
+    void Utree::_getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node ){
+
+
+        if (!node->isTerminalNode()) {
+
+            _getPostOrderNodeList(rlist, node->getNodeLeft());
+            _getPostOrderNodeList(rlist, node->getNodeRight());
+
+        }
+
+        rlist.push_back(node);
+
     }
 
 
