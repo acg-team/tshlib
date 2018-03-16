@@ -233,7 +233,7 @@ namespace tshlib {
         }
 
 
-        VLOG(1) << "[utree rearrangment] [" << mset_strategy << "] Found " << mset_foundmoves << " candidate moves for node " << mset_sourcenode->getNodeName();
+        VLOG(1) << "[TSH Cycle]  Found " << mset_foundmoves << " candidate moves for node " << mset_sourcenode->getNodeName();
     }
 
 
@@ -370,12 +370,12 @@ namespace tshlib {
         // ------------------------------------
         // Move exection details
         if(printTree){
-            VLOG(2) << "[apply  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
+            VLOG(2) << "[test  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
                 << " | " << start_col_line << getMove(idMove)->move_lk << end_col_line << "\t"
                 << " | (" <<  getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
                 << "\t[" << getMove(idMove)->move_radius << "] | " << getTree()->printTreeNewick(true);
         }else{
-            VLOG(2) << "[apply  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
+            VLOG(2) << "[test  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
                     << " | " << start_col_line << getMove(idMove)->move_lk << end_col_line << "\t"
                     << " | (" <<  getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
                     << "\t[" << getMove(idMove)->move_radius << "]";
