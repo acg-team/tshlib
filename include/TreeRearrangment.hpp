@@ -119,6 +119,34 @@ namespace tshlib {
         };
 
 
+        std::string getMoveDirection() const {
+            std::string returnString;
+            switch(move_direction){
+                case MoveDirections::left:
+                    returnString="left";
+                    break;
+                case MoveDirections::up:
+                    returnString="up";
+                    break;
+                case MoveDirections::up_left:
+                    returnString="up-left";
+                    break;
+                case MoveDirections::up_right:
+                    returnString="up-right";
+                    break;
+                case MoveDirections::right :
+                    returnString="right";
+                    break;
+                case MoveDirections::undef :
+                    returnString="undef";
+                    break;
+
+            }
+
+            return returnString;
+        }
+
+
         /*!
          * @brief Reset the protected move_targetnode field
          */
