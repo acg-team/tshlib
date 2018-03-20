@@ -454,21 +454,36 @@ namespace tshlib {
         VirtualNode *CurrentNode;
 
         // Add the first element of the path to the root
-        path2root.push_back(inVNode);
+        //path2root.push_back(inVNode);
 
         CurrentNode = inVNode;
 
         // Add all the other nodes traversing the tree in post-order
+        while(CurrentNode!= nullptr){
+
+            path2root.push_back(CurrentNode);
+
+            if(CurrentNode == CurrentNode->getNodeUp()->getNodeUp()){break;}
+
+
+            if(CurrentNode->getNodeUp() != nullptr){
+                CurrentNode = CurrentNode->getNodeUp();
+            }else{
+                CurrentNode = nullptr;
+            }
+
+        }
+        /*
         do {
             if(CurrentNode->getNodeUp() != nullptr){
-            CurrentNode = CurrentNode->getNodeUp();
-            path2root.push_back(CurrentNode);
+                CurrentNode = CurrentNode->getNodeUp();
+                path2root.push_back(CurrentNode);
             }else{
                 break;
             }
 
         } while (CurrentNode->getNodeUp() != nullptr && CurrentNode != CurrentNode->getNodeUp()->getNodeUp());
-
+        */
         if (fixPseudoRootOnNextSubtree) {
 
             if(CurrentNode->getNodeUp() != nullptr) {
@@ -702,7 +717,7 @@ namespace tshlib {
             }
             strpath.pop_back();
 
-            std::cout << strpath << std::endl;
+            VLOG(1) << strpath << std::endl;
             vnodes2root.clear();
             strpath.clear();
 

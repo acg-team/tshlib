@@ -45,6 +45,7 @@
 #include <chrono>
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include <map>
 #include "TreeRearrangment.hpp"
 
 #ifdef TSHLIB_BENCHMARK
@@ -381,6 +382,53 @@ namespace tshlib {
                     << "\t[" << getMove(idMove)->move_radius << "]";
         }
 
+    }
+
+    const std::vector<VirtualNode *> TreeRearrangment::updatePathBetweenNodes(unsigned long moveID, std::vector<VirtualNode *> inPath) {
+
+        Move *move = getMove(moveID);
+
+        if(move->move_direction != MoveDirections::up ){
+
+            std::vector<VirtualNode *> tmpVector_B, tmpVector_C, updatedNodesInPath;
+            tmpVector_B = inPath;
+
+            // Remove the first element of the array since it is not a likelihood component (source node)
+            tmpVector_B.erase(tmpVector_B.begin());
+
+            // Find the position of the target node (it is not necessarely the end of the vector)
+            ptrdiff_t pos;
+
+            if(move->move_direction == MoveDirections::up_left || move->move_direction == MoveDirections::up_right) {
+                pos = std::distance(tmpVector_B.begin(), find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
+            }else{
+                pos = std::distance(tmpVector_B.begin(), find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
+            }
+
+            if(pos <= tmpVector_B.size()) {
+
+                // Copy the reference to the pointers of the node starting from the target node to the end of the vector (root)
+                for(ptrdiff_t i=pos;i<tmpVector_B.size();i++) {
+                    tmpVector_C.push_back(tmpVector_B.at(i));
+                }
+
+                // Revert the order of the elements in the vector
+                std::reverse(std::begin(tmpVector_C), std::end(tmpVector_C));
+
+                // Add the beginning of the vector B to vector C
+                for(ptrdiff_t i=0;i<pos;i++) {
+                    tmpVector_C.push_back(tmpVector_B.at(i));
+                }
+
+                // Return the newly ordered vector
+                updatedNodesInPath = tmpVector_C;
+            }
+
+            return updatedNodesInPath;
+
+        }else{
+            return inPath;
+        }
     }
 
 

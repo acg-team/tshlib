@@ -232,6 +232,8 @@ namespace tshlib {
          */
         virtual void defineMoves(bool includeSelf, bool allowDuplicatedMoves);
 
+        const std::vector<VirtualNode *> updatePathBetweenNodes(unsigned long moveID, std::vector<VirtualNode *> inPath);
+
         virtual bool applyMove(unsigned long moveID);
 
         virtual void commitMove(int moveID);
