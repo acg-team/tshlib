@@ -108,14 +108,13 @@ endif (EIGEN3_FOUND)
 
 
 # Dependencies not covered by find package should be found in the following directories
-if(${CMAKE_PREFIX_PATH})
-    include_directories("${CMAKE_PREFIX_PATH}/include")
-    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}}/lib")
-    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}/lib64")
-    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib")
-    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib64")
-    message(STATUS "Looking for headers in the following directory: ${CMAKE_PREFIX_PATH}/include")
-endif()
+include_directories("${CMAKE_PREFIX_PATH}/include")
+LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}}/lib")
+LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}/lib64")
+message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib")
+message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib64")
+message(STATUS "Looking for headers in the following directory: ${CMAKE_PREFIX_PATH}/include")
+
 
 # Add local include folder
 include_directories("${PROJECT_SOURCE_DIR}/include")
