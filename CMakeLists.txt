@@ -106,38 +106,61 @@ if (EIGEN3_FOUND)
     include_directories(${EIGEN3_INCLUDE_DIR})
 endif (EIGEN3_FOUND)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Dependencies not covered by find package should be found in the following directories
-include_directories("${CMAKE_PREFIX_PATH}/include")
-message(STATUS "Including directory: ${CMAKE_PREFIX_PATH}") 
-LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}}/lib")
-LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}/lib64")
+if(${CMAKE_PREFIX_PATH})
+    include_directories("${CMAKE_PREFIX_PATH}/include")
+    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}}/lib")
+    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}/lib64")
+    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib")
+    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib64")
+    message(STATUS "Looking for headers in the following directory: ${CMAKE_PREFIX_PATH}/include")
+endif()
+
+# Add local include folder
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 
-
+# Files to compile
 file(GLOB SOURCES src/*.cpp )
 file(GLOB HEADERS include/*.hpp )
 
+# Create the shared library
 add_library(tshlib SHARED ${SOURCES} ${HEADERS})
-#target_link_libraries(tshlib ${EIGEN3_INCLUDE_DIR})
 target_link_libraries(tshlib glog::glog)
 set_target_properties(tshlib PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
+# Create the static library
+add_library(tshlib-static STATIC ${SOURCES} ${HEADERS})
+target_link_libraries(tshlib-static glog::glog)
+set_target_properties(tshlib-static PROPERTIES PUBLIC_HEADER "${HEADERS}")
+set_target_properties(tshlib-static PROPERTIES OUTPUT_NAME tshlib)
+
+# Install shared library
 install(TARGETS tshlib
-        # IMPORTANT: Add the foo library to the "export-set"
+        # IMPORTANT: Add the tshlib library to the "export-set"
         EXPORT TshLibTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
         PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}/tshlib"
         COMPONENT dev)
 
+# Install static library
+install(TARGETS tshlib-static
+        EXPORT  TshLibTargets
+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT dev
+        PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}/tshlib"
+        COMPONENT dev)
+
 # Add all targets to the build-tree export set
 export(TARGETS tshlib FILE "${PROJECT_BINARY_DIR}/TshLibTargets.cmake")
-
+export(TARGETS tshlib-static FILE "${PROJECT_BINARY_DIR}/TshLibTargets.cmake")
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)
 export(PACKAGE tshlib)
+export(PACKAGE tshlib-static)
 
 # Create the FooBarConfig.cmake and FooBarConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
