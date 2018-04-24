@@ -63,6 +63,7 @@ message("Project binary is in ${PROJECT_BINARY_DIR}")
 # set up include-directories
 include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
 
+
 # The interesting stuff goes here
 # ===============================
 
@@ -84,7 +85,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(LINUX TRUE)
     message(STATUS "Compilation will be performed under Linux")
-
+    
     find_package(Boost REQUIRED)
     find_package(glog 0.3.5 REQUIRED)
     if(GLOG_FOUND)
