@@ -10,4 +10,5 @@ target_link_libraries(Unit_Tests_run tshlib)
 #        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/tests/unit_tests/
 #        COMMAND ${PROJECT_BINARY_DIR}/tests/unit_tests/Unit_Tests_run})
 
-add_test(Unit_Tests_run Unit_Tests_run)
+add_test(NAME UNIT_ComputeDepthNode
+        COMMAND Unit_Tests_run "--gtest_output=xml:${PROJECT_BINARY_DIR}/unit_tests.xml")
