@@ -43,6 +43,7 @@
 #include <numeric>
 #include <iomanip>
 #include <chrono>
+#include <algorithm>
 #include <glog/logging.h>
 #include <map>
 #include "TreeRearrangment.hpp"
