@@ -396,7 +396,7 @@ namespace tshlib {
             tmpVector_B.erase(tmpVector_B.begin());
 
             // Find the position of the target node (it is not necessarely the end of the vector)
-            ptrdiff_t pos;
+            std::ptrdiff_t pos;
 
             if(move->move_direction == MoveDirections::up_left || move->move_direction == MoveDirections::up_right) {
                 pos = std::distance(tmpVector_B.begin(), find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
@@ -407,7 +407,7 @@ namespace tshlib {
             if(pos <= tmpVector_B.size()) {
 
                 // Copy the reference to the pointers of the node starting from the target node to the end of the vector (root)
-                for(ptrdiff_t i=pos;i<tmpVector_B.size();i++) {
+                for(std::ptrdiff_t i=pos;i<tmpVector_B.size();i++) {
                     tmpVector_C.push_back(tmpVector_B.at(i));
                 }
 
