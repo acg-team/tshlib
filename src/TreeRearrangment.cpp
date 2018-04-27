@@ -399,9 +399,9 @@ namespace tshlib {
             std::ptrdiff_t pos;
 
             if(move->move_direction == MoveDirections::up_left || move->move_direction == MoveDirections::up_right) {
-                pos = std::distance(tmpVector_B.begin(), find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
+                pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
             }else{
-                pos = std::distance(tmpVector_B.begin(), find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
+                pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
             }
 
             if(pos <= tmpVector_B.size()) {
@@ -415,7 +415,7 @@ namespace tshlib {
                 std::reverse(std::begin(tmpVector_C), std::end(tmpVector_C));
 
                 // Add the beginning of the vector B to vector C
-                for(ptrdiff_t i=0;i<pos;i++) {
+                for(std::ptrdiff_t i=0;i<pos;i++) {
                     tmpVector_C.push_back(tmpVector_B.at(i));
                 }
 
