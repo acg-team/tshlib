@@ -190,27 +190,9 @@ target_link_libraries(tshlib-static glog::glog)
 set_target_properties(tshlib-static PROPERTIES PUBLIC_HEADER "${HEADERS}")
 set_target_properties(tshlib-static PROPERTIES OUTPUT_NAME tshlib)
 
-
 # Test target
-
-
-
-#add_subdirectory (tests)
-#enable_testing()
-#add_test(NAME test_1 CONFIGURATIONS Debug
-#        COMMAND tshlib-tests)
-
-#find_package (Boost COMPONENTS unit_test_framework REQUIRED)
-#file(GLOB_RECURSE UnitTests_sources tests/*.cpp)
-#ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
-#include_directories($Boost_INCLUDE_DIR)
-#add_executable(UnitTests ${UnitTests_sources})
-#target_link_libraries (UnitTests ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-
-add_subdirectory (tests)
 enable_testing()
-
-
+add_subdirectory (tests)
 
 # Install shared library
 install(TARGETS tshlib
