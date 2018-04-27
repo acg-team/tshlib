@@ -46,12 +46,7 @@
 
 #include <string>
 #include <vector>
-#include <Eigen/Core>
-#include <Eigen/src/Core/IO.h>
-#include <Eigen/Dense>
-#include <unsupported/Eigen/MatrixFunctions>
 
-//#include "PhyTree.hpp"
 #include "Utilities.hpp"
 #include "Alignment.hpp"
 
@@ -84,17 +79,18 @@ namespace tshlib {
         double vnode_branchlength;                      /* Branch length connecting the node the parent node */
         double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
         double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
-        Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
+        int vnode_depth;                                /* Depth level of the node in the tree */
+        bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
+        int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
+        NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
 
-
-        std::vector<double> vnode_Fv_terminal;
-
+        //int vnode_seqid;                                /* Seq id on alignment vector */
+        //Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
+        //std::vector<double> vnode_Fv_terminal;
         //std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
         //std::vector<Eigen::VectorXd> vnode_Fv_operative;
         //std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
         //std::vector<Eigen::VectorXd> vnode_Fv_best;
-
-
         //Eigen::VectorXd vnode_Fv_empty_backup;
         //Eigen::VectorXd vnode_Fv_empty_operative;
         //Eigen::VectorXd vnode_Fv_empty_best;
@@ -105,11 +101,6 @@ namespace tshlib {
         //std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
         //std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
         //char vnode_character;                         /* Character associated to this node (only if terminal node) */
-        int vnode_seqid;                                /* Seq id on alignment vector */
-        int vnode_depth;                                /* Depth level of the node in the tree */
-        bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
-        int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
-        NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
 
         /*!
          *  Standard constructor
@@ -121,37 +112,37 @@ namespace tshlib {
         /*!
          * Virtual deconstructor
          */
-        virtual ~VirtualNode();
+         ~VirtualNode();
 
         /*!
          * @brief This function connects the current node to another one. It automatically performs a bidirectional connection
          * @param inVNode Target node to apply the connection to
          */
-        virtual void connectNode(VirtualNode *inVNode);
+        void connectNode(VirtualNode *inVNode);
 
         /*!
          * @brief This function disconnect the current node from any other one above it. The function is bidirectional.
          */
-        virtual void disconnectNode();
+        void disconnectNode();
 
         /*!
          * @brief This function perfomrms a one-step clockwise rotation of the virtualnode pointers
          */
-        virtual void rotateClockwise();
+        void rotateClockwise();
 
-        virtual void rotateClockwise(bool revertRotations);
+        void rotateClockwise(bool revertRotations);
 
         /*!
          * @brief This function perfomrms a one-step counter-clockwise rotation of the virtualnode pointers
          */
-        virtual void rotateCounterClockwise();
+        void rotateCounterClockwise();
 
-        virtual void rotateCounterClockwise(bool revertRotations);
+        void rotateCounterClockwise(bool revertRotations);
 
         /*!
          * @brief This function resets any rotation previously performed on the node
          */
-        virtual void resetNodeDirections(bool revertRotations);
+        void resetNodeDirections(bool revertRotations);
 
         //void getMemberNeighbors(int radius);
 
@@ -161,17 +152,9 @@ namespace tshlib {
          */
         std::string printNeighbours();
 
-        void setNodeName(const std::string s);
+        void setNodeName(std::string s);
 
-        std::string getNodeName();
-
-        virtual void setLeafCharacter(char ch);
-
-        void setMSAFv(Eigen::VectorXd &fv);
-
-        //virtual void setSetA(bool b);
-
-        //bool getSetA(int colnum);
+        const std::string getNodeName();
 
         double getIota();
 
@@ -181,7 +164,7 @@ namespace tshlib {
 
         void setBeta(double beta);
 
-        const Eigen::MatrixXd &getPr();
+        //const Eigen::MatrixXd &getPr();
 
         VirtualNode *getNodeUp();
 
@@ -193,6 +176,7 @@ namespace tshlib {
 
         double computeTotalTreeLength();
 
+        int getNodeLevel();
 
         //void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
 
@@ -246,17 +230,17 @@ namespace tshlib {
         bool isParent(VirtualNode *inVNode);
 
 
-        void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
+        //void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
-        virtual void _setNodeRight(VirtualNode *inVNode);
+        void _setNodeRight(VirtualNode *inVNode);
 
-        virtual void _setNodeLeft(VirtualNode *inVNode);
+        void _setNodeLeft(VirtualNode *inVNode);
 
-        virtual void _setNodeUp(VirtualNode *inVNode);
+        void _setNodeUp(VirtualNode *inVNode);
 
         //virtual void _printFV();
 
-        virtual void __print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input);
+        //void __print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input);
 
 
 
@@ -266,11 +250,10 @@ namespace tshlib {
         VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
 
 
-        virtual void _oneway_connectNode(VirtualNode *inVNode);
+         void _oneway_connectNode(VirtualNode *inVNode);
 
-        virtual void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
-
-        virtual void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
+         void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
+         void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
         //void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
 
@@ -288,11 +271,11 @@ namespace tshlib {
 
         Utree();
 
-        Utree(const Utree& rhs) { /* copy construction from rhs*/ }
+        Utree(const Utree &rhs) { /* copy construction from rhs*/ }
 
-        Utree& operator=(const Utree& rhs) {};
+        Utree &operator=(const Utree &rhs) {};
 
-        virtual ~Utree();
+        ~Utree();
 
         /*!
          * @brief This function finds the pseudoroot traversing the tree from starting node until a bidirectional connection is found
@@ -306,7 +289,7 @@ namespace tshlib {
          * @param inVNode       Pointer to the VirtualNode to add
          * @param isStartNode
          */
-        virtual void addMember(VirtualNode *inVNode, bool isStartNode = false);
+        void addMember(VirtualNode *inVNode, bool isStartNode = false);
 
         /*!
          * @brief
@@ -325,54 +308,55 @@ namespace tshlib {
          * @brief
          * @param outfilepath
          */
-        virtual void saveTreeOnFile(std::string outfilepath);
+        void saveTreeOnFile(std::string outfilepath);
 
         /*!
          * @brief
          */
-        virtual void printAllNodesNeighbors();
+        void printAllNodesNeighbors();
 
         /*!
          * @brief This function create a virtual root on the utree object. It breaks the link between two pseudoroot virtualnodes
          */
-        virtual void addVirtualRootNode();
+        void addVirtualRootNode();
 
         /*!
          * @brief This function remove the virtual root node added with the companion function addVirtualRootNode()
          */
-        virtual void removeVirtualRootNode();
+        void removeVirtualRootNode();
 
-        virtual void _testReachingPseudoRoot();
+        void _testReachingPseudoRoot();
 
-        virtual double computeTotalTreeLength();
+        double computeTotalTreeLength();
 
-        virtual void setIota(double tau, double mu);
+        void setIota(double tau, double mu);
 
-        virtual void setBeta(double tau, double mu);
+        void setBeta(double tau, double mu);
 
         //virtual void clearFv();
 
-        virtual void setLeafState(std::string s);
+        void setLeafState(std::string s);
 
         //virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
 
-        virtual void _printUtree();
+        void _printUtree();
 
         std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
+
         std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
 
         std::vector<VirtualNode *> getPostOrderNodeList();
+
         std::vector<VirtualNode *> getPostOrderNodeList(VirtualNode *startNode);
 
-        void _getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node );
-
+        void _getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node);
 
 
     protected:
         std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
 
-        virtual void _updateStartNodes();
+        void _updateStartNodes();
 
     private:
 
@@ -404,7 +388,7 @@ namespace UtreeUtils {
      */
     //std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
 
-    void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
+    //void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
 
     VirtualNode *getPseudoRoot(VirtualNode *vn);
 

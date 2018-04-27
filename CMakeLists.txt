@@ -164,12 +164,12 @@ if(Boost_FOUND)
     message("\t include dir: ${Boost_INCLUDE_DIRS}" )
 endif()
 
-find_package(Eigen3 REQUIRED)
-if (EIGEN3_FOUND)
-    message(STATUS "Found Eigen3")
-        message("\t include dir: ${EIGEN3_INCLUDE_DIR}")
-    include_directories(${EIGEN3_INCLUDE_DIR})
-endif ()
+#find_package(Eigen3 REQUIRED)
+#if (EIGEN3_FOUND)
+#    message(STATUS "Found Eigen3")
+#        message("\t include dir: ${EIGEN3_INCLUDE_DIR}")
+#    include_directories(${EIGEN3_INCLUDE_DIR})
+#endif ()
 
 
 # Add local include folder

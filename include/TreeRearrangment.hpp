@@ -58,7 +58,7 @@ namespace tshlib {
         classic_NNI, classic_SPR, classic_Mixed, particle_swarm, hillclimbing, greedy, nosearch
     };
 
-    enum class TreeRearrangmentOperations{
+    enum class TreeRearrangmentOperations {
         classic_NNI, classic_SPR, classic_TBR, classic_Mixed
     };
 
@@ -90,55 +90,55 @@ namespace tshlib {
         */
         ~Move();
 
-        Move(const Move& inMove) {
+        Move(const Move &inMove) {
 
             this->move_id = inMove.move_id;
-            this->move_name = "copy_"+inMove.move_name;
+            this->move_name = "copy_" + inMove.move_name;
             this->move_radius = inMove.move_radius;
             this->move_lk = inMove.move_lk;
             this->move_applied = inMove.move_applied;
             this->move_class = inMove.move_class;
             this->move_type = inMove.move_type;
             this->move_direction = inMove.move_direction;
-            this->move_targetnode =  inMove.move_targetnode;
-            this->move_sourcenode =  inMove.move_sourcenode;
+            this->move_targetnode = inMove.move_targetnode;
+            this->move_sourcenode = inMove.move_sourcenode;
 
         }
 
-        void operator=(const Move& inMove) {
+        void operator=(const Move &inMove) {
             this->move_id = inMove.move_id;
-            this->move_name = "copy_"+inMove.move_name;
+            this->move_name = "copy_" + inMove.move_name;
             this->move_radius = inMove.move_radius;
             this->move_lk = inMove.move_lk;
             this->move_applied = inMove.move_applied;
             this->move_class = inMove.move_class;
             this->move_type = inMove.move_type;
             this->move_direction = inMove.move_direction;
-            this->move_targetnode =  inMove.move_targetnode;
-            this->move_sourcenode =  inMove.move_sourcenode;
+            this->move_targetnode = inMove.move_targetnode;
+            this->move_sourcenode = inMove.move_sourcenode;
         };
 
 
         std::string getMoveDirection() const {
             std::string returnString;
-            switch(move_direction){
+            switch (move_direction) {
                 case MoveDirections::left:
-                    returnString="left";
+                    returnString = "left";
                     break;
                 case MoveDirections::up:
-                    returnString="up";
+                    returnString = "up";
                     break;
                 case MoveDirections::up_left:
-                    returnString="up-left";
+                    returnString = "up-left";
                     break;
                 case MoveDirections::up_right:
-                    returnString="up-right";
+                    returnString = "up-right";
                     break;
                 case MoveDirections::right :
-                    returnString="right";
+                    returnString = "right";
                     break;
                 case MoveDirections::undef :
-                    returnString="undef";
+                    returnString = "undef";
                     break;
 
             }
@@ -178,7 +178,7 @@ namespace tshlib {
 
         void setDirection(MoveDirections direction);
 
-        double getLikelihood() {return move_lk;};
+        double getLikelihood() { return move_lk; };
 
         void recomputeLikelihood();
 
@@ -204,11 +204,11 @@ namespace tshlib {
 
         TreeRearrangment();
 
-        virtual void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
+        void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
-        virtual void initTreeRearrangment(Utree *ref_tree, int min_radius, int max_radius, bool preserve_blengths, VirtualNode *node_source);
+        void initTreeRearrangment(Utree *ref_tree, int min_radius, int max_radius, bool preserve_blengths, VirtualNode *node_source);
 
-        virtual ~TreeRearrangment();
+        ~TreeRearrangment();
 
         VirtualNode *getSourceNode() const { return mset_sourcenode ?: nullptr; }
 
@@ -230,19 +230,19 @@ namespace tshlib {
          * @brief Perform a complete node search and fill the vector containing the candidate moves.
          * @param includeSelf bool ?
          */
-        virtual void defineMoves(bool includeSelf, bool allowDuplicatedMoves);
+        void defineMoves(bool includeSelf, bool allowDuplicatedMoves);
 
         const std::vector<VirtualNode *> updatePathBetweenNodes(unsigned long moveID, std::vector<VirtualNode *> inPath);
 
-        virtual bool applyMove(unsigned long moveID);
+        bool applyMove(unsigned long moveID);
 
-        virtual void commitMove(int moveID);
+        void commitMove(int moveID);
 
         Move *getMove(unsigned long moveID);
 
-        virtual bool revertMove(unsigned long moveID);
+        bool revertMove(unsigned long moveID);
 
-        virtual void printMoves();
+        void printMoves();
 
         unsigned long getNumberOfMoves();
 
@@ -263,7 +263,7 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param includeSelf bool ?
          */
-        virtual void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves);
+        void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves);
 
 
         /*!
@@ -279,7 +279,7 @@ namespace tshlib {
          * @brief Append candidate move to the mset_moves vector
          * @param move Move Pointer to the candidate move object
          */
-        void addMove(Move *move, bool allowDuplicatedMoves=true);
+        void addMove(Move *move, bool allowDuplicatedMoves = true);
     };
 
 

@@ -76,13 +76,13 @@ namespace tshlib {
 
         explicit Alignment(bool compressed);
 
-        virtual void addSequence(std::string label, std::string data);
+        void addSequence(std::string label, std::string data);
 
-        virtual void addWeight(std::vector<int> column_weight);
+        void addWeight(std::vector<int> column_weight);
 
-        virtual void countNumberCharactersinColumn();
+        void countNumberCharactersinColumn();
 
-        virtual long int getAlignmentSize();
+        long int getAlignmentSize();
 
         std::string extractColumn(int index);
 

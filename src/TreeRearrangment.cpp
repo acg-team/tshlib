@@ -443,7 +443,7 @@ namespace tshlib {
         move_class = "undef";
         move_direction = MoveDirections::undef;
 
-        move_lk = -INFINITY;
+        move_lk = -std::numeric_limits<double>::infinity();
 
         move_applied = false;
     }

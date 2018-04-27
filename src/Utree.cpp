@@ -121,29 +121,6 @@ void ::UtreeUtils::convertUtree(PhyTree *in_tree, Utree *out_tree) {
 }
 */
 
-
-void ::UtreeUtils::associateNode2Alignment(Alignment *inMSA, Utree *inTree) {
-
-    for(auto &node:inTree->listVNodes){
-
-        if(node->isTerminalNode()){
-
-            for(int i=0; i<inMSA->align_dataset.size();i++){
-
-                if(inMSA->align_dataset.at(i)->seq_name.compare(node->vnode_name)==0){
-
-                    node->vnode_seqid = i;
-                    break;
-                }
-
-            }
-
-        }
-
-    }
-
-
-}
 using namespace tshlib;
 VirtualNode *UtreeUtils::getPseudoRoot(VirtualNode *vn){
 
@@ -166,7 +143,7 @@ namespace tshlib {
         this->vnode_leaf = false;
         this->vnode_rotated = NodeRotation::undef;
         //this->vnode_character = NULL;
-        this->vnode_seqid = -1;
+        //this->vnode_seqid = -1;
 
     };
 
@@ -219,36 +196,11 @@ namespace tshlib {
     }
 
 
-    void VirtualNode::setLeafCharacter(char ch) {
-
-        //std::cout<<"I am node:"<<this->vnode_name<<" and I am setting: "<<ch<<std::endl;
-
-        //this->vnode_character = ch;
-    }
-
-/*
-    void VirtualNode::setSetA(bool b) {
-        //this->vnode_setA_backup = b;
-    }
-
-*/
-    std::string VirtualNode::getNodeName() {
+    const std::string VirtualNode::getNodeName() {
 
         return this->vnode_name;
     }
 
-/*
-    void VirtualNode::setMSAFv(Eigen::VectorXd &fv) {
-
-        this->vnode_Fv_backup.push_back(fv);
-    }
-
-
-    bool VirtualNode::getSetA(int colnum) {
-
-        return this->vnode_setA_backup.at(colnum);
-    }
-*/
 
     double VirtualNode::getIota() {
 
@@ -271,12 +223,6 @@ namespace tshlib {
     void VirtualNode::setBeta(double beta) {
 
         this->vnode_beta = beta;
-    }
-
-
-    const Eigen::MatrixXd &VirtualNode::getPr() {
-
-        return this->vnode_Pr;
     }
 
 
@@ -335,7 +281,7 @@ namespace tshlib {
         std::cout << "[Node branch length] " << this->vnode_branchlength << std::endl;
         std::cout << "[Node iota] " << this->vnode_iota << std::endl;
         std::cout << "[Node beta] " << this->vnode_beta << std::endl;
-        std::cout << "[Node Pr] " << this->vnode_Pr.rows() << " x " << this->vnode_Pr.cols() << std::endl;
+        //std::cout << "[Node Pr] " << this->vnode_Pr.rows() << " x " << this->vnode_Pr.cols() << std::endl;
 
         //if(this->vnode_character!=NULL){
         //    std::cout<<"[Node char] "<<this->vnode_character<<std::endl;
@@ -635,7 +581,7 @@ namespace tshlib {
             std::cout << "[Node branch length] " << vn->vnode_branchlength << std::endl;
             std::cout << "[Node iota] " << vn->vnode_iota << std::endl;
             std::cout << "[Node beta] " << vn->vnode_beta << std::endl;
-            std::cout << "[Node Pr] " << vn->vnode_Pr.rows() << " x " << vn->vnode_Pr.cols() << std::endl;
+            //std::cout << "[Node Pr] " << vn->vnode_Pr.rows() << " x " << vn->vnode_Pr.cols() << std::endl;
 
 //        if(vn->vnode_character!=NULL){
 //            std::cout<<"[Node char] "<<vn->vnode_character<<std::endl;
@@ -1065,7 +1011,7 @@ namespace tshlib {
 
     }
 
-*/
+
     void Utree::setLeafState(std::string s) {
 
         for (auto &node:this->listVNodes) {
@@ -1075,7 +1021,7 @@ namespace tshlib {
         }
 
     }
-/*
+
     void Utree::prepareSetADesCountOnNodes(int numcol, int lengthAlphabet) {
 
         for (auto &node:this->listVNodes) {
@@ -1510,7 +1456,7 @@ namespace tshlib {
 
 
     }
-*/
+
     void VirtualNode::__print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input){
         std::string line;
         std::ostringstream sout;
@@ -1554,7 +1500,7 @@ namespace tshlib {
 
     }
 
-
+*/
     VirtualNode::~VirtualNode() = default;
 
 }
