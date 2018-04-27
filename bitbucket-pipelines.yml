@@ -13,6 +13,8 @@ pipelines:
         - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
         - make
         - make test
+        artifacts:
+        - build/tests/*.xml
 
   branches:
       master:
@@ -21,6 +23,8 @@ pipelines:
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
+              artifacts:
+              - build/tests/*.xml
 
       develop:
           - step:
@@ -28,26 +32,29 @@ pipelines:
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-
+              artifacts:
+              - build/tests/*.xml
       feature/*:
           - step:
               script: # Modify the commands below to build your repository.
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-
+              artifacts:
+              - build/tests/*.xml
       release/*:
           - step:
               script: # Modify the commands below to build your repository.
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-
+              artifacts:
+              - build/tests/*.xml
       hotfix/*:
           - step:
               script: # Modify the commands below to build your repository.
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-
-
+              artifacts:
+              - build/tests/*.xml
