@@ -92,7 +92,7 @@ message("-- Compilation will be performed with the following release of the soft
 \tcurrent  ${MINIJATI_VERSION} (latest version)")
 
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wshadow -Weffc++ -O0 -g -DNDEBUG=1")
 SET(CMAKE_C_FLAGS_DEBUG "-Wall -Wshadow -O0 -g -DNDEBUG=1")
@@ -157,7 +157,7 @@ endif()
 set(Boost_USE_STATIC_LIBS        OFF) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system unit_test_framework)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     message("\t static lib:  ${Boost_LIBRARY_DIRS}" )
@@ -189,6 +189,10 @@ add_library(tshlib-static STATIC ${SOURCES} ${HEADERS})
 target_link_libraries(tshlib-static glog::glog)
 set_target_properties(tshlib-static PROPERTIES PUBLIC_HEADER "${HEADERS}")
 set_target_properties(tshlib-static PROPERTIES OUTPUT_NAME tshlib)
+
+# Test target
+enable_testing()
+add_subdirectory (tests)
 
 # Install shared library
 install(TARGETS tshlib
