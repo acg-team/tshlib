@@ -45,6 +45,7 @@
 #include <random>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
 #include <glog/logging.h>
 #include <map>
 
