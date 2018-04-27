@@ -1,0 +1,53 @@
+# This is a sample build configuration for C++ � Make.
+# Check our guides at https://confluence.atlassian.com/x/5Q4SMw for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+image:
+  name: lorenzogatti89/tshlib:latest
+
+pipelines:
+  default:
+   - step:
+        script: # Modify the commands below to build your repository.
+        - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+        - make
+        - make test
+
+  branches:
+      master:
+          - step:
+              script: # Modify the commands below to build your repository.
+              - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+              - make
+              - make test
+
+      develop:
+          - step:
+              script: # Modify the commands below to build your repository.
+              - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+              - make
+              - make test
+
+      feature/*:
+          - step:
+              script: # Modify the commands below to build your repository.
+              - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+              - make
+              - make test
+
+      release/*:
+          - step:
+              script: # Modify the commands below to build your repository.
+              - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+              - make
+              - make test
+
+      hotfix/*:
+          - step:
+              script: # Modify the commands below to build your repository.
+              - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+              - make
+              - make test
+
+
