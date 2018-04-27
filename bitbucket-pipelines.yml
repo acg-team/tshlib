@@ -13,8 +13,8 @@ pipelines:
         - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
         - make
         - make test
-        artifacts:
-        - tests/*.xml
+        - mkdir test-reports
+        - mv tests/*.xml test-reports/
 
   branches:
       master:
@@ -23,8 +23,8 @@ pipelines:
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-              artifacts:
-              - tests/*.xml
+              - mkdir test-reports
+              - mv tests/*.xml test-reports/
 
       develop:
           - step:
@@ -32,29 +32,32 @@ pipelines:
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-              artifacts:
-              - tests/*.xml
+              - mkdir test-reports
+              - mv tests/*.xml test-reports/
+
       feature/*:
           - step:
               script: # Modify the commands below to build your repository.
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-              artifacts:
-              - tests/*.xml
+              - mkdir test-reports
+              - mv tests/*.xml test-reports/
+
       release/*:
           - step:
               script: # Modify the commands below to build your repository.
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-              artifacts:
-              - tests/*.xml
+              - mkdir test-reports
+              - mv tests/*.xml test-reports/
+
       hotfix/*:
           - step:
               script: # Modify the commands below to build your repository.
               - cmake --target tshlib -- -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
               - make
               - make test
-              artifacts:
-              - tests/*.xml
+              - mkdir test-reports
+              - mv tests/*.xml test-reports/
