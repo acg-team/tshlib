@@ -108,6 +108,10 @@ namespace tshlib {
          */
         VirtualNode();
 
+        int getVnode_id() const;
+
+        void setVnode_id(int vnode_id);
+
         VirtualNode(const VirtualNode &inNode);
 
         /*!
@@ -120,6 +124,10 @@ namespace tshlib {
          * @param inVNode Target node to apply the connection to
          */
         void connectNode(VirtualNode *inVNode);
+
+
+        void setBranchLength(double blength);
+
 
         /*!
          * @brief This function disconnect the current node from any other one above it. The function is bidirectional.
@@ -178,6 +186,8 @@ namespace tshlib {
         double computeTotalTreeLength();
 
         int getNodeLevel();
+
+        void setNodeLevel(int level);
 
         //void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
 
@@ -264,6 +274,9 @@ namespace tshlib {
 
 
     class Utree {
+    private:
+        bool initialized_treeDepth;
+
     public:
 
         std::vector<VirtualNode *> listVNodes;
@@ -336,7 +349,7 @@ namespace tshlib {
 
         //virtual void clearFv();
 
-        void setLeafState(std::string s);
+        //void setLeafState(std::string s);
 
         //virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
 
@@ -352,6 +365,11 @@ namespace tshlib {
 
         void _getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node);
 
+        void computeTreeDepth();
+
+        int getTreeDepthAtNode(VirtualNode *vnode);
+
+        void computeNodeDepth(VirtualNode *vnode);
 
     protected:
         std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);

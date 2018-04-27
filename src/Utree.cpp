@@ -608,10 +608,11 @@ namespace tshlib {
 */
     Utree::Utree() {
 
+        initialized_treeDepth = false;
+
         // Added virtual root to utree
         auto root = new VirtualNode;
         root->vnode_name = "root";
-
         this->rootnode = root;
 
     };
@@ -1225,6 +1226,32 @@ namespace tshlib {
 
     }
 
+    void Utree::computeTreeDepth() {
+        for(auto &node : listVNodes){
+            computeNodeDepth(node);
+        }
+        initialized_treeDepth = true;
+    }
+
+    int Utree::getTreeDepthAtNode(VirtualNode *vnode) {
+        int level = 0;
+
+        if (initialized_treeDepth){
+            level = vnode->getNodeLevel();
+        }else{
+             LOG(ERROR) << "No depth on this tree! You should call setTreeDepth before accessing the level of node: " << vnode->getNodeName();
+        }
+        return level;
+    }
+
+    void Utree::computeNodeDepth(VirtualNode *vnode) {
+
+        int level = (int) (findPseudoRoot(vnode)).size();
+
+        vnode->setNodeLevel(level);
+
+    }
+
 
     void VirtualNode::resetNodeDirections(bool revertRotations) {
 
@@ -1445,6 +1472,32 @@ namespace tshlib {
     bool VirtualNode::isPseudoRootNode() {
         return this->getNodeUp()->getNodeUp() == this;
     }
+
+    int VirtualNode::getNodeLevel() {
+
+        return vnode_depth;
+    }
+
+    void VirtualNode::setNodeLevel(int level) {
+
+        vnode_depth = level;
+
+    }
+
+    void VirtualNode::setBranchLength(double blength) {
+
+        vnode_branchlength = blength;
+
+    }
+
+    int VirtualNode::getVnode_id() const {
+        return vnode_id;
+    }
+
+    void VirtualNode::setVnode_id(int vnode_id) {
+        VirtualNode::vnode_id = vnode_id;
+    }
+
 /*
     void VirtualNode::_printFV() {
 
