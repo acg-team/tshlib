@@ -14,7 +14,7 @@ pipelines:
         - make
         - make test
         artifacts:
-        - build/tests/*.xml
+        - $BUILD_DIR/**
 
   branches:
       master:
@@ -24,7 +24,7 @@ pipelines:
               - make
               - make test
               artifacts:
-              - build/tests/*.xml
+              - $BUILD_DIR/**
 
       develop:
           - step:
@@ -33,7 +33,7 @@ pipelines:
               - make
               - make test
               artifacts:
-              - build/tests/*.xml
+              - $BUILD_DIR/**
       feature/*:
           - step:
               script: # Modify the commands below to build your repository.
@@ -41,7 +41,7 @@ pipelines:
               - make
               - make test
               artifacts:
-              - build/tests/*.xml
+              - $BUILD_DIR/**
       release/*:
           - step:
               script: # Modify the commands below to build your repository.
@@ -49,7 +49,7 @@ pipelines:
               - make
               - make test
               artifacts:
-              - build/tests/*.xml
+              - $BUILD_DIR/**
       hotfix/*:
           - step:
               script: # Modify the commands below to build your repository.
@@ -57,4 +57,4 @@ pipelines:
               - make
               - make test
               artifacts:
-              - build/tests/*.xml
+              - $BUILD_DIR/**
