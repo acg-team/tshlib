@@ -145,13 +145,29 @@ class testData{
 
 
 
-TEST(TreeDepth, Leaves_and_Internal) {
+TEST(TreeDepth, Leaves_and_Internal_0) {
     auto t = new testData;
     Utree *tree = t->getTree();
     tree->computeTreeDepth();
 
     EXPECT_EQ(tree->getTreeDepthAtNode(tree->listVNodes.at(1)), 4);
+
+}
+
+TEST(TreeDepth, Leaves_and_Internal_1) {
+    auto t = new testData;
+    Utree *tree = t->getTree();
+    tree->computeTreeDepth();
+
     EXPECT_EQ(tree->getTreeDepthAtNode(tree->listVNodes.at(3)), 2);
+
+}
+
+TEST(TreeDepth, Leaves_and_Internal_2) {
+    auto t = new testData;
+    Utree *tree = t->getTree();
+    tree->computeTreeDepth();
+
     EXPECT_EQ(tree->getTreeDepthAtNode(tree->listVNodes.at(4)), 2);
 
 }
