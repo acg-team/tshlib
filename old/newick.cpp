@@ -2,7 +2,7 @@
  * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
  *******************************************************************************
  *
  * This file is part of tshlib
@@ -18,7 +18,7 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with likpip. If not, see <http://www.gnu.org/licenses/>.
+ * License along with TshLib. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
 /**
