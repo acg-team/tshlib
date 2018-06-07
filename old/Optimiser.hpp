@@ -2,10 +2,10 @@
  * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
  *******************************************************************************
  *
- * This file is part of tshexe
+ * This file is part of Tree Search Heuristic Library (TshLib)
  *
  * tshlib is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published

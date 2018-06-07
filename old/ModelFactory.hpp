@@ -2,7 +2,7 @@
  * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
  *******************************************************************************
  *
  * This file is part of tshlib

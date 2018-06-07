@@ -2,23 +2,23 @@
  * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
  *******************************************************************************
  *
  * This file is part of tshlib
  *
- * tshexe is a free software: you can redistribute it and/or modify it
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshexe is distributed in the hope that it will be useful,
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with likpip. If not, see <http://www.gnu.org/licenses/>.
+ * License along with TshLib. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
 /**
@@ -42,8 +42,6 @@
  */
 #include <numeric>
 #include <iomanip>
-#include <chrono>
-#include <algorithm>
 #include <glog/logging.h>
 #include <map>
 #include "TreeRearrangment.hpp"
@@ -90,15 +88,15 @@ namespace tshlib {
         this->mset_max_radius = max_radius;
         this->mset_preserve_blenghts = preserve_blengths;
 
-        if (min_radius == 3 && max_radius == 3){
+        if (min_radius == 3 && max_radius == 3) {
             this->mset_strategy = "standard NNI";
         }
 
-        if (min_radius == 3 && max_radius > 3){
+        if (min_radius == 3 && max_radius > 3) {
             this->mset_strategy = "mixed (NNI+SPR+TBR)";
         }
 
-        if (min_radius == 4 && (max_radius > 4 && max_radius < 10)){
+        if (min_radius == 4 && (max_radius > 4 && max_radius < 10)) {
             this->mset_strategy = "standard SPR";
         }
 
@@ -207,7 +205,7 @@ namespace tshlib {
                 if (vnode->getNodeUp() != nullptr) {
 
                     // Get the nodes in the radius from the node we reached after crossing the pseudoroot
-                    getNodesInRadiusDown(vnode, radius_min, radius_curr-1, radius_max-1, false, MoveDirections::up, allowDuplicatedMoves);
+                    getNodesInRadiusDown(vnode, radius_min, radius_curr - 1, radius_max - 1, false, MoveDirections::up, allowDuplicatedMoves);
 
                 }
 
@@ -216,7 +214,7 @@ namespace tshlib {
     }
 
 
-    void TreeRearrangment::defineMoves(bool includeSelf, bool allowDuplicatedMoves=true) {
+    void TreeRearrangment::defineMoves(bool includeSelf, bool allowDuplicatedMoves = true) {
         // Flag the nodes according to their position on the tree (left or right or above the source node -- p node).
         // For each node within the radius extremities, define a move and add it to TreeRearrangment.
         // Start from the children of the current starting node (if any)
@@ -242,7 +240,7 @@ namespace tshlib {
 
         bool storeMove = true;
 
-        if(!allowDuplicatedMoves) {
+        if (!allowDuplicatedMoves) {
             for (auto &query:mset_moves) {
 
                 if (query->getTargetNode() == move->getTargetNode() && query->getSourceNode() == move->getSourceNode()) {
@@ -256,14 +254,13 @@ namespace tshlib {
             }
         }
 
-        if(storeMove) {
+        if (storeMove) {
             move->move_id = (int) mset_moves.size();
             mset_moves.push_back(move);
             mset_foundmoves++;
         }
 
     }
-
 
 
     void TreeRearrangment::printMoves() {
@@ -315,11 +312,11 @@ namespace tshlib {
     }
 
 
-    Move *TreeRearrangment::selectBestMove(double value=-std::numeric_limits<double>::infinity()) {
+    Move *TreeRearrangment::selectBestMove(double value = -std::numeric_limits<double>::infinity()) {
 
         Move *selectedMove = nullptr;
-        for(auto &move:mset_moves){
-            if(move->move_lk>value){
+        for (auto &move:mset_moves) {
+            if (move->move_lk > value) {
                 selectedMove = move;
                 value = move->move_lk;
             }
@@ -335,7 +332,7 @@ namespace tshlib {
         applyMove(moveID);
 
         // reset node rotations
-        for (auto &node:tree->listVNodes){
+        for (auto &node:tree->listVNodes) {
             node->vnode_rotated = NodeRotation::undef;
 
         }
@@ -370,15 +367,15 @@ namespace tshlib {
 
         // ------------------------------------
         // Move exection details
-        if(printTree){
-            VLOG(2) << "[test  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
-                << " | " << start_col_line << getMove(idMove)->move_lk << end_col_line << "\t"
-                << " | (" <<  getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
-                << "\t[" << getMove(idMove)->move_radius << "] | " << getTree()->printTreeNewick(true);
-        }else{
+        if (printTree) {
             VLOG(2) << "[test  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
                     << " | " << start_col_line << getMove(idMove)->move_lk << end_col_line << "\t"
-                    << " | (" <<  getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
+                    << " | (" << getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
+                    << "\t[" << getMove(idMove)->move_radius << "] | " << getTree()->printTreeNewick(true);
+        } else {
+            VLOG(2) << "[test  move]\t" << getMove(idMove)->move_class << "." << std::setfill('0') << std::setw(3) << idMove
+                    << " | " << start_col_line << getMove(idMove)->move_lk << end_col_line << "\t"
+                    << " | (" << getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
                     << "\t[" << getMove(idMove)->move_radius << "]";
         }
 
@@ -388,7 +385,7 @@ namespace tshlib {
 
         Move *move = getMove(moveID);
 
-        if(move->move_direction != MoveDirections::up ){
+        if (move->move_direction != MoveDirections::up) {
 
             std::vector<VirtualNode *> tmpVector_B, tmpVector_C, updatedNodesInPath;
             tmpVector_B = inPath;
@@ -399,16 +396,16 @@ namespace tshlib {
             // Find the position of the target node (it is not necessarely the end of the vector)
             std::ptrdiff_t pos;
 
-            if(move->move_direction == MoveDirections::up_left || move->move_direction == MoveDirections::up_right) {
+            if (move->move_direction == MoveDirections::up_left || move->move_direction == MoveDirections::up_right) {
                 pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
-            }else{
+            } else {
                 pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
             }
 
-            if(pos <= tmpVector_B.size()) {
+            if (pos <= tmpVector_B.size()) {
 
                 // Copy the reference to the pointers of the node starting from the target node to the end of the vector (root)
-                for(std::ptrdiff_t i=pos;i<tmpVector_B.size();i++) {
+                for (std::ptrdiff_t i = pos; i < tmpVector_B.size(); i++) {
                     tmpVector_C.push_back(tmpVector_B.at(i));
                 }
 
@@ -416,7 +413,7 @@ namespace tshlib {
                 std::reverse(std::begin(tmpVector_C), std::end(tmpVector_C));
 
                 // Add the beginning of the vector B to vector C
-                for(std::ptrdiff_t i=0;i<pos;i++) {
+                for (std::ptrdiff_t i = 0; i < pos; i++) {
                     tmpVector_C.push_back(tmpVector_B.at(i));
                 }
 
@@ -426,7 +423,7 @@ namespace tshlib {
 
             return updatedNodesInPath;
 
-        }else{
+        } else {
             return inPath;
         }
     }
@@ -480,7 +477,6 @@ namespace tshlib {
         return this->move_sourcenode;
 
     }
-
 
 
     void Move::setMoveClass(int Value) {

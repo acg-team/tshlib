@@ -2,7 +2,7 @@
  * Licensed Materials - Property of Lorenzo Gatti
  *
  *
- * Copyright (C) 2015-2017 by Lorenzo Gatti
+ * Copyright (C) 2015-2018 by Lorenzo Gatti
  *******************************************************************************
  *
  * This file is part of tshlib
