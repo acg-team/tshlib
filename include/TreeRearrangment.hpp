@@ -51,38 +51,33 @@
 
 namespace tshlib {
 
-    enum class TreeSearchStopCondition {
-        iterations, convergence
-    };
-
-    enum class TreeSearchHeuristics {
-        classic_NNI, classic_SPR, classic_Mixed, particle_swarm, hillclimbing, greedy, swap, phyml, mixed, nosearch
-    };
-
-    enum class TreeRearrangmentOperations {
-        classic_NNI, classic_SPR, classic_TBR, classic_Mixed
-    };
-
-
-
-
     class TreeRearrangment {
+    protected:
+        VirtualNode *trSourceNode_;                /* Starting node from which starting the tree exploration */
+
+        int trSearchRadius_min;                    /* Radius of the node search (for NNI must set it to 3) */
+        int trSearchRadius_max;                    /* Radius of the node search (for NNI must set it to 3) */
+        std::vector<Move *>  trMoveSet;            /* Vector containing the pre-computed moves */
+        TreeSearchHeuristics trStrategy;           /* Strategy used to test (apply/revert) the candidate moves  */
+        TreeRearrangmentOperations trTreeCoverage;
+
+    protected:
+        /* Strategy used to define the candidate moves -- max coverage of the tree space */
+        bool trPreserveBranchLenghts_;             /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
+
+        Utree *UTree_;
+
+
     private:
-
-        Utree *tree;
-        std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-        int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
-        int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
-        bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
-        std::vector<Move *> mset_moves;     /* Vector containing the pre-computed moves */
-        int mset_foundmoves;                /* Number of moves found during the defineMoves call */
-
-        VirtualNode *mset_sourcenode;       /* Starting node from which starting the tree exploration */
+        std::string trUID_;                        /* Tree-rearrangment ID. Useful in case of parallel independent executions */
+        int trCandidateMovesFound_;                /* Number of moves found during the defineMoves call */
+        bool trInitialized_;
 
     public:
-        std::string mset_strategy;          /* Description of the node search strategy */
 
         TreeRearrangment();
+
+        void initialize();
 
         void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
@@ -90,21 +85,21 @@ namespace tshlib {
 
         ~TreeRearrangment();
 
-        VirtualNode *getSourceNode() const { return mset_sourcenode ?: nullptr; }
+        VirtualNode *getSourceNode() const { return trSourceNode_ ?: nullptr; }
 
-        void setSourceNode(VirtualNode *mset_sourcenode) { TreeRearrangment::mset_sourcenode = mset_sourcenode; }
+        void setSourceNode(VirtualNode *mset_sourcenode) { TreeRearrangment::trSourceNode_ = mset_sourcenode; }
 
-        int getMinRadius() const { return mset_min_radius; }
+        int getMinRadius() const { return trSearchRadius_min; }
 
-        void setMinRadius(int mset_min_radius) { TreeRearrangment::mset_min_radius = mset_min_radius; }
+        void setMinRadius(int mset_min_radius) { TreeRearrangment::trSearchRadius_min = mset_min_radius; }
 
-        int getMaxRadius() const { return mset_max_radius; }
+        int getMaxRadius() const { return trSearchRadius_max; }
 
-        void setMaxRadius(int mset_max_radius) { TreeRearrangment::mset_max_radius = mset_max_radius; }
+        void setMaxRadius(int mset_max_radius) { TreeRearrangment::trSearchRadius_max = mset_max_radius; }
 
-        Utree *getTree() const { return tree; }
+        Utree *getTree() const { return UTree_; }
 
-        void setTree(Utree *tree) { TreeRearrangment::tree = tree; }
+        void setTree(Utree *tree) { TreeRearrangment::UTree_ = tree; }
 
         /*!
          * @brief Perform a complete node search and fill the vector containing the candidate moves.
@@ -133,6 +128,56 @@ namespace tshlib {
         void setTreeTopology(Utree *inTree);
 
         void displayRearrangmentStatus(int idMove, bool printTree);
+
+        std::string getStrategy() const {
+            std::string rtToken;
+            switch (trStrategy) {
+                case TreeSearchHeuristics::swap:
+                    rtToken = "Swap";
+                    break;
+                case TreeSearchHeuristics::phyml:
+                    rtToken = "phyML";
+                    break;
+                case TreeSearchHeuristics::mixed:
+                    rtToken = "Mixed(Swap+phyML)";
+                    break;
+                case TreeSearchHeuristics::nosearch:
+                    rtToken = "no-search";
+                    break;
+            }
+            return rtToken;
+        }
+
+        TreeRearrangmentOperations getRearrangmentCoverage() const {
+            return trTreeCoverage;
+        }
+
+        std::string getRearrangmentCoverageDescription() const {
+            std::string rtToken;
+            switch (trTreeCoverage) {
+                case TreeRearrangmentOperations::classic_NNI:
+                    rtToken = "NNI-like";
+                    break;
+                case TreeRearrangmentOperations::classic_SPR:
+                    rtToken = "SPR-like";
+                    break;
+                case TreeRearrangmentOperations::classic_TBR:
+                    rtToken = "TBR-like";
+                    break;
+                case TreeRearrangmentOperations::classic_Mixed:
+                    rtToken = "Complete";
+                    break;
+            }
+            return rtToken;
+        }
+
+        void setTreeCoverage(TreeRearrangmentOperations trTreeCoverage) {
+            TreeRearrangment::trTreeCoverage = trTreeCoverage;
+        }
+
+        void setStrategy(TreeSearchHeuristics trStrategy) {
+            TreeRearrangment::trStrategy = trStrategy;
+        }
 
     protected:
 

@@ -41,24 +41,27 @@
 #ifndef TSHLIB_MOVE_HPP
 #define TSHLIB_MOVE_HPP
 
+#include "Utilities.hpp"
+
 namespace tshlib {
     class Move {
 
     private:
 
     protected:
-        VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
-        VirtualNode *move_sourcenode;   /* Pointer to the source node  */
+        VirtualNode *moveTargetNode_;   /* Pointer to the target node found during the node search */
+        VirtualNode *moveSourceNode_;   /* Pointer to the source node  */
 
     public:
-        int move_id;                            /* Move ID - Useful in case of parallel independent executions*/
-        std::string move_name;                  /* Move Name - Unused */
-        int move_radius;                        /* Move Radius */
-        MoveDirections move_direction;          /* Move Direction for applying a rotation to the VirtualNode pointers */
-        double move_lk;                         /* Likelihood of the move if applied */
-        bool move_applied;                      /* Indicator is set to true if the move is applied to the tree */
-        std::string move_class;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-        MoveType move_type;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+        int moveUID_;                           /* Move UID - Useful in case of parallel independent executions*/
+        std::string moveName_;                   /* Move Name - Unused */
+        int moveRadius_;                        /* Move Radius */
+        MoveDirections moveDirection_;          /* Move Direction for applying a rotation to the VirtualNode pointers */
+        double moveScore_;                      /* Likelihood of the move if applied */
+        bool moveApplied_;                      /* Indicator is set to true if the move is applied to the tree */
+        std::string moveClass_;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+        MoveType moveType_;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+        TreeSearchHeuristics moveStrategy_;     /* Store the strategy used to generate this candidate.
 
         /*!
          * @brief Standard constructor
@@ -72,36 +75,38 @@ namespace tshlib {
 
         Move(const Move &inMove) {
 
-            move_id = inMove.move_id;
-            move_name = "copy_" + inMove.move_name;
-            move_radius = inMove.move_radius;
-            move_lk = inMove.move_lk;
-            move_applied = inMove.move_applied;
-            move_class = inMove.move_class;
-            move_type = inMove.move_type;
-            move_direction = inMove.move_direction;
-            move_targetnode = inMove.move_targetnode;
-            move_sourcenode = inMove.move_sourcenode;
+            moveUID_ = inMove.moveUID_;
+            moveName_ = "copy_" + inMove.moveName_;
+            moveRadius_ = inMove.moveRadius_;
+            moveScore_ = inMove.moveScore_;
+            moveApplied_ = inMove.moveApplied_;
+            moveClass_ = inMove.moveClass_;
+            moveType_ = inMove.moveType_;
+            moveDirection_ = inMove.moveDirection_;
+            moveTargetNode_ = inMove.moveTargetNode_;
+            moveSourceNode_ = inMove.moveSourceNode_;
 
         }
 
         Move &operator=(const Move &inMove) {
-            move_id = inMove.move_id;
-            move_name = "copy_" + inMove.move_name;
-            move_radius = inMove.move_radius;
-            move_lk = inMove.move_lk;
-            move_applied = inMove.move_applied;
-            move_class = inMove.move_class;
-            move_type = inMove.move_type;
-            move_direction = inMove.move_direction;
-            move_targetnode = inMove.move_targetnode;
-            move_sourcenode = inMove.move_sourcenode;
+            moveUID_ = inMove.moveUID_;
+            moveName_ = "copy_" + inMove.moveName_;
+            moveRadius_ = inMove.moveRadius_;
+            moveScore_ = inMove.moveScore_;
+            moveApplied_ = inMove.moveApplied_;
+            moveClass_ = inMove.moveClass_;
+            moveType_ = inMove.moveType_;
+            moveDirection_ = inMove.moveDirection_;
+            moveTargetNode_ = inMove.moveTargetNode_;
+            moveSourceNode_ = inMove.moveSourceNode_;
         };
 
+        void initMove();
 
-        std::string getMoveDirection() const {
+
+        std::string getDirection() const {
             std::string rtToken;
-            switch (move_direction) {
+            switch (moveDirection_) {
                 case MoveDirections::left:
                     rtToken = "left";
                     break;
@@ -126,10 +131,14 @@ namespace tshlib {
             return rtToken;
         }
 
-        std::string getMoveClass() const {
+
+        void setClass(int Value);
+
+
+        std::string getClass() const {
 
             std::string rtToken;
-            switch (move_type) {
+            switch (moveType_) {
 
                 case MoveType::VFNNI:
                     rtToken = "vfNNI";
@@ -168,33 +177,73 @@ namespace tshlib {
          * @brief Returns the target node pointer
          * @return VirtualNode pointer of the target node
          */
-        VirtualNode *getTargetNode();
+        VirtualNode *getTargetNode(){
+            return moveTargetNode_;
+        };
 
 /*!
         * @brief Returns the source node pointer
         * @return VirtualNode pointer of the source node
         */
-        VirtualNode *getSourceNode();
+        VirtualNode *getSourceNode(){
+            return moveSourceNode_;
+        };
 
         /*!
          * @brief Set the protected move_targetnode field
          * @param target_node PhyTree Pointer to the target node
          */
-        void setTargetNode(VirtualNode *target_node);
+        void setTargetNode(VirtualNode *target_node){
+            moveTargetNode_ = target_node;
+        };
 
-        void setSourceNode(VirtualNode *source_node);
+        void setSourceNode(VirtualNode *source_node){
+            moveSourceNode_ = source_node;
+        };
 
-        void setMoveClass(int Value);
 
-        MoveType getMoveType() const;
 
-        void setRadius(int radius);
+        MoveType getType() const{
+            return moveType_;
+        };
 
-        void setDirection(MoveDirections direction);
 
-        double getLikelihood() { return move_lk; };
+        void setRadius(int radius){
+            Move::moveRadius_ = radius;
+        };
 
-        void initMove();
+        int getRadius() const {
+            return moveRadius_;
+        }
+
+        void setDirection(MoveDirections direction){
+            Move::moveDirection_ = direction;
+        };
+
+        int getUID() const {
+            return moveUID_;
+        }
+
+        void setUID(int moveUID_) {
+            Move::moveUID_ = moveUID_;
+        }
+
+        const std::string &getName() const {
+            return moveName_;
+        }
+
+        void setName(const std::string &moveName_) {
+            Move::moveName_ = moveName_;
+        }
+
+        double getScore() const {
+            return moveScore_;
+        }
+
+        void setScore(double moveScore_) {
+            Move::moveScore_ = moveScore_;
+        }
+
     };
 }
 

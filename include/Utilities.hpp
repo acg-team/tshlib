@@ -59,5 +59,22 @@ namespace tshlib {
     enum class MoveType {
         NNI=1, SPR=2, TBR=3, FNNI=4, VFNNI=5, undef=0
     };
+
+    enum class TreeSearchStopCondition {
+        iterations, convergence
+    };
+
+    enum class TreeSearchHeuristics {
+        swap, phyml, mixed, nosearch
+    };
+
+    enum class StartingNodeHeuristics {
+        particle_swarm, hillclimbing, greedy, undef
+    };
+
+    enum class TreeRearrangmentOperations {
+        classic_NNI, classic_SPR, classic_TBR, classic_Mixed
+    };
+
 }
 #endif //TSHLIB_UTILITIES_H

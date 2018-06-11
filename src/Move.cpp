@@ -58,83 +58,47 @@ namespace tshlib {
 
 
     void Move::initMove() {
-        move_id = 0;
-        move_name = "undef";
-        move_type = MoveType::undef;
-        move_class = "undef";
-        move_direction = MoveDirections::undef;
+        moveUID_ = 0;
+        moveName_ = "undef";
+        moveType_ = MoveType::undef;
+        moveClass_ = "undef";
+        moveDirection_ = MoveDirections::undef;
 
-        move_lk = -std::numeric_limits<double>::infinity();
+        moveScore_ = -std::numeric_limits<double>::infinity();
 
-        move_applied = false;
+        moveApplied_ = false;
     }
 
 
-    void Move::setTargetNode(VirtualNode *target_node) {
-
-        move_targetnode = target_node;
-
-    }
-
-    void Move::setSourceNode(VirtualNode *source_node) {
-
-        move_sourcenode = source_node;
-
-    }
 
     void Move::deleteTargetNode() {
 
-        move_targetnode = nullptr;
+        moveTargetNode_ = nullptr;
 
     }
 
 
-    VirtualNode *Move::getTargetNode() {
 
-        return move_targetnode;
 
-    }
-
-    VirtualNode *Move::getSourceNode() {
-
-        return move_sourcenode;
-
-    }
-
-    void Move::setMoveClass(int Value) {
+    void Move::setClass(int Value) {
 
         if (Value >= 4 and Value < 10) {
-            move_type = MoveType::SPR;
-            move_class = "SPR";
+            moveType_ = MoveType::SPR;
         } else if (Value >= 10) {
-            move_type = MoveType::TBR;
-            move_class = "TBR";
+            moveType_ = MoveType::TBR;
         } else if (Value == 3) {
-            move_type = MoveType::NNI;
-            move_class = "NNI";
+            moveType_ = MoveType::NNI;
         } else {
-            move_type = MoveType::undef;
-            move_class = "undef";
+            moveType_ = MoveType::undef;
         }
+
+        moveClass_ = getClass();
     }
 
 
-    void Move::setRadius(int radius) {
-
-        move_radius = radius;
-    }
 
 
-    void Move::setDirection(MoveDirections direction) {
 
-        move_direction = direction;
-
-    }
-
-
-    MoveType Move::getMoveType() const {
-        return move_type;
-    }
 
 
 }
