@@ -41,6 +41,7 @@
  *
  */
 #include <numeric>
+#include <limits>
 #include <iomanip>
 #include <glog/logging.h>
 #include <map>
