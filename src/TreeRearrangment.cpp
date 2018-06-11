@@ -45,7 +45,7 @@
 #include <iomanip>
 #include <iterator>
 #include <chrono>
-#incude <algorithm>
+#include <algorithm>
 #include <glog/logging.h>
 #include <map>
 #include "TreeRearrangment.hpp"
