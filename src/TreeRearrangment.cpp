@@ -50,6 +50,7 @@
 #include <map>
 #include "TreeRearrangment.hpp"
 
+
 #ifdef TSHLIB_BENCHMARK
 #include <iostream>
 #include <fstream>
@@ -304,6 +305,10 @@ namespace tshlib {
 
             case MoveType::NNI:
 
+            case MoveType::SPR:
+
+            case MoveType::TBR:
+
                 revertRotations = false;
                 // Swap pnode with qnode according to the direction found during the move configuration
                 // If the swap is performed correctly then the function returns true otherwise false
@@ -311,9 +316,7 @@ namespace tshlib {
 
                 break;
 
-            case MoveType::SPR:
 
-            case MoveType::TBR:
 
             case MoveType::undef:
 

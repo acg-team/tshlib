@@ -72,60 +72,92 @@ namespace tshlib {
 
         Move(const Move &inMove) {
 
-            this->move_id = inMove.move_id;
-            this->move_name = "copy_" + inMove.move_name;
-            this->move_radius = inMove.move_radius;
-            this->move_lk = inMove.move_lk;
-            this->move_applied = inMove.move_applied;
-            this->move_class = inMove.move_class;
-            this->move_type = inMove.move_type;
-            this->move_direction = inMove.move_direction;
-            this->move_targetnode = inMove.move_targetnode;
-            this->move_sourcenode = inMove.move_sourcenode;
+            move_id = inMove.move_id;
+            move_name = "copy_" + inMove.move_name;
+            move_radius = inMove.move_radius;
+            move_lk = inMove.move_lk;
+            move_applied = inMove.move_applied;
+            move_class = inMove.move_class;
+            move_type = inMove.move_type;
+            move_direction = inMove.move_direction;
+            move_targetnode = inMove.move_targetnode;
+            move_sourcenode = inMove.move_sourcenode;
 
         }
 
         Move &operator=(const Move &inMove) {
-            this->move_id = inMove.move_id;
-            this->move_name = "copy_" + inMove.move_name;
-            this->move_radius = inMove.move_radius;
-            this->move_lk = inMove.move_lk;
-            this->move_applied = inMove.move_applied;
-            this->move_class = inMove.move_class;
-            this->move_type = inMove.move_type;
-            this->move_direction = inMove.move_direction;
-            this->move_targetnode = inMove.move_targetnode;
-            this->move_sourcenode = inMove.move_sourcenode;
+            move_id = inMove.move_id;
+            move_name = "copy_" + inMove.move_name;
+            move_radius = inMove.move_radius;
+            move_lk = inMove.move_lk;
+            move_applied = inMove.move_applied;
+            move_class = inMove.move_class;
+            move_type = inMove.move_type;
+            move_direction = inMove.move_direction;
+            move_targetnode = inMove.move_targetnode;
+            move_sourcenode = inMove.move_sourcenode;
         };
 
 
         std::string getMoveDirection() const {
-            std::string returnString;
+            std::string rtToken;
             switch (move_direction) {
                 case MoveDirections::left:
-                    returnString = "left";
+                    rtToken = "left";
                     break;
                 case MoveDirections::up:
-                    returnString = "up";
+                    rtToken = "up";
                     break;
                 case MoveDirections::up_left:
-                    returnString = "up-left";
+                    rtToken = "up-left";
                     break;
                 case MoveDirections::up_right:
-                    returnString = "up-right";
+                    rtToken = "up-right";
                     break;
                 case MoveDirections::right :
-                    returnString = "right";
+                    rtToken = "right";
                     break;
                 case MoveDirections::undef :
-                    returnString = "undef";
+                    rtToken = "undef";
                     break;
 
             }
 
-            return returnString;
+            return rtToken;
         }
 
+        std::string getMoveClass() const {
+
+            std::string rtToken;
+            switch (move_type) {
+
+                case MoveType::VFNNI:
+                    rtToken = "vfNNI";
+                    break;
+
+                case MoveType::FNNI:
+                    rtToken = "fNNI";
+                    break;
+
+                case MoveType::NNI:
+                    rtToken = "NNI";
+                    break;
+
+                case MoveType::SPR:
+                    rtToken = "SPR";
+                    break;
+
+                case MoveType::TBR:
+                    rtToken = "TBR";
+                    break;
+
+                case MoveType::undef:
+                    rtToken = "undef";
+                    break;
+            }
+
+            return rtToken;
+        }
 
         /*!
          * @brief Reset the protected move_targetnode field

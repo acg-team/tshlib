@@ -82,7 +82,7 @@ namespace tshlib {
         bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
         int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
         NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
-
+        int vnode_seqid;                                /* Needed to associate the seqID to the nodeID
 
         /*!
          *  Standard constructor
