@@ -49,7 +49,7 @@
 
 
 #include "Utilities.hpp"
-#include "Alignment.hpp"
+//#include "Alignment.hpp"
 
 namespace tshlib {
 
@@ -78,30 +78,11 @@ namespace tshlib {
         int vnode_id;                                   /* Node ID - Useful in case of parallel independent executions */
         std::string vnode_name;                         /* Node Name - Useful in case of parallel independent executions */
         double vnode_branchlength;                      /* Branch length connecting the node the parent node */
-        double vnode_iota;                              /* PIP Iota value computed on the branch connecting the node to the parent */
-        double vnode_beta;                              /* PIP Beta value computed on the branch connecting the node to the parent */
         int vnode_depth;                                /* Depth level of the node in the tree */
         bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
         int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
         NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
-        int vnode_seqid;                                /* Seq id on alignment vector */
 
-        //Eigen::MatrixXd vnode_Pr;                       /* Pr matrix computed recursively */
-        //std::vector<double> vnode_Fv_terminal;
-        //std::vector<Eigen::VectorXd> vnode_Fv_backup;          /* Fv matrix computed recursively */
-        //std::vector<Eigen::VectorXd> vnode_Fv_operative;
-        //std::vector<Eigen::VectorXd> vnode_Fv_partial_operative;
-        //std::vector<Eigen::VectorXd> vnode_Fv_best;
-        //Eigen::VectorXd vnode_Fv_empty_backup;
-        //Eigen::VectorXd vnode_Fv_empty_operative;
-        //Eigen::VectorXd vnode_Fv_empty_best;
-        //std::vector<bool> vnode_setA_backup;                   /* Flag: Include node in computing the set A -- might be not necessary */
-        //std::vector<int> vnode_descCount_backup;               /* Counter of the characters associated    */
-        //std::vector<bool> vnode_setA_operative;              /* Flag: Include node in computing the set A -- might be not necessary */
-        //std::vector<int> vnode_descCount_operative;          /* Counter of the characters associated    */
-        //std::vector<int> vnode_descCount_best;          /* Counter of the characters associated    */
-        //std::vector<bool> vnode_setA_best;                   /* Flag: Include node in computing the set A -- might be not necessary */
-        //char vnode_character;                         /* Character associated to this node (only if terminal node) */
 
         /*!
          *  Standard constructor
@@ -165,16 +146,6 @@ namespace tshlib {
 
         const std::string getNodeName();
 
-        double getIota();
-
-        void setIota(double iota);
-
-        double getBeta();
-
-        void setBeta(double beta);
-
-        //const Eigen::MatrixXd &getPr();
-
         VirtualNode *getNodeUp();
 
         VirtualNode *getNodeLeft();
@@ -189,17 +160,7 @@ namespace tshlib {
 
         void setNodeLevel(int level);
 
-        //void initialiseLikelihoodComponents(int numcol, int lengthAlphabet);
-
-        //void recombineFv();
-
-        //void revertFv();
-
-        //void keepFv();
-
         void clearChildren();
-
-        //void printAncestralFlagOnFile(FILE *fid);
 
         /*!
          * @brief This function returns true if the node is terminal
@@ -240,19 +201,11 @@ namespace tshlib {
          */
         bool isParent(VirtualNode *inVNode);
 
-
-        //void setAncestralFlag(Alignment &MSA, int colnum, bool isReference);
-
         void _setNodeRight(VirtualNode *inVNode);
 
         void _setNodeLeft(VirtualNode *inVNode);
 
         void _setNodeUp(VirtualNode *inVNode);
-
-        //virtual void _printFV();
-
-        //void __print2Dmat(VirtualNode *node, std::vector<Eigen::VectorXd> input);
-
 
 
     protected:
@@ -264,11 +217,9 @@ namespace tshlib {
          void _oneway_connectNode(VirtualNode *inVNode);
 
          void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
+
          void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
-        //void _recursiveSetAncestralFlag(Alignment &MSA, int colnum, bool isReference);
-
-        //void _recursiveSetDescCount(Alignment &MSA, bool isReference, int colnum);
 
     };
 
@@ -342,16 +293,6 @@ namespace tshlib {
         void _testReachingPseudoRoot();
 
         double computeTotalTreeLength();
-
-        void setIota(double tau, double mu);
-
-        void setBeta(double tau, double mu);
-
-        //virtual void clearFv();
-
-        //void setLeafState(std::string s);
-
-        //virtual void prepareSetADesCountOnNodes(int numcol, int lengthAlphabet);
 
         void _printUtree();
 

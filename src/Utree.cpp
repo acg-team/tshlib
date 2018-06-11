@@ -46,6 +46,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iomanip>
+#include <iostream>
 #include <glog/logging.h>
 #include <map>
 
@@ -67,14 +68,13 @@ namespace tshlib {
 
     VirtualNode::VirtualNode() {
         // Initialise a new VirtualNode completely disconnected from the tree
-        this->vnode_right = nullptr;
-        this->vnode_left = nullptr;
-        this->vnode_up = nullptr;
-        this->vnode_branchlength = 0;
-        this->vnode_leaf = false;
-        this->vnode_rotated = NodeRotation::undef;
-        //this->vnode_character = NULL;
-        //this->vnode_seqid = -1;
+        vnode_right = nullptr;
+        vnode_left = nullptr;
+        vnode_up = nullptr;
+        vnode_branchlength = 0;
+        vnode_leaf = false;
+        vnode_rotated = NodeRotation::undef;
+
 
     };
 
@@ -84,82 +84,59 @@ namespace tshlib {
         // Connect this node to the parent node
         inVNode->_setNodeUp(this);
         //inNode->_oneway_connectNode(this);
-        this->_oneway_connectNode(inVNode);
+        _oneway_connectNode(inVNode);
     }
 
 
     bool VirtualNode::isTerminalNode() {
 
-        return this->vnode_leaf;
+        return vnode_leaf;
     }
 
 
     bool VirtualNode::isRootNode() {
 
-        return this->getNodeUp() == nullptr;
+        return getNodeUp() == nullptr;
     }
 
 
     void VirtualNode::setNodeName(const std::string s) {
 
-        this->vnode_name = s;
+        vnode_name = s;
     }
 
 
     void VirtualNode::_setNodeRight(VirtualNode *inVNode) {
 
-        this->vnode_right = inVNode;
+        vnode_right = inVNode;
 
     }
 
 
     void VirtualNode::_setNodeLeft(VirtualNode *inVNode) {
 
-        this->vnode_left = inVNode;
+        vnode_left = inVNode;
 
     }
 
 
     void VirtualNode::_setNodeUp(VirtualNode *inVNode) {
 
-        this->vnode_up = inVNode;
+        vnode_up = inVNode;
 
     }
 
 
     const std::string VirtualNode::getNodeName() {
 
-        return this->vnode_name;
+        return vnode_name;
     }
 
-
-    double VirtualNode::getIota() {
-
-        return this->vnode_iota;
-    }
-
-
-    void VirtualNode::setIota(double iota) {
-
-        this->vnode_iota = iota;
-    }
-
-
-    double VirtualNode::getBeta() {
-
-        return this->vnode_beta;
-    }
-
-
-    void VirtualNode::setBeta(double beta) {
-
-        this->vnode_beta = beta;
-    }
 
 
     VirtualNode *VirtualNode::getNodeUp() {
 
-        return this->vnode_up ?: nullptr;
+        return vnode_up ?: nullptr;
     }
 
 
@@ -189,49 +166,38 @@ namespace tshlib {
 
     VirtualNode *VirtualNode::getNodeLeft() {
 
-        return this->vnode_left ?: nullptr;
+        return vnode_left ?: nullptr;
     }
 
 
     VirtualNode *VirtualNode::getNodeRight() {
 
-        return this->vnode_right ?: nullptr;
+        return vnode_right ?: nullptr;
     }
 
 
     void VirtualNode::_traverseVirtualNodeTree() {
 
-        std::cout << "[Name] " << this->vnode_name << std::endl;
+        std::cout << "[Name] " << vnode_name << std::endl;
 
-        if (this->vnode_up) {
-            std::cout << "[Up name] " << this->getNodeUp()->vnode_name << std::endl;
+        if (vnode_up) {
+            std::cout << "[Up name] " << getNodeUp()->vnode_name << std::endl;
         } else {
             std::cout << "[Up name] " << " ' ' " << std::endl;
         }
 
-        std::cout << "[Node branch length] " << this->vnode_branchlength << std::endl;
-        std::cout << "[Node iota] " << this->vnode_iota << std::endl;
-        std::cout << "[Node beta] " << this->vnode_beta << std::endl;
-        //std::cout << "[Node Pr] " << this->vnode_Pr.rows() << " x " << this->vnode_Pr.cols() << std::endl;
+        std::cout << "[Node branch length] " << vnode_branchlength << std::endl;
 
-        //if(this->vnode_character!=NULL){
-        //    std::cout<<"[Node char] "<<this->vnode_character<<std::endl;
-        //} else{
-        //    std::cout<<"[Node char] '' "<<std::endl;
-        //}
-
-        //std::cout<<"[Node setA_flag] "<<this->vnode_setA_backup<<std::endl;
-
-        if (this->isTerminalNode()) {
+        if (isTerminalNode()) {
             std::cout << std::endl;
         } else {
 
-            std::cout << "[Left name] " << this->getNodeLeft()->vnode_name << std::endl;
-            std::cout << "[Right name] " << this->getNodeRight()->vnode_name << std::endl;
+            std::cout << "[Left name] " << getNodeLeft()->vnode_name << std::endl;
+            std::cout << "[Right name] " << getNodeRight()->vnode_name << std::endl;
             std::cout << std::endl;
 
-            this->getNodeLeft()->_traverseVirtualNodeTree();
-            this->getNodeRight()->_traverseVirtualNodeTree();
+            getNodeLeft()->_traverseVirtualNodeTree();
+            getNodeRight()->_traverseVirtualNodeTree();
         }
 
 
@@ -240,27 +206,27 @@ namespace tshlib {
 
     double VirtualNode::computeTotalTreeLength() {
 
-        if (this->isTerminalNode()) {
-            return this->vnode_branchlength;
+        if (isTerminalNode()) {
+            return vnode_branchlength;
         } else {
-            return this->vnode_branchlength +
-                   this->getNodeLeft()->computeTotalTreeLength() +
-                   this->getNodeRight()->computeTotalTreeLength();
+            return vnode_branchlength +
+                   getNodeLeft()->computeTotalTreeLength() +
+                   getNodeRight()->computeTotalTreeLength();
         }
     }
 
 
     void VirtualNode::clearChildren() {
-        this->vnode_left = nullptr;
-        this->vnode_right = nullptr;
+        vnode_left = nullptr;
+        vnode_right = nullptr;
     }
 
 
     void Utree::addMember(VirtualNode *inVNode, bool isStartNode) {
 
-        this->listVNodes.push_back(inVNode);
+        listVNodes.push_back(inVNode);
         if (isStartNode) {
-            this->startVNodes.push_back(inVNode);
+            startVNodes.push_back(inVNode);
         }
 
     }
@@ -320,16 +286,16 @@ namespace tshlib {
     std::string Utree::printTreeNewick(bool showInternalNodeNames) {
         std::string s, terminator;
 
-        this->_updateStartNodes();
+        _updateStartNodes();
 
         s += "(";
-        for (unsigned long i = 0; i < this->startVNodes.size(); i++) {
-            if (i == this->startVNodes.size() - 1) {
+        for (unsigned long i = 0; i < startVNodes.size(); i++) {
+            if (i == startVNodes.size() - 1) {
                 terminator = ");";
             } else {
                 terminator = ",";
             }
-            s += _recursiveFormatNewick(this->startVNodes.at(i), showInternalNodeNames) + terminator;
+            s += _recursiveFormatNewick(startVNodes.at(i), showInternalNodeNames) + terminator;
         }
 
         return s;
@@ -365,12 +331,12 @@ namespace tshlib {
 
     Utree::~Utree() {
 
-        for (std::vector<VirtualNode *>::reverse_iterator i = this->listVNodes.rbegin(); i < this->listVNodes.rend(); i++) {
+        for (std::vector<VirtualNode *>::reverse_iterator i = listVNodes.rbegin(); i < listVNodes.rend(); i++) {
             VirtualNode *vnode = *i;
             delete vnode;
         }
 
-        delete this->rootnode;
+        delete rootnode;
 
     }
 
@@ -379,71 +345,21 @@ namespace tshlib {
         double t_length;
 
         t_length = 0.0;
-        for (unsigned long i = 0; i < this->listVNodes.size(); i++) {
-            t_length += this->listVNodes.at(i)->vnode_branchlength;
+        for (unsigned long i = 0; i < listVNodes.size(); i++) {
+            t_length += listVNodes.at(i)->vnode_branchlength;
         }
 
         return t_length;
     }
 
 
-    void Utree::setIota(double tau, double mu) {
-        VirtualNode *vn;
-        double T;
-
-        if (fabs(mu) < 1e-8) {
-            perror("ERROR in set_iota: mu too small");
-        }
-
-        T = tau + 1 / mu;
-
-        if (fabs(T) < 1e-8) {
-            perror("ERROR in set_iota: T too small");
-        }
-
-        for (unsigned long i = 0; i < this->listVNodes.size(); i++) {
-            vn = this->listVNodes.at(i);
-
-            //if (vn->isRootNode()) {
-            //    vn->vnode_iota=(1/mu)/T;
-            //} else {
-            vn->vnode_iota = vn->vnode_branchlength / T;
-            //}
-        }
-
-    }
-
-
-    void Utree::setBeta(double tau, double mu) {
-        VirtualNode *vn;
-
-        if (fabs(mu) < 1e-8) {
-            perror("ERROR : mu too small");
-        }
-
-        for (unsigned long i = 0; i < this->listVNodes.size(); i++) {
-            vn = this->listVNodes.at(i);
-
-            //if (vn->isRootNode()) {
-            //    vn->vnode_beta=1.0;
-            //} else {
-            if (fabs(vn->vnode_branchlength) < 1e-8) {
-                perror("ERROR : branch_length too small");
-            }
-            vn->vnode_beta = (1 - exp(-mu * vn->vnode_branchlength)) / (mu * vn->vnode_branchlength);
-            //}
-
-        }
-
-    }
-
 
     void Utree::_printUtree() {
 
         VirtualNode *vn;
 
-        for (unsigned long i = 0; i < this->listVNodes.size(); i++) {
-            vn = this->listVNodes.at(i);
+        for (unsigned long i = 0; i < listVNodes.size(); i++) {
+            vn = listVNodes.at(i);
 
             std::cout << "[Node name] " << vn->vnode_name << std::endl;
 
@@ -454,24 +370,11 @@ namespace tshlib {
                 std::cout << "[R. child node name] " << vn->getNodeRight()->vnode_name << std::endl;
             }
             std::cout << "[Node branch length] " << vn->vnode_branchlength << std::endl;
-            std::cout << "[Node iota] " << vn->vnode_iota << std::endl;
-            std::cout << "[Node beta] " << vn->vnode_beta << std::endl;
-            //std::cout << "[Node Pr] " << vn->vnode_Pr.rows() << " x " << vn->vnode_Pr.cols() << std::endl;
-
-//        if(vn->vnode_character!=NULL){
-//            std::cout<<"[Node char] "<<vn->vnode_character<<std::endl;
-//        } else{
-//            std::cout<<"[Node char] '' "<<std::endl;
-//        }
-
-            //std::cout<<"[Node setA_flag] "<<vn->vnode_setA_backup<<std::endl;
 
             std::cout << std::endl;
         }
 
     }
-
-    using namespace tshlib;
 
     Utree::Utree() {
 
@@ -480,7 +383,7 @@ namespace tshlib {
         // Added virtual root to utree
         auto root = new VirtualNode;
         root->vnode_name = "root";
-        this->rootnode = root;
+        rootnode = root;
 
     };
 
@@ -489,20 +392,20 @@ namespace tshlib {
 
         // Find the pseudoroot node on the first side of the tree
         bool fixPseudoRootOnNextSubtree = true;
-        std::vector<VirtualNode *> sideA = this->findPseudoRoot(this->listVNodes.at(0), fixPseudoRootOnNextSubtree);
+        std::vector<VirtualNode *> sideA = findPseudoRoot(listVNodes.at(0), fixPseudoRootOnNextSubtree);
         VirtualNode *sideA_node = sideA.back();
 
         // Find the pseudoroot node on the opposite side of the tree
         fixPseudoRootOnNextSubtree = false;
-        std::vector<VirtualNode *> sideB = this->findPseudoRoot(this->listVNodes.at(0), fixPseudoRootOnNextSubtree);
+        std::vector<VirtualNode *> sideB = findPseudoRoot(listVNodes.at(0), fixPseudoRootOnNextSubtree);
         VirtualNode *sideB_node = sideB.back();
 
         // Reset the original utree attribute
-        this->startVNodes.clear();
+        startVNodes.clear();
 
         // Update the utree attribute
-        this->startVNodes.push_back(sideA_node);
-        this->startVNodes.push_back(sideB_node);
+        startVNodes.push_back(sideA_node);
+        startVNodes.push_back(sideB_node);
 
     }
 
@@ -512,9 +415,9 @@ namespace tshlib {
         std::string strpath;
         std::vector<VirtualNode *> vnodes2root;
 
-        for (auto &i : this->listVNodes) {
+        for (auto &i : listVNodes) {
 
-            vnodes2root = this->findPseudoRoot(i, true);
+            vnodes2root = findPseudoRoot(i, true);
 
             for (auto &tnode: vnodes2root) {
                 strpath += tnode->vnode_name;
@@ -546,7 +449,7 @@ namespace tshlib {
         std::ofstream outfile;
 
         outfile.open(outfilepath, std::ios_base::app);
-        outfile << this->printTreeNewick(true) << std::endl;
+        outfile << printTreeNewick(true) << std::endl;
 
     }
 
@@ -555,12 +458,12 @@ namespace tshlib {
 
         long int max_distance = 0;
 
-        for (auto &vnode:this->listVNodes) {
+        for (auto &vnode:listVNodes) {
 
             if (vnode->isTerminalNode()) {
 
-                if (max_distance < this->findPseudoRoot(vnode).size()) {
-                    max_distance = this->findPseudoRoot(vnode).size();
+                if (max_distance < findPseudoRoot(vnode).size()) {
+                    max_distance = findPseudoRoot(vnode).size();
                 };
 
             }
@@ -573,19 +476,19 @@ namespace tshlib {
 
         std::stringstream description;
 
-        if (!this->isTerminalNode()) {
+        if (!isTerminalNode()) {
 
-            if (this->getNodeUp()) {
-                description << this->vnode_name << " (^" << this->getNodeUp()->vnode_name << ";";
+            if (getNodeUp()) {
+                description << vnode_name << " (^" << getNodeUp()->vnode_name << ";";
             } else {
-                description << this->vnode_name << " (^NULL;";
+                description << vnode_name << " (^NULL;";
             }
 
-            description << "<" << this->getNodeLeft()->vnode_name << ";";
-            description << this->getNodeRight()->vnode_name << ">)";
+            description << "<" << getNodeLeft()->vnode_name << ";";
+            description << getNodeRight()->vnode_name << ">)";
 
         } else {
-            description << this->vnode_name << " (^" << this->getNodeUp()->vnode_name << "; ";
+            description << vnode_name << " (^" << getNodeUp()->vnode_name << "; ";
             description << "<-;->)";
         }
 
@@ -595,7 +498,7 @@ namespace tshlib {
 
     NodePosition VirtualNode::indexOf() {
         NodePosition node_position;
-        VirtualNode *parent = this->getNodeUp();
+        VirtualNode *parent = getNodeUp();
         if (parent->getNodeLeft() == this) {
 
             node_position = NodePosition::left;
@@ -636,7 +539,7 @@ namespace tshlib {
 
             pnode = this;
             qnode = targetNode;
-            pnode_parent = this->getNodeUp();
+            pnode_parent = getNodeUp();
             qnode_parent = targetNode->getNodeUp();
 
 /*
@@ -759,39 +662,39 @@ namespace tshlib {
     void VirtualNode::disconnectNode() {
 
         // 1. Get the location where this node is connected on the parent node and disconnect
-        switch (this->indexOf()) {
+        switch (indexOf()) {
             case NodePosition::left:
                 // The node is connected on the left side
-                this->getNodeUp()->_setNodeLeft(nullptr);
+                getNodeUp()->_setNodeLeft(nullptr);
                 break;
             case NodePosition::right:
                 // The node is connected on the right side
-                this->getNodeUp()->_setNodeRight(nullptr);
+                getNodeUp()->_setNodeRight(nullptr);
                 break;
             case NodePosition::up:
                 // The node is connect on the up side (pseudoroot)
-                this->getNodeUp()->_setNodeUp(nullptr);
+                getNodeUp()->_setNodeUp(nullptr);
                 break;
             default:
                 break;
         }
 
         // 2. Disconnect the parent node
-        this->_setNodeUp(nullptr);
+        _setNodeUp(nullptr);
     }
 
 
     void VirtualNode::_oneway_connectNode(VirtualNode *inVNode) {
 
         // Check which direction is still available (either left or right)
-        if (!this->getNodeLeft()) {
-            this->_setNodeLeft(inVNode);
+        if (!getNodeLeft()) {
+            _setNodeLeft(inVNode);
             return;
-        } else if (!this->getNodeRight()) {
-            this->_setNodeRight(inVNode);
+        } else if (!getNodeRight()) {
+            _setNodeRight(inVNode);
             return;
-        } else if (!this->getNodeUp()) {
-            this->_setNodeUp(inVNode);
+        } else if (!getNodeUp()) {
+            _setNodeUp(inVNode);
             return;
         } else {
             perror("No direction available in the VirtualNode to add a new child");
@@ -819,7 +722,7 @@ namespace tshlib {
 
     void Utree::printAllNodesNeighbors() {
 
-        for (auto &node:this->listVNodes) {
+        for (auto &node:listVNodes) {
             VLOG(2) << node->printNeighbours();
         }
 
@@ -830,17 +733,17 @@ namespace tshlib {
 
         if (rootnode->getNodeRight() == nullptr && rootnode->getNodeLeft() == nullptr) {
             // Update starting nodes in the startVNodes array
-            this->_updateStartNodes();
+            _updateStartNodes();
 
             // Clear children nodes in the virtual root
-            this->rootnode->clearChildren();
+            rootnode->clearChildren();
 
             // Disconnect the bidirectional connection in the pseudoroot nodes
-            this->startVNodes.at(0)->disconnectNode();
+            startVNodes.at(0)->disconnectNode();
 
             // Reconnect nodes to virtual root node
-            this->rootnode->connectNode(this->startVNodes.at(0));
-            this->rootnode->connectNode(this->startVNodes.at(1));
+            rootnode->connectNode(startVNodes.at(0));
+            rootnode->connectNode(startVNodes.at(1));
         }
     }
 
@@ -848,8 +751,8 @@ namespace tshlib {
 
         if (rootnode->getNodeRight() != nullptr && rootnode->getNodeLeft() != nullptr) {
             // Get reference children nodes from virtual root
-            VirtualNode *left = this->rootnode->getNodeLeft();
-            VirtualNode *right = this->rootnode->getNodeRight();
+            VirtualNode *left = rootnode->getNodeLeft();
+            VirtualNode *right = rootnode->getNodeRight();
 
             // Disconnect nodes from virtual root node
             left->disconnectNode();
@@ -860,7 +763,7 @@ namespace tshlib {
             right->_setNodeUp(left);
 
             // Clear residual connection with virtual root node
-            this->rootnode->clearChildren();
+            rootnode->clearChildren();
 
         }
     }
@@ -869,8 +772,8 @@ namespace tshlib {
 
         std::vector<VirtualNode *> list_vnode_to_root;
 
-        std::vector<VirtualNode *> path2root_1 = this->findPseudoRoot(vnode_1, false);
-        std::vector<VirtualNode *> path2root_2 = this->findPseudoRoot(vnode_2, false);
+        std::vector<VirtualNode *> path2root_1 = findPseudoRoot(vnode_1, false);
+        std::vector<VirtualNode *> path2root_2 = findPseudoRoot(vnode_2, false);
 
         std::reverse(path2root_1.begin(), path2root_1.end());
         std::reverse(path2root_2.begin(), path2root_2.end());
@@ -918,7 +821,7 @@ namespace tshlib {
         //path2root_1.erase(last, path2root_1.end());
         //list_vnode_to_root = path2root_1;
 
-        //list_vnode_to_root = this->_unique(path2root_1, path2root_2);
+        //list_vnode_to_root = _unique(path2root_1, path2root_2);
 
 
         //delete(path2root_1);
@@ -1038,13 +941,13 @@ namespace tshlib {
 
     void VirtualNode::resetNodeDirections(bool revertRotations) {
 
-        if (this->vnode_rotated != NodeRotation::undef) {
-            switch (this->vnode_rotated) {
+        if (vnode_rotated != NodeRotation::undef) {
+            switch (vnode_rotated) {
                 case NodeRotation::clockwise:
-                    this->rotateCounterClockwise(revertRotations);
+                    rotateCounterClockwise(revertRotations);
                     break;
                 case NodeRotation::counterclockwise:
-                    this->rotateClockwise(revertRotations);
+                    rotateClockwise(revertRotations);
                     break;
                 default:
                     break;
@@ -1232,7 +1135,7 @@ namespace tshlib {
     }
 
     bool VirtualNode::isPseudoRootNode() {
-        return this->getNodeUp()->getNodeUp() == this;
+        return getNodeUp()->getNodeUp() == this;
     }
 
     int VirtualNode::getNodeLevel() {
