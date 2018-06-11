@@ -290,22 +290,33 @@ namespace tshlib {
         VirtualNode *pnode = mset_moves.at(moveID)->getSourceNode();
         VirtualNode *qnode = mset_moves.at(moveID)->getTargetNode();
 
+        bool revertRotations = false;
 
         switch(mset_moves.at(moveID)->getMoveType()){
+
             case MoveType::VFNNI:
+
             case MoveType::FNNI:
+
             case MoveType::NNI:
-                bool revertRotations = false;
+
+                revertRotations = false;
                 // Swap pnode with qnode according to the direction found during the move configuration
                 // If the swap is performed correctly then the function returns true otherwise false
                 outcomeExecutionMove =  pnode->swapNode(qnode, mset_moves.at(moveID)->move_direction, revertRotations);
+
                 break;
 
             case MoveType::SPR:
+
+            case MoveType::TBR:
+
+            case MoveType::undef:
+
+
                 LOG(FATAL) << "Case not implemented!";
+
                 break;
-            default:
-                LOG(FATAL) << "Case not implemented!";
         }
 
         return outcomeExecutionMove;

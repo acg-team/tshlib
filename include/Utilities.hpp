@@ -57,7 +57,7 @@ namespace tshlib {
     };
 
     enum class MoveType {
-        NNI, SPR, TBR, FNNI, VFNNI, undef
+        NNI=1, SPR=2, TBR=3, FNNI=4, VFNNI=5, undef=0
     };
 }
 #endif //TSHLIB_UTILITIES_H
