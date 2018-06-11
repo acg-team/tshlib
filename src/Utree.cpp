@@ -45,19 +45,18 @@
 #include <random>
 #include <fstream>
 #include <iomanip>
-#include <algorithm>
 #include <glog/logging.h>
 #include <map>
 
 #include "Utree.hpp"
-#include "Alignment.hpp"
 
 using namespace tshlib;
-VirtualNode *UtreeUtils::getPseudoRoot(VirtualNode *vn){
 
-    VirtualNode *vtemp=vn;
-    while(!vtemp->isRootNode()){
-        vtemp=vtemp->getNodeUp();
+VirtualNode *UtreeUtils::getPseudoRoot(VirtualNode *vn) {
+
+    VirtualNode *vtemp = vn;
+    while (!vtemp->isRootNode()) {
+        vtemp = vtemp->getNodeUp();
     }
 
     return vtemp;
@@ -250,7 +249,6 @@ namespace tshlib {
     }
 
 
-
     void VirtualNode::clearChildren() {
         this->vnode_left = nullptr;
         this->vnode_right = nullptr;
@@ -281,16 +279,16 @@ namespace tshlib {
         CurrentNode = inVNode;
 
         // Add all the other nodes traversing the tree in post-order
-        while(CurrentNode!= nullptr){
+        while (CurrentNode != nullptr) {
 
             path2root.push_back(CurrentNode);
 
-            if(CurrentNode == CurrentNode->getNodeUp()->getNodeUp()){break;}
+            if (CurrentNode == CurrentNode->getNodeUp()->getNodeUp()) { break; }
 
 
-            if(CurrentNode->getNodeUp() != nullptr){
+            if (CurrentNode->getNodeUp() != nullptr) {
                 CurrentNode = CurrentNode->getNodeUp();
-            }else{
+            } else {
                 CurrentNode = nullptr;
             }
 
@@ -308,7 +306,7 @@ namespace tshlib {
         */
         if (fixPseudoRootOnNextSubtree) {
 
-            if(CurrentNode->getNodeUp() != nullptr) {
+            if (CurrentNode->getNodeUp() != nullptr) {
                 path2root.push_back(CurrentNode->getNodeUp());
             }
 
@@ -471,6 +469,7 @@ namespace tshlib {
         }
 
     }
+
     using namespace tshlib;
 
     Utree::Utree() {
@@ -877,17 +876,17 @@ namespace tshlib {
 
         // Test map
 
-        std::map<VirtualNode *,int> tmpMap;
+        std::map<VirtualNode *, int> tmpMap;
 
-        for(int i=0; i<path2root_1.size(); i++){
-            tmpMap.insert(std::pair<VirtualNode *,int>(path2root_1.at(i), i));
+        for (int i = 0; i < path2root_1.size(); i++) {
+            tmpMap.insert(std::pair<VirtualNode *, int>(path2root_1.at(i), i));
         }
 
-        for(int i=0; i<path2root_2.size(); i++) {
+        for (int i = 0; i < path2root_2.size(); i++) {
 
-            if (tmpMap.find(path2root_2.at(i)) == tmpMap.end()){
+            if (tmpMap.find(path2root_2.at(i)) == tmpMap.end()) {
 
-                tmpMap.insert(std::pair<VirtualNode *,int>(path2root_2.at(i), tmpMap.size()));
+                tmpMap.insert(std::pair<VirtualNode *, int>(path2root_2.at(i), tmpMap.size()));
 
             }
         }
@@ -897,7 +896,7 @@ namespace tshlib {
         //std::map<VirtualNode *,int>::iterator it = tmpMap.begin();
 
         // Iterate over the map using c++11 range based for loop
-        for (std::pair<VirtualNode *,int> element : tmpMap) {
+        for (std::pair<VirtualNode *, int> element : tmpMap) {
 
             // Accessing KEY from element
             VirtualNode *node = element.first;
@@ -970,7 +969,7 @@ namespace tshlib {
         _getPostOrderNodeList(rlist, rootnode);
 
 
-        if(removeRoot) {
+        if (removeRoot) {
             removeVirtualRootNode();
         }
 
@@ -988,14 +987,14 @@ namespace tshlib {
         }
         _getPostOrderNodeList(rlist, startNode);
 
-        if(removeRoot) {
+        if (removeRoot) {
             removeVirtualRootNode();
         }
         return rlist;
     }
 
 
-    void Utree::_getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node ){
+    void Utree::_getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node) {
 
 
         if (!node->isTerminalNode()) {
@@ -1010,7 +1009,7 @@ namespace tshlib {
     }
 
     void Utree::computeTreeDepth() {
-        for(auto &node : listVNodes){
+        for (auto &node : listVNodes) {
             computeNodeDepth(node);
         }
         initialized_treeDepth = true;
@@ -1019,10 +1018,10 @@ namespace tshlib {
     int Utree::getTreeDepthAtNode(VirtualNode *vnode) {
         int level = 0;
 
-        if (initialized_treeDepth){
+        if (initialized_treeDepth) {
             level = vnode->getNodeLevel();
-        }else{
-             LOG(ERROR) << "No depth on this tree! You should call setTreeDepth before accessing the level of node: " << vnode->getNodeName();
+        } else {
+            LOG(ERROR) << "No depth on this tree! You should call setTreeDepth before accessing the level of node: " << vnode->getNodeName();
         }
         return level;
     }

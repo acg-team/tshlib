@@ -55,7 +55,7 @@ namespace tshlib {
     };
 
     enum class TreeSearchHeuristics {
-        classic_NNI, classic_SPR, classic_Mixed, particle_swarm, hillclimbing, greedy, nosearch
+        classic_NNI, classic_SPR, classic_Mixed, particle_swarm, hillclimbing, greedy, swap, phyml, mixed, nosearch
     };
 
     enum class TreeRearrangmentOperations {
@@ -105,7 +105,7 @@ namespace tshlib {
 
         }
 
-        void operator=(const Move &inMove) {
+        Move &operator=(const Move &inMove) {
             this->move_id = inMove.move_id;
             this->move_name = "copy_" + inMove.move_name;
             this->move_radius = inMove.move_radius;
@@ -174,6 +174,8 @@ namespace tshlib {
 
         void setMoveClass(int Value);
 
+        MoveType getMoveType() const;
+
         void setRadius(int radius);
 
         void setDirection(MoveDirections direction);
@@ -230,7 +232,7 @@ namespace tshlib {
          * @brief Perform a complete node search and fill the vector containing the candidate moves.
          * @param includeSelf bool ?
          */
-        void defineMoves(bool includeSelf, bool allowDuplicatedMoves);
+        void defineMoves(bool includeSelf, bool allowDuplicatedMoves = true, TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
 
         const std::vector<VirtualNode *> updatePathBetweenNodes(unsigned long moveID, std::vector<VirtualNode *> inPath);
 
@@ -263,7 +265,8 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param includeSelf bool ?
          */
-        void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves);
+        void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves,
+                                  TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
 
 
         /*!
@@ -273,13 +276,14 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
          */
-        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction, bool allowDuplicatedMoves);
+        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction, bool allowDuplicatedMoves,
+                                TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
 
         /*!
          * @brief Append candidate move to the mset_moves vector
          * @param move Move Pointer to the candidate move object
          */
-        void addMove(Move *move, bool allowDuplicatedMoves = true);
+        void addMove(Move *move, bool allowDuplicatedMoves = true, TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
     };
 
 
