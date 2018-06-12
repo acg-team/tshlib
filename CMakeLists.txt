@@ -75,7 +75,12 @@ set(TSHLIB_RELTIME ${PROJECT_BUILD_TIME})
 set(TSHLIB_RELDATE ${PROJECT_BUILD_DATE})
 set(TSHLIB_VERSION ${GIT_TAG_VERSION_STRIPPED})
 
-project(${TSHLIB_SOFTWARENAME} VERSION ${GIT_TAG_VERSION_STRIPPED})
+# Set library package version from git repository release tag version
+set(TSHLIB_PACKAGE_VERSION ${TSHLIB_VERSION})
+string(REPLACE "." ";" TSHLIB_PACKAGE_VERSION_LIST ${TSHLIB_PACKAGE_VERSION})
+list (GET TSHLIB_PACKAGE_VERSION_LIST 0 MAJOR_PACKAGE_VERSION)
+
+project(${TSHLIB_SOFTWARENAME} VERSION ${TSHLIB_VERSION})
 
 add_definitions(-DPRJ_GITBRANCH=\"${PROJECT_GIT_REF}\"
         -DPRJ_VERSION=\"${MINIJATI_VERSION}\"
@@ -88,8 +93,8 @@ add_definitions(-DPRJ_GITBRANCH=\"${PROJECT_GIT_REF}\"
 message("-- Compilation will be performed with the following release of the software:
 \tbranch   ${PROJECT_GIT_REF}
 \tref      ${PROJECT_SOURCE_VERSION}
-\ttime     ${MINIJATI_RELDATE} ${MINIJATI_RELTIME}
-\tcurrent  ${MINIJATI_VERSION} (latest version)")
+\ttime     ${TSHLIB_RELDATE} ${TSHLIB_RELTIME}
+\tversion  ${TSHLIB_VERSION}")
 
 
 set(CMAKE_CXX_STANDARD 11)
@@ -177,12 +182,15 @@ file(GLOB HEADERS include/*.hpp )
 add_library(tshlib SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(tshlib glog::glog)
 set_target_properties(tshlib PROPERTIES PUBLIC_HEADER "${HEADERS}")
+set_target_properties(tshlib PROPERTIES VERSION ${GIT_TAG_VERSION_STRIPPED} SOVERSION ${MAJOR_PACKAGE_VERSION})
+
 
 # Create the static library
 add_library(tshlib-static STATIC ${SOURCES} ${HEADERS})
 target_link_libraries(tshlib-static glog::glog)
 set_target_properties(tshlib-static PROPERTIES PUBLIC_HEADER "${HEADERS}")
 set_target_properties(tshlib-static PROPERTIES OUTPUT_NAME tshlib)
+set_target_properties(tshlib-static PROPERTIES VERSION ${GIT_TAG_VERSION_STRIPPED} SOVERSION ${MAJOR_PACKAGE_VERSION})
 
 # Test target
 enable_testing()
