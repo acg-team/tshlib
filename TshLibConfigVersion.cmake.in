@@ -1,4 +1,5 @@
 set(PACKAGE_VERSION "@TSHLIB_VERSION@")
+set(PACKAGE_VERSION_COMPATIBLE TRUE)
 
 # Check whether the requested PACKAGE_FIND_VERSION is compatible
 if("${PACKAGE_VERSION}" VERSION_LESS "${PACKAGE_FIND_VERSION}")
@@ -10,7 +11,7 @@ else()
   endif()
 endif()
 
-if(NOT $PACKAGE_VERSION_COMPATIBLE)
+if("${PACKAGE_VERSION}" VERSION_LESS "${PACKAGE_FIND_VERSION}")
   message(STATUS "
   + ------------------------------------------- WARNING -------------------------------------------
   | The version of Tree Search Heuristic Library (TSHLib) you requested (${PACKAGE_FIND_VERSION})
