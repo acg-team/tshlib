@@ -17,3 +17,5 @@ endif()
 set(TSHLIB_LIBRARIES tshlib)
 
 set(TSHLIB_FOUND TRUE)
+message(STATUS "tshlib @TSHLIB_VERSION@ found:")
+message(STATUS "  includes: @CONF_INCLUDE_DIRS@")

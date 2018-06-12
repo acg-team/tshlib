@@ -47,162 +47,37 @@
 //#include "PhyTree.hpp"
 #include "Utree.hpp"
 #include "Utilities.hpp"
+#include "Move.hpp"
 
 namespace tshlib {
 
-    enum class TreeSearchStopCondition {
-        iterations, convergence
-    };
+    class TreeRearrangment {
+    protected:
+        VirtualNode *trSourceNode_;                /* Starting node from which starting the tree exploration */
 
-    enum class TreeSearchHeuristics {
-        classic_NNI, classic_SPR, classic_Mixed, particle_swarm, hillclimbing, greedy, nosearch
-    };
-
-    enum class TreeRearrangmentOperations {
-        classic_NNI, classic_SPR, classic_TBR, classic_Mixed
-    };
-
-    class Move {
-
-    private:
+        int trSearchRadius_min;                    /* Radius of the node search (for NNI must set it to 3) */
+        int trSearchRadius_max;                    /* Radius of the node search (for NNI must set it to 3) */
+        std::vector<Move *>  trMoveSet;            /* Vector containing the pre-computed moves */
+        TreeSearchHeuristics trStrategy;           /* Strategy used to test (apply/revert) the candidate moves  */
+        TreeRearrangmentOperations trTreeCoverage;
 
     protected:
-        VirtualNode *move_targetnode;   /* Pointer to the target node found during the node search */
-        VirtualNode *move_sourcenode;   /* Pointer to the source node  */
+        /* Strategy used to define the candidate moves -- max coverage of the tree space */
+        bool trPreserveBranchLenghts_;             /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
 
-    public:
-        int move_id;                            /* Move ID - Useful in case of parallel independent executions*/
-        std::string move_name;                  /* Move Name - Unused */
-        int move_radius;                        /* Move Radius */
-        MoveDirections move_direction;          /* Move Direction for applying a rotation to the VirtualNode pointers */
-        double move_lk;                         /* Likelihood of the move if applied */
-        bool move_applied;                      /* Indicator is set to true if the move is applied to the tree */
-        std::string move_class;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-        MoveType move_type;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-
-        /*!
-         * @brief Standard constructor
-         */
-        Move();
-
-        /*!
-        * @brief Standard deconstructor
-        */
-        ~Move();
-
-        Move(const Move &inMove) {
-
-            this->move_id = inMove.move_id;
-            this->move_name = "copy_" + inMove.move_name;
-            this->move_radius = inMove.move_radius;
-            this->move_lk = inMove.move_lk;
-            this->move_applied = inMove.move_applied;
-            this->move_class = inMove.move_class;
-            this->move_type = inMove.move_type;
-            this->move_direction = inMove.move_direction;
-            this->move_targetnode = inMove.move_targetnode;
-            this->move_sourcenode = inMove.move_sourcenode;
-
-        }
-
-        void operator=(const Move &inMove) {
-            this->move_id = inMove.move_id;
-            this->move_name = "copy_" + inMove.move_name;
-            this->move_radius = inMove.move_radius;
-            this->move_lk = inMove.move_lk;
-            this->move_applied = inMove.move_applied;
-            this->move_class = inMove.move_class;
-            this->move_type = inMove.move_type;
-            this->move_direction = inMove.move_direction;
-            this->move_targetnode = inMove.move_targetnode;
-            this->move_sourcenode = inMove.move_sourcenode;
-        };
+        Utree *UTree_;
 
 
-        std::string getMoveDirection() const {
-            std::string returnString;
-            switch (move_direction) {
-                case MoveDirections::left:
-                    returnString = "left";
-                    break;
-                case MoveDirections::up:
-                    returnString = "up";
-                    break;
-                case MoveDirections::up_left:
-                    returnString = "up-left";
-                    break;
-                case MoveDirections::up_right:
-                    returnString = "up-right";
-                    break;
-                case MoveDirections::right :
-                    returnString = "right";
-                    break;
-                case MoveDirections::undef :
-                    returnString = "undef";
-                    break;
-
-            }
-
-            return returnString;
-        }
-
-
-        /*!
-         * @brief Reset the protected move_targetnode field
-         */
-        void deleteTargetNode();
-
-        /*!
-         * @brief Returns the target node pointer
-         * @return VirtualNode pointer of the target node
-         */
-        VirtualNode *getTargetNode();
-
-/*!
-        * @brief Returns the source node pointer
-        * @return VirtualNode pointer of the source node
-        */
-        VirtualNode *getSourceNode();
-
-        /*!
-         * @brief Set the protected move_targetnode field
-         * @param target_node PhyTree Pointer to the target node
-         */
-        void setTargetNode(VirtualNode *target_node);
-
-        void setSourceNode(VirtualNode *source_node);
-
-        void setMoveClass(int Value);
-
-        void setRadius(int radius);
-
-        void setDirection(MoveDirections direction);
-
-        double getLikelihood() { return move_lk; };
-
-        void recomputeLikelihood();
-
-        void initMove();
-    };
-
-
-    class TreeRearrangment {
     private:
-
-        Utree *tree;
-        std::string mset_id;                /* Tree-rearrangment ID. Useful in case of parallel independent executions */
-        int mset_min_radius;                /* Radius of the node search (for NNI must set it to 3) */
-        int mset_max_radius;                /* Radius of the node search (for NNI must set it to 3) */
-        bool mset_preserve_blenghts;        /* Switch to preserve branch lentghs in case the move is applied (i.e NNI vs SPR) */
-        std::vector<Move *> mset_moves;     /* Vector containing the pre-computed moves */
-        int mset_foundmoves;                /* Number of moves found during the defineMoves call */
-
-        VirtualNode *mset_sourcenode;       /* Starting node from which starting the tree exploration */
+        std::string trUID_;                        /* Tree-rearrangment ID. Useful in case of parallel independent executions */
+        int trCandidateMovesFound_;                /* Number of moves found during the defineMoves call */
+        bool trInitialized_;
 
     public:
-        std::string mset_strategy;          /* Description of the node search strategy */
 
         TreeRearrangment();
+
+        void initialize();
 
         void initTreeRearrangment(VirtualNode *node_source, int radius, bool preserve_blengths);
 
@@ -210,27 +85,27 @@ namespace tshlib {
 
         ~TreeRearrangment();
 
-        VirtualNode *getSourceNode() const { return mset_sourcenode ?: nullptr; }
+        VirtualNode *getSourceNode() const { return trSourceNode_ ?: nullptr; }
 
-        void setSourceNode(VirtualNode *mset_sourcenode) { TreeRearrangment::mset_sourcenode = mset_sourcenode; }
+        void setSourceNode(VirtualNode *mset_sourcenode) { TreeRearrangment::trSourceNode_ = mset_sourcenode; }
 
-        int getMinRadius() const { return mset_min_radius; }
+        int getMinRadius() const { return trSearchRadius_min; }
 
-        void setMinRadius(int mset_min_radius) { TreeRearrangment::mset_min_radius = mset_min_radius; }
+        void setMinRadius(int mset_min_radius) { TreeRearrangment::trSearchRadius_min = mset_min_radius; }
 
-        int getMaxRadius() const { return mset_max_radius; }
+        int getMaxRadius() const { return trSearchRadius_max; }
 
-        void setMaxRadius(int mset_max_radius) { TreeRearrangment::mset_max_radius = mset_max_radius; }
+        void setMaxRadius(int mset_max_radius) { TreeRearrangment::trSearchRadius_max = mset_max_radius; }
 
-        Utree *getTree() const { return tree; }
+        Utree *getTree() const { return UTree_; }
 
-        void setTree(Utree *tree) { TreeRearrangment::tree = tree; }
+        void setTree(Utree *tree) { TreeRearrangment::UTree_ = tree; }
 
         /*!
          * @brief Perform a complete node search and fill the vector containing the candidate moves.
          * @param includeSelf bool ?
          */
-        void defineMoves(bool includeSelf, bool allowDuplicatedMoves);
+        void defineMoves(bool includeSelf, bool allowDuplicatedMoves = true, TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
 
         const std::vector<VirtualNode *> updatePathBetweenNodes(unsigned long moveID, std::vector<VirtualNode *> inPath);
 
@@ -254,6 +129,56 @@ namespace tshlib {
 
         void displayRearrangmentStatus(int idMove, bool printTree);
 
+        std::string getStrategy() const {
+            std::string rtToken;
+            switch (trStrategy) {
+                case TreeSearchHeuristics::swap:
+                    rtToken = "Swap";
+                    break;
+                case TreeSearchHeuristics::phyml:
+                    rtToken = "phyML";
+                    break;
+                case TreeSearchHeuristics::mixed:
+                    rtToken = "Mixed(Swap+phyML)";
+                    break;
+                case TreeSearchHeuristics::nosearch:
+                    rtToken = "no-search";
+                    break;
+            }
+            return rtToken;
+        }
+
+        TreeRearrangmentOperations getRearrangmentCoverage() const {
+            return trTreeCoverage;
+        }
+
+        std::string getRearrangmentCoverageDescription() const {
+            std::string rtToken;
+            switch (trTreeCoverage) {
+                case TreeRearrangmentOperations::classic_NNI:
+                    rtToken = "NNI-like";
+                    break;
+                case TreeRearrangmentOperations::classic_SPR:
+                    rtToken = "SPR-like";
+                    break;
+                case TreeRearrangmentOperations::classic_TBR:
+                    rtToken = "TBR-like";
+                    break;
+                case TreeRearrangmentOperations::classic_Mixed:
+                    rtToken = "Complete";
+                    break;
+            }
+            return rtToken;
+        }
+
+        void setTreeCoverage(TreeRearrangmentOperations trTreeCoverage) {
+            TreeRearrangment::trTreeCoverage = trTreeCoverage;
+        }
+
+        void setStrategy(TreeSearchHeuristics trStrategy) {
+            TreeRearrangment::trStrategy = trStrategy;
+        }
+
     protected:
 
         /*!
@@ -263,7 +188,8 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param includeSelf bool ?
          */
-        void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves);
+        void getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves,
+                                  TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
 
 
         /*!
@@ -273,13 +199,14 @@ namespace tshlib {
          * @param radius_max    int Radius of the search (NNI = 1, SPR > 1)
          * @param traverse_direction     NodePosition it indicates the direction of the node wrt parent node
          */
-        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction, bool allowDuplicatedMoves);
+        void getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction, bool allowDuplicatedMoves,
+                                TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
 
         /*!
          * @brief Append candidate move to the mset_moves vector
          * @param move Move Pointer to the candidate move object
          */
-        void addMove(Move *move, bool allowDuplicatedMoves = true);
+        void addMove(Move *move, bool allowDuplicatedMoves = true, TreeSearchHeuristics moveSchema = TreeSearchHeuristics::swap);
     };
 
 

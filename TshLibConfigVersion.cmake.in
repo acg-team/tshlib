@@ -9,3 +9,12 @@ else()
     set(PACKAGE_VERSION_EXACT TRUE)
   endif()
 endif()
+
+if(NOT $PACKAGE_VERSION_COMPATIBLE)
+  message(STATUS "
+  + ------------------------------------------- WARNING -------------------------------------------
+  | The version of Tree Search Heuristic Library (TSHLib) you requested (${PACKAGE_FIND_VERSION})
+  | is newer than the one you have installed on your machine (${PACKAGE_VERSION})
+  | Please install a newer version visiting the website: https://bitbucket.org/acg-team/tshlib/src
+  + ----------------------------------------------------------------------------------------------- ")
+endif()
