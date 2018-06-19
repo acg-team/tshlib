@@ -572,6 +572,7 @@ namespace tshlib {
                     LOG(ERROR) << "[thslib::_applySPR] Move #" << move->getUID() << " has an undefined direction.";
                     break;
             }
+
             // Re-Connections
             moveStepParent->connectNode(moveStepChild);
             parentTarget->connectNode(parentSource);
@@ -579,115 +580,6 @@ namespace tshlib {
 
             VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] pS: " << parentSource->getNodeName() << " pT: " << parentTarget->getNodeName();
             VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] stepParent: " << moveStepParent->getNodeName() << " stepChild: " << moveStepChild->getNodeName();
-
-
-            /*
-            // Case where either source or target belong to the pseudoroot
-            if(parentSource->getNodeUp() == sourceNode) {
-
-                // Assing a node to be the step-parent
-                moveStepParent = parentSource->getNodeLeft();
-                moveStepChild = parentSource->getNodeRight();
-
-                // Disconnect grandchildren = disconnect parentSource
-                moveStepParent->disconnectNode();
-                moveStepChild->disconnectNode();
-
-                // Connect grandchildren together
-                moveStepChild->_bidirectionalUpwardConnection(moveStepParent);
-
-                // Rotate node triangular pointers (resolves pseudoroot)
-                VirtualNodeUtils::rotateNodeCounterClockwise(parentSource);
-
-                // Set flag
-                move->setOnPseudoRoot_(true);
-
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Root-Neighborhood for S | (n=0) " << sourceNode->getNodeName() << " ^ " << sourceNode->getNodeUp()
-                        ->getNodeName();
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Redefinition of step-relatives | stepParent: " << moveStepParent->getNodeName() << " stepChild: "
-                        << moveStepChild->getNodeName();
-
-            } else if (parentSource == parentSource->getNodeUp()->getNodeUp()) {
-
-                // Assing a node to be the step-parent
-                moveStepParent = parentSource->getNodeUp();
-
-                // Assing a node to be the step-child // TODO: This section of reassigning step-relatives is useless
-                moveStepChild = parentSource->getSiblingNode();
-
-                // Disconnect grandchildren = disconnect parentSource
-                moveStepParent->disconnectNode();
-                moveStepChild->disconnectNode();
-
-                // Connect grandchildren together
-                moveStepChild->_bidirectionalUpwardConnection(moveStepParent);
-
-                // Set flag
-                move->setOnPseudoRoot_(true);
-
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "]Root-Neighborhood for S | (n=1) " << sourceNode->getNodeName() << " ^ " << sourceNode->getNodeUp()
-                        ->getNodeName();
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Redefinition of step-relatives | stepParent: " << moveStepParent->getNodeName() << " stepChild: " << moveStepChild->getNodeName();
-
-            } else {
-
-                // Disconnections
-                parentSource->disconnectNode();
-                moveStepChild->disconnectNode();
-
-                // Connect step-parent with step-child
-                moveStepParent->connectNode(moveStepChild);
-
-                // Set flag
-                move->setOnPseudoRoot_(false);
-
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Below the root movement: " << sourceNode->getNodeName() << " ^ " << sourceNode->getNodeUp()->getNodeName();
-            }
-
-            //// Operations on the target node according to its relative position to the pseudoroot nodes
-
-            // In case target is on the root or on the proximity (n=1)
-            if(parentTarget->getNodeUp() == targetNode){
-
-                // Rotate node triangular pointers (resolves pseudoroot)
-                VirtualNodeUtils::rotateNodeCounterClockwise(targetNode);
-
-
-
-
-                // Set flag
-                move->setOnPseudoRoot_(true);
-
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Root-Neighborhood for T | (n=0) " << targetNode->getNodeName() << " ^ " << targetNode->getNodeUp()
-                        ->getNodeName();
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Redefinition of step-relatives | stepParent: " << moveStepParent->getNodeName() << " stepChild: "
-                        << moveStepChild->getNodeName();
-
-            }else if (parentTarget == parentTarget->getNodeUp()->getNodeUp()) {
-
-
-
-                // Set flag
-                move->setOnPseudoRoot_(true);
-
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Root-Neighborhood for T | (n=1) " << targetNode->getNodeName() << " ^ " << targetNode->getNodeUp()
-                        ->getNodeName();
-                VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] Redefinition of step-relatives | stepParent: " << moveStepParent->getNodeName() << " stepChild: "
-                        << moveStepChild->getNodeName();
-            }else {
-
-                // Disconnect target node from its parentnode
-                targetNode->disconnectNode();
-
-                // Connect targetnode with parentSourceNode and parentTarget with paretnSource
-                parentSource->connectNode(targetNode);
-                parentTarget->connectNode(parentSource);
-
-                move->setOnPseudoRoot_(false);
-            }
-
-            */
-
 
 
             // Set StepParent and StepChild in move description
@@ -747,62 +639,16 @@ namespace tshlib {
                     break;
             }
 
-            // 3. Revert rotations on the parentSourceNode (resolve)
-//            switch(parentSourceNode->getNodeRotation()){
-//                case NodeRotation::counterclockwise:
-//                    VirtualNodeUtils::rotateNodeClockwise(parentSourceNode);
-//                    break;
-//                case NodeRotation::clockwise:
-//                    VirtualNodeUtils::rotateNodeCounterClockwise(parentSourceNode);
-//                    break;
-//                case NodeRotation::undef:
-//                    break;
-//            }
-
             // 4. Reconnections
             parentSourceNode->connectNode(moveStepChild);
+
             if(rotatedcase){
-                //moveStepParent->connectNode(parentSourceNode);
                 parentSourceNode->connectNode(moveStepParent);
             }else{
                 moveStepParent->connectNode(parentSourceNode);
-                //parentSourceNode->connectNode(moveStepParent);
-
             }
+
             parentTargetNode->connectNode(targetNode);
-
-//            parentSource->disconnectNode();
-//            targetNode->disconnectNode();
-//            stepChild = moveStepChild;
-//
-//            // If the move involved nodes close to the pseudoroot, then the process of reconnecting them is slightly different
-//            if (move->isOverPseudoRoot_()) {
-//                // If the parentSource node is rotated, then the topology has been rerooted
-//                if (parentSource->vnode_rotated != NodeRotation::undef) {
-//                    VirtualNodeUtils::rotateNodeClockwise(parentSource);
-//                    stepChild = moveStepParent->getNodeUp();
-//                    //parentSource->connectNode(moveStepParent);
-//                }
-//                stepChild->disconnectNode();
-//
-//                granParentSource->connectNode(targetNode);
-//                parentSource->connectNode(stepChild);
-//                parentSource->connectNode(moveStepParent);
-//            }else{
-//                stepChild->disconnectNode();
-//
-//                granParentSource->connectNode(targetNode);
-//                parentSource->connectNode(stepChild);
-//                moveStepParent->connectNode(parentSource);
-//            }
-
-            //stepChild->disconnectNode();
-
-            //granParentSource->connectNode(targetNode);
-            //parentSource->connectNode(stepChild);
-
-
-
 
             execstatus = true;
         }
