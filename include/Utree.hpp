@@ -49,6 +49,7 @@
 
 
 #include "Utilities.hpp"
+
 //#include "Alignment.hpp"
 
 namespace tshlib {
@@ -81,7 +82,11 @@ namespace tshlib {
         int vnode_depth;                                /* Depth level of the node in the tree */
         bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
         int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
-        NodeRotation vnode_rotated;                     /* Flag: if node was rotaded during a tree rearrangement move */
+        NodeRotation vnode_rotated;
+
+        NodeRotation getVnode_rotated() const;
+
+        /* Flag: if node was rotaded during a tree rearrangement move */
         int vnode_seqid;                                /* Needed to associate the seqID to the nodeID
 
         /*!
@@ -156,6 +161,8 @@ namespace tshlib {
 
         double computeTotalTreeLength();
 
+        VirtualNode *getSiblingNode();
+
         int getNodeLevel();
 
         void setNodeLevel(int level);
@@ -207,18 +214,24 @@ namespace tshlib {
 
         void _setNodeUp(VirtualNode *inVNode);
 
+        void _bidirectionalUpwardConnection(VirtualNode *inNode);
+
+        NodeRotation getNodeRotation() const {
+            return vnode_rotated;
+        }
 
     protected:
+
         VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
         VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
         VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
 
 
-         void _oneway_connectNode(VirtualNode *inVNode);
+        void _oneway_connectNode(VirtualNode *inVNode);
 
-         void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
+        void _recursive_cw_rotation(VirtualNode *vnode, bool revertRotations);
 
-         void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
+        void _recursive_ccw_rotation(VirtualNode *vnode, bool revertRotations);
 
 
     };
@@ -322,36 +335,44 @@ namespace tshlib {
 
     };
 
-}
 
-namespace UtreeUtils {
-    using namespace tshlib;
 
-    //void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
+    namespace VirtualNodeUtils{
 
-    //void convertUtree(PhyTree *in_tree, Utree *out_tree);
+        void rotateNodeClockwise(VirtualNode *vnode);
+
+        void rotateNodeCounterClockwise(VirtualNode *vnode);
+    }
+
+
+    namespace UtreeUtils {
+        using namespace tshlib;
+
+        //void _traverseTree(Utree *in_tree, VirtualNode *target, PhyTree *source);
+
+        //void convertUtree(PhyTree *in_tree, Utree *out_tree);
+
+        /*!
+         * @brief This function has been ported in Utree::_unique
+         * @param n
+         * @return
+         */
+        //std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+
+
+        //std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
 
     /*!
-     * @brief This function has been ported in Utree::_unique
-     * @param n
-     * @return
-     */
-    //std::vector<VirtualNode *> get_unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
+         * @brief This function has been ported in Utree::computePathBetweenNodes
+         * @param n
+         * @return
+         */
+        //std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
 
+        //void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
 
-    //std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
+        VirtualNode *getPseudoRoot(VirtualNode *vn);
 
-/*!
-     * @brief This function has been ported in Utree::computePathBetweenNodes
-     * @param n
-     * @return
-     */
-    //std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
-
-    //void associateNode2Alignment(Alignment *inMSA, Utree *inTree);
-
-    VirtualNode *getPseudoRoot(VirtualNode *vn);
-
+    }
 }
-
 #endif //TSHLIB_UTREE_HPP

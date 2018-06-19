@@ -45,8 +45,8 @@
 #include <iterator>
 #include <chrono>
 #include <algorithm>
-#include <include/Utilities.hpp>
-#include <include/Utree.hpp>
+#include <Utilities.hpp>
+
 
 #include "Move.hpp"
 
@@ -61,7 +61,7 @@ namespace tshlib {
         moveUID_ = 0;
         moveName_ = "undef";
         moveType_ = MoveType::undef;
-        moveClass_ = "undef";
+        moveClassDescription_ = "undef";
         moveDirection_ = MoveDirections::undef;
 
         moveScore_ = -std::numeric_limits<double>::infinity();
@@ -78,27 +78,68 @@ namespace tshlib {
     }
 
 
+    void Move::setClass(TreeSearchHeuristics tsStrategy) {
 
+        // Set tree search strategy associated to this move
+        moveStrategy_ = tsStrategy;
 
-    void Move::setClass(int Value) {
+        // Get radius of the current move
+        int radius = getRadius();
 
-        if (Value >= 4 and Value < 10) {
-            moveType_ = MoveType::SPR;
-        } else if (Value >= 10) {
-            moveType_ = MoveType::TBR;
-        } else if (Value == 3) {
-            moveType_ = MoveType::NNI;
-        } else {
+        if (radius == 3) {
+            switch (tsStrategy) {
+                case TreeSearchHeuristics::swap:
+                case TreeSearchHeuristics::phyml:
+                case TreeSearchHeuristics::mixed:
+                    moveType_ = MoveType::NNI;
+                    break;
+                case TreeSearchHeuristics::nosearch:
+                    moveType_ = MoveType::undef;
+                    break;
+            }
+        }else if (radius == 4){
+            switch (tsStrategy) {
+                case TreeSearchHeuristics::swap:
+                    moveType_ = MoveType::FNNI;
+                    break;
+                case TreeSearchHeuristics::phyml:
+                    moveType_ = MoveType::SPR;
+                    break;
+                case TreeSearchHeuristics::mixed:
+                    moveType_ = MoveType::SPR;
+                    break;
+                case TreeSearchHeuristics::nosearch:
+                    moveType_ = MoveType::undef;
+                    break;
+            }
+        }else if(radius > 4){
+            switch (tsStrategy) {
+                case TreeSearchHeuristics::swap:
+                    moveType_ = MoveType::VFNNI;
+                    break;
+                case TreeSearchHeuristics::phyml:
+                    moveType_ = MoveType::SPR;
+                    break;
+                case TreeSearchHeuristics::mixed:
+                    moveType_ = MoveType::SPR;
+                    break;
+                case TreeSearchHeuristics::nosearch:
+                    moveType_ = MoveType::undef;
+                    break;
+            }
+        }else{
+
             moveType_ = MoveType::undef;
         }
 
-        moveClass_ = getClass();
+        // If either the source or the target node define are on the pseudoroot, and the tree-search strategy is [PhyML], then the
+        // movetype is handled as TBR
+        if((moveTargetNode_->isPseudoRootNode() || moveSourceNode_->isPseudoRootNode()) && tsStrategy == TreeSearchHeuristics::phyml){
+            moveType_ = MoveType::TBR;
+        }
+
+        moveClassDescription_ = getClass();
     }
-
-
-
-
-
 
 
 }

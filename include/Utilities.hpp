@@ -53,7 +53,7 @@ namespace tshlib {
     };
 
     enum class MoveDirections {
-        left, right, up, up_right, up_left, undef
+        down_left, down_right, up, up_right, up_left, undef
     };
 
     enum class MoveType {

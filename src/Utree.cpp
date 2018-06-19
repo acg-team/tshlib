@@ -525,12 +525,12 @@ namespace tshlib {
 
         if (this == targetNode) {
 
-            perror("The source and the target nodes must be different!");
-            exit(EXIT_FAILURE);
+            LOG(FATAL) << "[tshlib::swapNode] The source and the target nodes must be different!";
+
 
         } else if (targetNode == nullptr) {
 
-            perror("The target node is empty");
+            LOG(FATAL) << "[tshlib::swapNode] The target node is empty";
 
 
         } else {
@@ -553,7 +553,7 @@ namespace tshlib {
 
             switch (move_direction) {
 
-                case MoveDirections::left:
+                case MoveDirections::down_left:
                     pnode->rotateCounterClockwise();
                     pnode_parent = pnode->getNodeUp();
 
@@ -565,7 +565,7 @@ namespace tshlib {
 
                     break;
 
-                case MoveDirections::right:
+                case MoveDirections::down_right:
 
                     pnode->rotateClockwise();
                     pnode_parent = pnode->getNodeUp();
@@ -697,11 +697,17 @@ namespace tshlib {
             _setNodeUp(inVNode);
             return;
         } else {
-            perror("No direction available in the VirtualNode to add a new child");
+            LOG(ERROR) << "[VirtualNode::_oneway_connectNode] No direction available in the VirtualNode to add a new child";
         }
 
     }
 
+    void VirtualNode::_bidirectionalUpwardConnection(VirtualNode *inNode){
+
+        _setNodeUp(inNode);
+        inNode->_setNodeUp(this);
+
+    }
 
     bool VirtualNode::isParent(VirtualNode *inVNode) {
 
@@ -978,26 +984,11 @@ namespace tshlib {
 
         // rotate the pointers only if the node is not a leaf
         if (!vnode->isTerminalNode()) {
-            VirtualNode *curr_vn_up;
-            VirtualNode *curr_vn_left;
-            VirtualNode *curr_vn_right;
+
             VirtualNode *n_up;
+            VirtualNode *curr_vn_up = vnode->getNodeUp();
 
-
-            curr_vn_up = vnode->getNodeUp();
-            curr_vn_left = vnode->getNodeLeft();
-            curr_vn_right = vnode->getNodeRight();
-
-            vnode->_setNodeUp(curr_vn_right);
-            vnode->_setNodeLeft(curr_vn_up);
-            vnode->_setNodeRight(curr_vn_left);
-
-            // Store the information about the rotation
-            if (vnode->vnode_rotated != NodeRotation::undef) {
-                vnode->vnode_rotated = NodeRotation::undef;
-            } else {
-                vnode->vnode_rotated = NodeRotation::clockwise;
-            }
+            VirtualNodeUtils::rotateNodeClockwise(vnode);
 
             if (revertRotations) {
                 n_up = vnode->getNodeUp();
@@ -1064,31 +1055,13 @@ namespace tshlib {
             curr_node_position = vnode->indexOf();
         }
 
-
         // rotate the pointers only if the node is not a leaf
         if (!vnode->isTerminalNode()) {
 
-            VirtualNode *curr_vn_up;
-            VirtualNode *curr_vn_left;
-            VirtualNode *curr_vn_right;
-
             VirtualNode *n_up;
+            VirtualNode *curr_vn_up = vnode->getNodeUp();
 
-            curr_vn_up = vnode->getNodeUp();
-            curr_vn_left = vnode->getNodeLeft();
-            curr_vn_right = vnode->getNodeRight();
-
-            // Revert pointers
-            vnode->_setNodeUp(curr_vn_left);
-            vnode->_setNodeLeft(curr_vn_right);
-            vnode->_setNodeRight(curr_vn_up);
-
-            // Store the information about the rotation
-            if (vnode->vnode_rotated != NodeRotation::undef) {
-                vnode->vnode_rotated = NodeRotation::undef;
-            } else {
-                vnode->vnode_rotated = NodeRotation::counterclockwise;
-            }
+            VirtualNodeUtils::rotateNodeCounterClockwise(vnode);
 
             if (revertRotations) {
                 n_up = vnode->getNodeUp();
@@ -1134,6 +1107,55 @@ namespace tshlib {
 
     }
 
+    void VirtualNodeUtils::rotateNodeCounterClockwise(VirtualNode *vnode) {
+
+        VirtualNode *curr_vn_up;
+        VirtualNode *curr_vn_left;
+        VirtualNode *curr_vn_right;
+
+        curr_vn_up = vnode->getNodeUp();
+        curr_vn_left = vnode->getNodeLeft();
+        curr_vn_right = vnode->getNodeRight();
+
+        // Revert pointers
+        vnode->_setNodeUp(curr_vn_left);
+        vnode->_setNodeLeft(curr_vn_right);
+        vnode->_setNodeRight(curr_vn_up);
+
+        // Store the information about the rotation
+        if (vnode->vnode_rotated != NodeRotation::undef) {
+            vnode->vnode_rotated = NodeRotation::undef;
+        } else {
+            vnode->vnode_rotated = NodeRotation::counterclockwise;
+        }
+    }
+
+
+    void VirtualNodeUtils::rotateNodeClockwise(VirtualNode *vnode) {
+
+
+        VirtualNode *curr_vn_up;
+        VirtualNode *curr_vn_left;
+        VirtualNode *curr_vn_right;
+
+        curr_vn_up = vnode->getNodeUp();
+        curr_vn_left = vnode->getNodeLeft();
+        curr_vn_right = vnode->getNodeRight();
+
+        vnode->_setNodeUp(curr_vn_right);
+        vnode->_setNodeLeft(curr_vn_up);
+        vnode->_setNodeRight(curr_vn_left);
+
+        // Store the information about the rotation
+        if (vnode->vnode_rotated != NodeRotation::undef) {
+            vnode->vnode_rotated = NodeRotation::undef;
+        } else {
+            vnode->vnode_rotated = NodeRotation::clockwise;
+        }
+
+    }
+
+
     bool VirtualNode::isPseudoRootNode() {
         return getNodeUp()->getNodeUp() == this;
     }
@@ -1162,6 +1184,146 @@ namespace tshlib {
     void VirtualNode::setVnode_id(int vnode_id) {
         VirtualNode::vnode_id = vnode_id;
     }
+
+    VirtualNode *VirtualNode::getSiblingNode() {
+        VirtualNode *siblingNode = nullptr;
+        if (indexOf() == NodePosition::left) {
+            siblingNode = getNodeUp()->getNodeRight();
+        } else if(indexOf() == NodePosition::right) {
+            siblingNode = getNodeUp()->getNodeLeft();
+        } else {
+            if(isTerminalNode()){
+                LOG(WARNING) << "[tshlib::VirtualNode::getSiblingNode] Node " << getNodeName() << " has no siblings since it is a leaf.";
+            }
+        }
+        return siblingNode;
+    }
+
+
+
+//    bool VirtualNode::sprNode_apply(VirtualNode *targetNode, Move *rearrangmentMove) {
+//        bool execstatus = false;
+//
+//
+//
+//        if (this == targetNode) {
+//
+//            LOG(FATAL) << "[tshlib::sprNode_apply] The source and the target nodes must be different!";
+//
+//        } else if (targetNode == nullptr) {
+//
+//            LOG(FATAL) << "[tshlib::sprNode_apply] The target node is empty";
+//
+//
+//        } else {
+//
+//            // References
+//            VirtualNode *moveStepChild = nullptr;
+//            VirtualNode *moveStepParent = nullptr;
+//            VirtualNode *parentTarget = targetNode->getNodeUp();
+//            VirtualNode *parentSource = getNodeUp();
+//
+//            // Assing a node to be the step-child
+//            if (indexOf() == NodePosition::left) {
+//                moveStepChild = parentSource->getNodeRight();
+//            } else {
+//                moveStepChild = parentSource->getNodeLeft();
+//            }
+//
+//            // Assing a node to be the step-parent
+//            moveStepParent = parentSource->getNodeUp();
+//
+//            // Disconnections (at the root the behaviour changes)
+//            if(getNodeUp()->getNodeUp()==this || targetNode->getNodeUp()->getNodeUp()== targetNode){
+//                VLOG(1) << "[tshlib::sprNode_apply] Over the root movement: " << this->getNodeName() << " ^ " << getNodeUp()->getNodeName();
+//
+//                // Assing a node to be the step-parent
+//                moveStepParent = parentSource->getNodeLeft();
+//                moveStepChild = parentSource->getNodeRight();
+//
+//                // Disconnect grandchildren = disconnect parentSource
+//                moveStepParent->disconnectNode();
+//                moveStepChild->disconnectNode();
+//
+//                // Connect grandchildren together
+//                //moveStepParent->connectNode(moveStepChild);
+//                moveStepChild->connectNode(moveStepParent);
+//                // Rotate node triangular pointers (resolves pseudoroot)
+//                rotateNodeCounterClockwise(parentSource);
+//
+//
+//            }else {
+//                VLOG(1) << "[tshlib::sprNode_apply] Below the root movement: " << this->getNodeName() << " ^ " << getNodeUp()->getNodeName();
+//
+//                // Disconnections
+//                parentSource->disconnectNode();
+//                moveStepChild->disconnectNode();
+//
+//            }
+//
+//            // Disconnect target node from its parentnode
+//            targetNode->disconnectNode();
+//
+//            // Re-connections
+//            moveStepChild->connectNode(moveStepParent);
+//            parentSource->connectNode(targetNode);
+//            parentTarget->connectNode(parentSource);
+//
+//            // Set StepParent and StepChild in move description
+//            rearrangmentMove->setStepChildNode(moveStepChild);
+//            rearrangmentMove->setStepParentNode(moveStepParent);
+//
+//            // Update branches
+//
+//
+//
+//            execstatus = true;
+//
+//        }
+//        return execstatus;
+//    }
+//
+//    bool VirtualNode::sprNode_revert(VirtualNode *targetNode, VirtualNode *moveStepParent, VirtualNode *moveStepChild) {
+//        bool execstatus = false;
+//
+//        if (this == targetNode) {
+//
+//            LOG(FATAL) << "[tshlib::sprNode_revert] The source and the target nodes must be different!";
+//
+//        } else if (targetNode == nullptr) {
+//
+//            LOG(FATAL) << "[tshlib::sprNode_revert] The target node is empty";
+//
+//
+//        } else {
+//
+//            // References
+//            VirtualNode *stepChild = nullptr;
+//            VirtualNode *parentSource = getNodeUp();
+//            VirtualNode *granParentSource = parentSource->getNodeUp();
+//
+//            parentSource->disconnectNode();
+//            targetNode->disconnectNode();
+//            stepChild = moveStepChild;
+//
+//            // If the parentSource node is rotated, then the topology has been rerooted
+//            if (parentSource->vnode_rotated != NodeRotation::undef){
+//                rotateNodeClockwise(parentSource);
+//                stepChild = moveStepParent->getNodeUp();
+//            }
+//
+//            stepChild->disconnectNode();
+//            granParentSource->connectNode(targetNode);
+//            stepChild->connectNode(parentSource);
+//            moveStepParent->connectNode(parentSource);
+//
+//
+//
+//            execstatus = true;
+//
+//        }
+//        return execstatus;
+//    }
 
     VirtualNode::~VirtualNode() = default;
 

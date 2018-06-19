@@ -42,6 +42,7 @@
 #define TSHLIB_MOVE_HPP
 
 #include "Utilities.hpp"
+#include <Utree.hpp>
 
 namespace tshlib {
     class Move {
@@ -49,8 +50,12 @@ namespace tshlib {
     private:
 
     protected:
-        VirtualNode *moveTargetNode_;   /* Pointer to the target node found during the node search */
-        VirtualNode *moveSourceNode_;   /* Pointer to the source node  */
+        VirtualNode *moveTargetNode_;       /* Pointer to the target node found during the node search */
+        VirtualNode *moveSourceNode_;       /* Pointer to the source node  */
+        VirtualNode *moveStepParentNode_;   /* Pointer to the node that acts as step parent during the SPR move */
+        VirtualNode *moveStepChildNode_;    /* Pointer to the node that acts as step parent during the SPR move */
+        bool onPseudoRoot_ ;                /* If the SPR node is infact a pseudoroot */
+
 
     public:
         int moveUID_;                           /* Move UID - Useful in case of parallel independent executions*/
@@ -59,7 +64,7 @@ namespace tshlib {
         MoveDirections moveDirection_;          /* Move Direction for applying a rotation to the VirtualNode pointers */
         double moveScore_;                      /* Likelihood of the move if applied */
         bool moveApplied_;                      /* Indicator is set to true if the move is applied to the tree */
-        std::string moveClass_;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
+        std::string moveClassDescription_;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
         MoveType moveType_;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
         TreeSearchHeuristics moveStrategy_;     /* Store the strategy used to generate this candidate.
 
@@ -80,13 +85,15 @@ namespace tshlib {
             moveRadius_ = inMove.moveRadius_;
             moveScore_ = inMove.moveScore_;
             moveApplied_ = inMove.moveApplied_;
-            moveClass_ = inMove.moveClass_;
+            moveClassDescription_ = inMove.moveClassDescription_;
             moveType_ = inMove.moveType_;
             moveDirection_ = inMove.moveDirection_;
             moveTargetNode_ = inMove.moveTargetNode_;
             moveSourceNode_ = inMove.moveSourceNode_;
+            moveStepParentNode_ = inMove.moveStepParentNode_;
 
         }
+
 
         Move &operator=(const Move &inMove) {
             moveUID_ = inMove.moveUID_;
@@ -94,11 +101,13 @@ namespace tshlib {
             moveRadius_ = inMove.moveRadius_;
             moveScore_ = inMove.moveScore_;
             moveApplied_ = inMove.moveApplied_;
-            moveClass_ = inMove.moveClass_;
+            moveClassDescription_ = inMove.moveClassDescription_;
             moveType_ = inMove.moveType_;
             moveDirection_ = inMove.moveDirection_;
             moveTargetNode_ = inMove.moveTargetNode_;
             moveSourceNode_ = inMove.moveSourceNode_;
+            moveStepParentNode_ = inMove.moveStepParentNode_;
+
         };
 
         void initMove();
@@ -107,7 +116,7 @@ namespace tshlib {
         std::string getDirection() const {
             std::string rtToken;
             switch (moveDirection_) {
-                case MoveDirections::left:
+                case MoveDirections::down_left:
                     rtToken = "left";
                     break;
                 case MoveDirections::up:
@@ -119,7 +128,7 @@ namespace tshlib {
                 case MoveDirections::up_right:
                     rtToken = "up-right";
                     break;
-                case MoveDirections::right :
+                case MoveDirections::down_right :
                     rtToken = "right";
                     break;
                 case MoveDirections::undef :
@@ -132,7 +141,7 @@ namespace tshlib {
         }
 
 
-        void setClass(int Value);
+        void setClass(TreeSearchHeuristics tsStrategy);
 
 
         std::string getClass() const {
@@ -201,6 +210,21 @@ namespace tshlib {
             moveSourceNode_ = source_node;
         };
 
+        void setStepParentNode(VirtualNode *stepParent){
+            moveStepParentNode_ = stepParent;
+        };
+
+        VirtualNode *getStepParentNode(){
+            return moveStepParentNode_;
+        };
+
+        void setStepChildNode(VirtualNode *stepChild){
+            moveStepChildNode_ = stepChild;
+        };
+
+        VirtualNode *getStepChildNode(){
+            return moveStepChildNode_;
+        };
 
 
         MoveType getType() const{
@@ -244,6 +268,17 @@ namespace tshlib {
             Move::moveScore_ = moveScore_;
         }
 
+        bool isOverPseudoRoot_() const {
+            return onPseudoRoot_;
+        }
+
+        void setOnPseudoRoot_(bool onPseudoRoot_) {
+            Move::onPseudoRoot_ = onPseudoRoot_;
+        }
+
+        MoveDirections getMoveDirection() const {
+            return moveDirection_;
+        }
     };
 }
 
