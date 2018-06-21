@@ -284,21 +284,31 @@ namespace tshlib {
 
 
     std::string Utree::printTreeNewick(bool showInternalNodeNames) {
-        std::string s, terminator;
 
-        _updateStartNodes();
+        try {
+            std::string s, terminator;
 
-        s += "(";
-        for (unsigned long i = 0; i < startVNodes.size(); i++) {
-            if (i == startVNodes.size() - 1) {
-                terminator = ");";
-            } else {
-                terminator = ",";
+            _updateStartNodes();
+
+            s += "(";
+            for (unsigned long i = 0; i < startVNodes.size(); i++) {
+                if (i == startVNodes.size() - 1) {
+                    terminator = ");";
+                } else {
+                    terminator = ",";
+                }
+                s += _recursiveFormatNewick(startVNodes.at(i), showInternalNodeNames) + terminator;
+
+
             }
-            s += _recursiveFormatNewick(startVNodes.at(i), showInternalNodeNames) + terminator;
+            return s;
+        }catch (const std::exception& e) {
+
+            LOG(FATAL) << "[Utree::printTreeNewick]" << e.what();
+
         }
 
-        return s;
+
     }
 
 
@@ -727,9 +737,12 @@ namespace tshlib {
     }
 
     void Utree::printAllNodesNeighbors() {
-
+        std::string token = "";
         for (auto &node:listVNodes) {
-            VLOG(2) << node->printNeighbours();
+
+            if(node->isPseudoRootNode()) token = "***";
+            VLOG(3) << node->printNeighbours() << token;
+            token = "";
         }
 
     }
