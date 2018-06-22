@@ -204,7 +204,7 @@ namespace tshlib {
          * @brief Append candidate move to the mset_moves vector
          * @param move Move Pointer to the candidate move object
          */
-        void addMove(Move *move, bool allowDuplicatedMoves = true);
+        void addMove(int radius, VirtualNode *targetNode, MoveDirections moveDirection, bool allowDuplicatedMoves = true);
 
 
 

@@ -80,14 +80,15 @@ namespace tshlib {
         } else {
             //if (radius_max == 0 ) {
             if (radius_curr <= (radius_max - radius_min) && radius_curr >= 0) {
-                auto moveInstance = new Move;
-                moveInstance->initMove();
-                moveInstance->setSourceNode(trSourceNode_);
-                moveInstance->setDirection(direction);
-                moveInstance->setRadius(radius_max - radius_curr);
-                moveInstance->setTargetNode(node);
-                moveInstance->setClass(trStrategy);
-                addMove(moveInstance, allowDuplicatedMoves);
+                //auto moveInstance = new Move;
+                //moveInstance->initMove();
+                //moveInstance->setSourceNode(trSourceNode_);
+                //moveInstance->setDirection(direction);
+                //moveInstance->setRadius(radius_max - radius_curr);
+                //moveInstance->setTargetNode(node);
+                //moveInstance->setClass(trStrategy);
+
+                addMove(radius_max - radius_curr, node, direction, allowDuplicatedMoves);
             }
         }
 
@@ -132,14 +133,14 @@ namespace tshlib {
                     moving_direction = MoveDirections::undef;
 
             }
-            auto moveInstance = new Move;
-            moveInstance->initMove();
-            moveInstance->setSourceNode(trSourceNode_);
-            moveInstance->setDirection(moving_direction);
-            moveInstance->setRadius(radius_max - radius_curr);
-            moveInstance->setTargetNode(vnode);
-            moveInstance->setClass(trStrategy);
-            addMove(moveInstance, allowDuplicatedMoves);
+            //auto moveInstance = new Move;
+            //moveInstance->initMove();
+            //moveInstance->setSourceNode(trSourceNode_);
+            //moveInstance->setDirection(moving_direction);
+            //moveInstance->setRadius(radius_max - radius_curr);
+            //moveInstance->setTargetNode(vnode);
+            //moveInstance->setClass(trStrategy);
+            addMove(radius_max - radius_curr, vnode, moving_direction, allowDuplicatedMoves);
         }
 
         if (radius_curr > 0) {
@@ -198,30 +199,58 @@ namespace tshlib {
         VLOG(1) << "[TSH Cycle]  Found " << trCandidateMovesFound_ << " candidate moves for node " << trSourceNode_->getNodeName();
     }
 
-    void TreeRearrangment::addMove(Move *move, bool allowDuplicatedMoves) {
+    void TreeRearrangment::addMove(int radius, VirtualNode *targetNode, MoveDirections moveDirection, bool allowDuplicatedMoves) {
 
-        bool storeMove = true;
+        std::vector<TreeSearchHeuristics> strategies;
 
-        if (!allowDuplicatedMoves) {
-            for (auto &query:trMoveSet) {
+        if(trStrategy == TreeSearchHeuristics::mixed){
+            strategies.push_back(TreeSearchHeuristics::swap);
+            strategies.push_back(TreeSearchHeuristics::phyml);
+        }else{
+            strategies.push_back(trStrategy);
+        }
 
-                if (query->getTargetNode() == move->getTargetNode() && query->getSourceNode() == move->getSourceNode()) {
-                    storeMove = false;
+        for(auto &ts_strategy:strategies) {
+
+            // Skip SPR-like moves if the radius is insufficient
+            if (ts_strategy == TreeSearchHeuristics::phyml && radius<4 ) continue;
+
+            auto moveInstance = new Move;
+            moveInstance->initMove();
+            moveInstance->setSourceNode(trSourceNode_);
+            moveInstance->setDirection(moveDirection);
+            moveInstance->setRadius(radius);
+            moveInstance->setTargetNode(targetNode);
+            moveInstance->setClass(ts_strategy);
+
+
+            bool storeMove = true;
+
+            if (!allowDuplicatedMoves) {
+                for (auto &query:trMoveSet) {
+
+                    if (query->getTargetNode() == targetNode
+                        && query->getSourceNode() == trSourceNode_
+                        && query->getMoveStrategy() == ts_strategy ) {
+
+                        storeMove = false;
+                    }
+
+                    if (targetNode == query->getSourceNode()
+                        && trSourceNode_ == query->getTargetNode()
+                        && query->getMoveStrategy() == ts_strategy ) {
+                        storeMove = false;
+                    }
+
                 }
+            }
 
-                if (move->getTargetNode() == query->getSourceNode() && move->getSourceNode() == query->getTargetNode()) {
-                    storeMove = false;
-                }
-
+            if (storeMove) {
+                moveInstance->moveUID_ = (int) trMoveSet.size();
+                trMoveSet.push_back(moveInstance);
+                trCandidateMovesFound_++;
             }
         }
-
-        if (storeMove) {
-            move->moveUID_ = (int) trMoveSet.size();
-            trMoveSet.push_back(move);
-            trCandidateMovesFound_++;
-        }
-
     }
 
     void TreeRearrangment::printMoves() {
