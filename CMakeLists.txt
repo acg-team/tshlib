@@ -100,7 +100,7 @@ message("-- Compilation will be performed with the following release of the soft
 set(CMAKE_CXX_STANDARD 11)
 
 
-SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wshadow -Weffc++ -O0 -g -DNDEBUG=1 ")
+SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wshadow -O0 -g -DNDEBUG=1 ")
 SET(CMAKE_C_FLAGS_DEBUG "-Wall -Wshadow -O0 -g -DNDEBUG=1 ")
 
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3  -g0 -DNDEBUG=0 ")
