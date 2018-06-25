@@ -279,7 +279,15 @@ namespace tshlib {
         MoveDirections getMoveDirection() const {
             return moveDirection_;
         }
+
+
+        TreeSearchHeuristics getMoveStrategy() const {
+            return moveStrategy_;
+        }
+
     };
+
+
 }
 
 #endif //TSHLIB_MOVE_HPP

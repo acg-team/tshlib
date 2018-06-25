@@ -100,7 +100,7 @@ message("-- Compilation will be performed with the following release of the soft
 set(CMAKE_CXX_STANDARD 11)
 
 
-SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wshadow -Weffc++ -O0 -g -DNDEBUG=1 ")
+SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wshadow -O0 -g -DNDEBUG=1 ")
 SET(CMAKE_C_FLAGS_DEBUG "-Wall -Wshadow -O0 -g -DNDEBUG=1 ")
 
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3  -g0 -DNDEBUG=0 ")
@@ -145,14 +145,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif ()
 
 # Dependencies not covered by find package should be found in the following directories
-if (${CMAKE_PREFIX_PATH})
-    include_directories("${CMAKE_PREFIX_PATH}/include")
-    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}}/lib")
-    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}/lib64")
-    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib")
-    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib64")
-    message(STATUS "Looking for headers in the following directory: ${CMAKE_PREFIX_PATH}/include")
-endif ()
+#if (${CMAKE_PREFIX_PATH})
+#    include_directories("${CMAKE_PREFIX_PATH}/include")
+#    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}}/lib")
+#    LINK_DIRECTORIES("${CMAKE_PREFIX_PATH}/lib64")
+#    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib")
+#    message(STATUS "Looking for libraries in the following directory: ${CMAKE_PREFIX_PATH}/lib64")
+#    message(STATUS "Looking for headers in the following directory: ${CMAKE_PREFIX_PATH}/include")
+#endif ()
 
 find_package(glog 0.3.5 REQUIRED)
 if(GLOG_FOUND)
