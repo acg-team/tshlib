@@ -307,7 +307,7 @@ namespace tshlib {
                 break;
 
             case MoveType::TBR:
-
+                outcomeExecutionMove = false;
                 LOG(WARNING) << "[tshlib::TreeRearrangment::applyMove] Move [" << moveID << "] is TBR. Not implemented method to apply it.";
 
                 break;
@@ -315,7 +315,7 @@ namespace tshlib {
 
 
             case MoveType::undef:
-
+                outcomeExecutionMove = false;
                 LOG(FATAL) << "[tshlib::TreeRearrangment::applyMove] Something went wrong during the application of the move [" << moveID << "]. It looks like its type is undefined!";
 
                 break;
@@ -359,7 +359,7 @@ namespace tshlib {
                 break;
 
             case MoveType::TBR:
-
+                outcomeExecutionMove = false;
                 LOG(WARNING) << "[tshlib::TreeRearrangment::applyMove] Move [" << moveID << "] is TBR. Not implemented method to revert it.";
 
                 break;
@@ -367,7 +367,7 @@ namespace tshlib {
 
 
             case MoveType::undef:
-
+                outcomeExecutionMove = false;
                 LOG(FATAL) << "[tshlib::TreeRearrangment::applyMove] Something went wrong during the application of the move [" << moveID << "]. It looks like its type is undefined!";
 
                 break;
@@ -664,6 +664,9 @@ namespace tshlib {
             VirtualNode *parentTarget = targetNode->getNodeUp();
             VirtualNode *parentSource = sourceNode->getNodeUp();
 
+            std::string parentS_RN = parentSource->isPseudoRootNode() ? "yes" : "no";
+            std::string parentT_RN = parentTarget->isPseudoRootNode() ? "yes" : "no";
+
             // Assign flags to nodes
 
             switch (move->getMoveDirection()) {
@@ -736,7 +739,10 @@ namespace tshlib {
             parentTarget->connectNode(parentSource);
             parentSource->connectNode(targetNode);
 
-            VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] pS: " << parentSource->getNodeName() << " pT: " << parentTarget->getNodeName();
+
+
+            VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] pS: " << parentSource->getNodeName() << "("<< parentS_RN << ")" <<
+                    " pT: " << parentTarget->getNodeName() << "("<< parentT_RN << ")";
             VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] stepParent: " << moveStepParent->getNodeName() << " stepChild: " << moveStepChild->getNodeName();
 
 
@@ -803,7 +809,9 @@ namespace tshlib {
                 parentSourceNode->connectNode(moveStepParent);
             }else{
                 if(!moveStepParent->getNodeLeft()&&!moveStepParent->getNodeRight()){
-                    parentSourceNode->connectNode(moveStepParent);
+                    moveStepParent->_setNodeUp(parentSourceNode);
+                    parentSourceNode->_setNodeUp(moveStepParent);
+                    //parentSourceNode->connectNode(moveStepParent);
                 }else{
                     moveStepParent->connectNode(parentSourceNode);
                 }
