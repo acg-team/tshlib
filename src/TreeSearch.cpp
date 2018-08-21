@@ -25,7 +25,7 @@
  * @file TreeSearchEngine.cpp
  * @author Lorenzo Gatti
  * @date 11 10 2017
- * @version 1.0
+ * @version 2.0.2
  * @maintainer Lorenzo Gatti
  * @email lg@lorenzogatti.me
  * @status Development

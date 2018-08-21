@@ -26,7 +26,7 @@
  * @author Lorenzo Gatti
  * @author Massimo Maiolo
  * @date 18 10 2017
- * @version 1.0
+ * @version 2.0.2
  * @maintainer Lorenzo Gatti
  * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
@@ -249,6 +249,8 @@ namespace tshlib {
                 moveInstance->moveUID_ = (int) trMoveSet.size();
                 trMoveSet.push_back(moveInstance);
                 trCandidateMovesFound_++;
+            }else{
+                delete moveInstance;
             }
         }
     }
