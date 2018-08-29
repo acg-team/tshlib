@@ -7,25 +7,25 @@
  *
  * This file is part of tshlib
  *
- * tshlib is a free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshlib is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with tshlib. If not, see <http://www.gnu.org/licenses/>.
+ * License along with TshLib. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
 /**
  * @file Move.hpp
  * @author Lorenzo Gatti
  * @date 11 06 2018
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
  * @email lg@lorenzogatti.me
  * @status Development
@@ -50,23 +50,29 @@ namespace tshlib {
     private:
 
     protected:
-        VirtualNode *moveTargetNode_;       /* Pointer to the target node found during the node search */
-        VirtualNode *moveSourceNode_;       /* Pointer to the source node  */
-        VirtualNode *moveStepParentNode_;   /* Pointer to the node that acts as step parent during the SPR move */
-        VirtualNode *moveStepChildNode_;    /* Pointer to the node that acts as step parent during the SPR move */
-        bool onPseudoRoot_ ;                /* If the SPR node is infact a pseudoroot */
+        //VirtualNode *moveTargetNode_;      // Pointer to the target node found during the node search
+        //VirtualNode *moveSourceNode_;      // Pointer to the source node
+        //VirtualNode *moveStepParentNode_;  // Pointer to the node that acts as step parent during the SPR move
+        //VirtualNode *moveStepChildNode_;   // Pointer to the node that acts as step parent during the SPR move
+
+        int moveTargetNode_;      // Pointer to the target node found during the node search
+        int moveSourceNode_;      // Pointer to the source node
+        int moveStepParentNode_;  // Pointer to the node that acts as step parent during the SPR move
+        int moveStepChildNode_;   // Pointer to the node that acts as step parent during the SPR move
+
+        bool onPseudoRoot_;                // If the SPR node is infact a pseudoroot
 
 
     public:
-        int moveUID_;                           /* Move UID - Useful in case of parallel independent executions*/
-        std::string moveName_;                   /* Move Name - Unused */
-        int moveRadius_;                        /* Move Radius */
-        MoveDirections moveDirection_;          /* Move Direction for applying a rotation to the VirtualNode pointers */
-        double moveScore_;                      /* Likelihood of the move if applied */
-        bool moveApplied_;                      /* Indicator is set to true if the move is applied to the tree */
-        std::string moveClassDescription_;                 /* String indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-        MoveType moveType_;                     /* Integer indicating the move class (i.e. NNI,SPR,TBR) - Usefull in case of mixed tree-search strategies */
-        TreeSearchHeuristics moveStrategy_;     /* Store the strategy used to generate this candidate.
+        int moveUID_;                           // Move UID - Useful in case of parallel independent executions
+        std::string moveName_;                  // Move Name - Unused
+        int moveRadius_;                        // Move Radius
+        MoveDirections moveDirection_;          // Move Direction for applying a rotation to the VirtualNode pointers
+        double moveScore_;                      // Likelihood of the move if applied
+        bool moveApplied_;                      // Indicator is set to true if the move is applied to the tree
+        std::string moveClassDescription_;      // String indicating the move class (i.e. NNI,SPR,TBR) - Needed for mixed tree-search strategies
+        MoveType moveType_;                     // Integer indicating the move class (i.e. NNI,SPR,TBR) - Needed for mixed tree-search strategies
+        TreeSearchHeuristics moveStrategy_;     // Store the strategy used to generate this candidate.
 
         /*!
          * @brief Standard constructor
@@ -186,104 +192,66 @@ namespace tshlib {
          * @brief Returns the target node pointer
          * @return VirtualNode pointer of the target node
          */
-        VirtualNode *getTargetNode(){
-            return moveTargetNode_;
-        };
-
+        //VirtualNode *getTargetNode() {
+        //    return moveTargetNode_;
+        //};
+        int getTargetNode() { return moveTargetNode_; };
 /*!
         * @brief Returns the source node pointer
         * @return VirtualNode pointer of the source node
         */
-        VirtualNode *getSourceNode(){
-            return moveSourceNode_;
-        };
+        //VirtualNode *getSourceNode() { return moveSourceNode_; };
+        int getSourceNode() { return moveSourceNode_; };
 
         /*!
          * @brief Set the protected move_targetnode field
          * @param target_node PhyTree Pointer to the target node
          */
-        void setTargetNode(VirtualNode *target_node){
-            moveTargetNode_ = target_node;
-        };
+        //void setTargetNode(VirtualNode *in_target_node) { moveTargetNode_ = in_target_node; };
+        void setTargetNode(int in_target_node) { moveTargetNode_ = in_target_node; };
 
-        void setSourceNode(VirtualNode *source_node){
-            moveSourceNode_ = source_node;
-        };
+        //void setSourceNode(VirtualNode *in_source_node) { moveSourceNode_ = in_source_node; };
+        void setSourceNode(int in_source_node) { moveSourceNode_ = in_source_node; };
 
-        void setStepParentNode(VirtualNode *stepParent){
-            moveStepParentNode_ = stepParent;
-        };
+        //void setStepParentNode(VirtualNode *in_stepParent) { moveStepParentNode_ = in_stepParent; };
+        void setStepParentNode(int in_stepParent) { moveStepParentNode_ = in_stepParent; };
 
-        VirtualNode *getStepParentNode(){
-            return moveStepParentNode_;
-        };
+        //VirtualNode *getStepParentNode() { return moveStepParentNode_; };
+        int getStepParentNode() { return moveStepParentNode_; };
 
-        void setStepChildNode(VirtualNode *stepChild){
-            moveStepChildNode_ = stepChild;
-        };
+        //void setStepChildNode(VirtualNode *in_stepChild) { moveStepChildNode_ = in_stepChild; };
+        void setStepChildNode(int in_stepChild) { moveStepChildNode_ = in_stepChild; };
 
-        VirtualNode *getStepChildNode(){
-            return moveStepChildNode_;
-        };
+        //VirtualNode *getStepChildNode() { return moveStepChildNode_; };
+        int getStepChildNode() { return moveStepChildNode_; };
 
+        MoveType getType() const { return moveType_; };
 
-        MoveType getType() const{
-            return moveType_;
-        };
+        void setRadius(int in_radius) { Move::moveRadius_ = in_radius; };
 
+        int getRadius() const { return moveRadius_; }
 
-        void setRadius(int radius){
-            Move::moveRadius_ = radius;
-        };
+        void setDirection(MoveDirections in_direction) { Move::moveDirection_ = in_direction; };
 
-        int getRadius() const {
-            return moveRadius_;
-        }
+        int getUID() const { return moveUID_; }
 
-        void setDirection(MoveDirections direction){
-            Move::moveDirection_ = direction;
-        };
+        void setUID(int in_moveUID_) { Move::moveUID_ = in_moveUID_; }
 
-        int getUID() const {
-            return moveUID_;
-        }
+        const std::string &getName() const { return moveName_; }
 
-        void setUID(int moveUID_) {
-            Move::moveUID_ = moveUID_;
-        }
+        void setName(const std::string &in_moveName_) { Move::moveName_ = in_moveName_; }
 
-        const std::string &getName() const {
-            return moveName_;
-        }
+        double getScore() const { return moveScore_; }
 
-        void setName(const std::string &moveName_) {
-            Move::moveName_ = moveName_;
-        }
+        void setScore(double in_moveScore_) { Move::moveScore_ = in_moveScore_; }
 
-        double getScore() const {
-            return moveScore_;
-        }
+        bool isOverPseudoRoot_() const { return onPseudoRoot_; }
 
-        void setScore(double moveScore_) {
-            Move::moveScore_ = moveScore_;
-        }
+        void setOnPseudoRoot_(bool in_onPseudoRoot_) { Move::onPseudoRoot_ = in_onPseudoRoot_; }
 
-        bool isOverPseudoRoot_() const {
-            return onPseudoRoot_;
-        }
+        MoveDirections getMoveDirection() const { return moveDirection_; }
 
-        void setOnPseudoRoot_(bool onPseudoRoot_) {
-            Move::onPseudoRoot_ = onPseudoRoot_;
-        }
-
-        MoveDirections getMoveDirection() const {
-            return moveDirection_;
-        }
-
-
-        TreeSearchHeuristics getMoveStrategy() const {
-            return moveStrategy_;
-        }
+        TreeSearchHeuristics getMoveStrategy() const { return moveStrategy_; }
 
     };
 

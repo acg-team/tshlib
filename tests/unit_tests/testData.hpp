@@ -25,7 +25,7 @@
  * @file testData.hpp
  * @author Lorenzo Gatti
  * @date 07 06 2018
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
  * @email lg@lorenzogatti.me
  * @status Development

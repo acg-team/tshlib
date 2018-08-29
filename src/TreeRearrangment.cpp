@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
+ * Licensed Materials - Property of Lorenzo Gatti
  *
  *
- * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti
  *******************************************************************************
  *
  * This file is part of tshlib
  *
- * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
@@ -24,13 +24,10 @@
 /**
  * @file TreeRearrangment.cpp
  * @author Lorenzo Gatti
- * @author Massimo Maiolo
  * @date 18 10 2017
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
- * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
- * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -39,6 +36,7 @@
  * @bug
  * @warning
  *
+ * @see For more information visit: http://www.lorenzogatti.me
  */
 #include <numeric>
 #include <limits>
@@ -50,11 +48,6 @@
 #include <map>
 #include "TreeRearrangment.hpp"
 
-
-#ifdef TSHLIB_BENCHMARK
-#include <iostream>
-#include <fstream>
-#endif
 
 namespace tshlib {
     TreeRearrangment::TreeRearrangment() = default;
@@ -70,7 +63,8 @@ namespace tshlib {
 
     };
 
-    void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf, MoveDirections direction, bool allowDuplicatedMoves) {
+    void TreeRearrangment::getNodesInRadiusDown(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, bool includeSelf,
+                                                MoveDirections direction, bool allowDuplicatedMoves) {
 
         VirtualNode *node = node_source;
 
@@ -78,15 +72,8 @@ namespace tshlib {
             includeSelf = true;
 
         } else {
-            //if (radius_max == 0 ) {
+
             if (radius_curr <= (radius_max - radius_min) && radius_curr >= 0) {
-                //auto moveInstance = new Move;
-                //moveInstance->initMove();
-                //moveInstance->setSourceNode(trSourceNode_);
-                //moveInstance->setDirection(direction);
-                //moveInstance->setRadius(radius_max - radius_curr);
-                //moveInstance->setTargetNode(node);
-                //moveInstance->setClass(trStrategy);
 
                 addMove(radius_max - radius_curr, node, direction, allowDuplicatedMoves);
             }
@@ -106,7 +93,9 @@ namespace tshlib {
 
     }
 
-    void TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction, bool allowDuplicatedMoves) {
+    void
+    TreeRearrangment::getNodesInRadiusUp(VirtualNode *node_source, int radius_min, int radius_curr, int radius_max, NodePosition traverse_direction,
+                                         bool allowDuplicatedMoves) {
 
         VirtualNode *vnode;
 
@@ -133,13 +122,7 @@ namespace tshlib {
                     moving_direction = MoveDirections::undef;
 
             }
-            //auto moveInstance = new Move;
-            //moveInstance->initMove();
-            //moveInstance->setSourceNode(trSourceNode_);
-            //moveInstance->setDirection(moving_direction);
-            //moveInstance->setRadius(radius_max - radius_curr);
-            //moveInstance->setTargetNode(vnode);
-            //moveInstance->setClass(trStrategy);
+
             addMove(radius_max - radius_curr, vnode, moving_direction, allowDuplicatedMoves);
         }
 
@@ -185,42 +168,61 @@ namespace tshlib {
 
         trCandidateMovesFound_ = 0;
 
-        if (!trSourceNode_->isTerminalNode()) {
-            getNodesInRadiusDown(trSourceNode_->getNodeLeft(), trSearchRadius_min, trSearchRadius_max - 1, trSearchRadius_max, includeSelf, MoveDirections::down_left, allowDuplicatedMoves);
+        if (!utree_->getNode(trSourceNode_)->isTerminalNode()) {
 
-            getNodesInRadiusDown(trSourceNode_->getNodeRight(), trSearchRadius_min, trSearchRadius_max - 1, trSearchRadius_max, includeSelf, MoveDirections::down_right, allowDuplicatedMoves);
+            getNodesInRadiusDown(utree_->getNode(trSourceNode_)->getNodeLeft(),
+                                 trSearchRadius_min,
+                                 trSearchRadius_max - 1,
+                                 trSearchRadius_max,
+                                 includeSelf,
+                                 MoveDirections::down_left,
+                                 allowDuplicatedMoves);
+
+            getNodesInRadiusDown(utree_->getNode(trSourceNode_)->getNodeRight(),
+                                 trSearchRadius_min,
+                                 trSearchRadius_max - 1,
+                                 trSearchRadius_max,
+                                 includeSelf,
+                                 MoveDirections::down_right,
+                                 allowDuplicatedMoves);
         }
         // If the node is a leaf, then go up
-        if (nullptr != trSourceNode_->getNodeUp()) {
-            getNodesInRadiusUp(trSourceNode_->getNodeUp(), trSearchRadius_min, trSearchRadius_max - 1, trSearchRadius_max, trSourceNode_->indexOf(), allowDuplicatedMoves);
+        if (nullptr != utree_->getNode(trSourceNode_)->getNodeUp()) {
+
+            getNodesInRadiusUp(utree_->getNode(trSourceNode_)->getNodeUp(),
+                               trSearchRadius_min,
+                               trSearchRadius_max - 1,
+                               trSearchRadius_max,
+                               utree_->getNode(trSourceNode_)->indexOf(),
+                               allowDuplicatedMoves);
         }
 
 
-        VLOG(1) << "[TSH Cycle]  Found " << trCandidateMovesFound_ << " candidate moves for node " << trSourceNode_->getNodeName();
+        VLOG(1) << "[TSH Cycle]  Found " << trCandidateMovesFound_ << " candidate moves for node " << utree_->getNode(trSourceNode_)->getNodeName();
     }
 
     void TreeRearrangment::addMove(int radius, VirtualNode *targetNode, MoveDirections moveDirection, bool allowDuplicatedMoves) {
 
         std::vector<TreeSearchHeuristics> strategies;
 
-        if(trStrategy == TreeSearchHeuristics::mixed){
+        if (trStrategy == TreeSearchHeuristics::mixed) {
             strategies.push_back(TreeSearchHeuristics::swap);
             strategies.push_back(TreeSearchHeuristics::phyml);
-        }else{
+        } else {
             strategies.push_back(trStrategy);
         }
 
-        for(auto &ts_strategy:strategies) {
+        for (auto &ts_strategy:strategies) {
 
             // Skip SPR-like moves if the radius is insufficient
-            if (ts_strategy == TreeSearchHeuristics::phyml && radius<4 ) continue;
+            if (ts_strategy == TreeSearchHeuristics::phyml && radius < 4) continue;
 
             auto moveInstance = new Move;
             moveInstance->initMove();
             moveInstance->setSourceNode(trSourceNode_);
             moveInstance->setDirection(moveDirection);
             moveInstance->setRadius(radius);
-            moveInstance->setTargetNode(targetNode);
+            moveInstance->setTargetNode(targetNode->getVnode_id());
             moveInstance->setClass(ts_strategy);
 
 
@@ -229,16 +231,16 @@ namespace tshlib {
             if (!allowDuplicatedMoves) {
                 for (auto &query:trMoveSet) {
 
-                    if (query->getTargetNode() == targetNode
+                    if (query->getTargetNode() == targetNode->getVnode_id()
                         && query->getSourceNode() == trSourceNode_
-                        && query->getMoveStrategy() == ts_strategy ) {
+                        && query->getMoveStrategy() == ts_strategy) {
 
                         storeMove = false;
                     }
 
-                    if (targetNode == query->getSourceNode()
+                    if (targetNode->getVnode_id() == query->getSourceNode()
                         && trSourceNode_ == query->getTargetNode()
-                        && query->getMoveStrategy() == ts_strategy ) {
+                        && query->getMoveStrategy() == ts_strategy) {
                         storeMove = false;
                     }
 
@@ -249,7 +251,7 @@ namespace tshlib {
                 moveInstance->moveUID_ = (int) trMoveSet.size();
                 trMoveSet.push_back(moveInstance);
                 trCandidateMovesFound_++;
-            }else{
+            } else {
                 delete moveInstance;
             }
         }
@@ -261,8 +263,8 @@ namespace tshlib {
         VLOG(2) << "[class]\t(P\t; Q)" << std::endl;
         for (auto &nmove: trMoveSet) {
             VLOG(2) << "[" << nmove->moveClassDescription_ << "]\t" << nmove->moveRadius_
-                    << "\t(" << trSourceNode_->vnode_name << "\t; "
-                    << nmove->getTargetNode()->vnode_name << ")\t"
+                    << "\t(" << utree_->getNode(trSourceNode_)->vnode_name << "\t; "
+                    << utree_->getNode(nmove->getTargetNode())->vnode_name << ")\t"
                     << static_cast<int>(nmove->moveDirection_) << std::endl;
         }
 
@@ -273,20 +275,26 @@ namespace tshlib {
         return trMoveSet.size();
     }
 
-    bool TreeRearrangment::applyMove(unsigned long moveID) {
+    bool TreeRearrangment::applyMove(unsigned long moveID, Utree &_utree__topology) {
 
         bool outcomeExecutionMove = false;
 
-        VirtualNode *pnode = trMoveSet.at(moveID)->getSourceNode();
-        VirtualNode *qnode = trMoveSet.at(moveID)->getTargetNode();
+        //VirtualNode *pnode = trMoveSet.at(moveID)->getSourceNode();
+        //VirtualNode *qnode = trMoveSet.at(moveID)->getTargetNode();
+
+        int pnode = trMoveSet.at(moveID)->getSourceNode();
+        int qnode = trMoveSet.at(moveID)->getTargetNode();
 
         VLOG(2) << "[tshlib::applyMove] Debug: [MOVE#" << trMoveSet.at(moveID)->getUID() << "] direction: " << trMoveSet.at(moveID)->getDirection();
-        VLOG(2) << "[tshlib::applyMove] Debug: [MOVE#" << trMoveSet.at(moveID)->getUID() << "] S: " << pnode->getNodeName() << " T: " << qnode->getNodeName();
+        VLOG(2) << "[tshlib::applyMove] Debug: [MOVE#"
+                << trMoveSet.at(moveID)->getUID()
+                << "] S: " << _utree__topology.getNode(pnode)->getNodeName()
+                << " T: " << _utree__topology.getNode(qnode)->getNodeName();
 
 
         bool revertRotations;
 
-        switch(trMoveSet.at(moveID)->getType()){
+        switch (trMoveSet.at(moveID)->getType()) {
 
             case MoveType::VFNNI:
 
@@ -297,15 +305,17 @@ namespace tshlib {
                 revertRotations = false;
                 // Swap pnode with qnode according to the direction found during the move configuration
                 // If the swap is performed correctly then the function returns true otherwise false
-                outcomeExecutionMove =  pnode->swapNode(qnode, trMoveSet.at(moveID)->moveDirection_, revertRotations);
+                outcomeExecutionMove = _utree__topology.getNode(pnode)->swapNode(_utree__topology.getNode(qnode),
+                                                                                 trMoveSet.at(moveID)->moveDirection_,
+                                                                                 revertRotations);
 
                 break;
 
             case MoveType::SPR:
                 // Swap pnode with qnode according to the direction found during the move configuration
                 // If the swap is performed correctly then the function returns true otherwise false
-                outcomeExecutionMove = _applySPR(trMoveSet.at(moveID));
-                UTree_->printAllNodesNeighbors();
+                outcomeExecutionMove = _applySPR(trMoveSet.at(moveID), _utree__topology);
+                _utree__topology.printAllNodesNeighbors();
                 break;
 
             case MoveType::TBR:
@@ -315,10 +325,10 @@ namespace tshlib {
                 break;
 
 
-
             case MoveType::undef:
                 outcomeExecutionMove = false;
-                LOG(FATAL) << "[tshlib::TreeRearrangment::applyMove] Something went wrong during the application of the move [" << moveID << "]. It looks like its type is undefined!";
+                LOG(FATAL) << "[tshlib::TreeRearrangment::applyMove] Something went wrong during the application of the move [" << moveID
+                           << "]. It looks like its type is undefined!";
 
                 break;
         }
@@ -327,19 +337,19 @@ namespace tshlib {
 
     }
 
-    bool TreeRearrangment::revertMove(unsigned long moveID) {
+    bool TreeRearrangment::revertMove(unsigned long moveID, Utree &_utree__topology) {
 
         bool outcomeExecutionMove = false;
 
-        VirtualNode *pnode = trMoveSet.at(moveID)->getTargetNode();
-        VirtualNode *qnode = trMoveSet.at(moveID)->getSourceNode();
+        //VirtualNode *pnode = trMoveSet.at(moveID)->getTargetNode();
+        //VirtualNode *qnode = trMoveSet.at(moveID)->getSourceNode();
 
-        //bool revertRotations = true;
-        //return pnode->swapNode(qnode, MoveDirections::up, revertRotations);
+        int pnode = trMoveSet.at(moveID)->getTargetNode();
+        int qnode = trMoveSet.at(moveID)->getSourceNode();
 
         bool revertRotations;
 
-        switch(trMoveSet.at(moveID)->getType()){
+        switch (trMoveSet.at(moveID)->getType()) {
 
             case MoveType::VFNNI:
 
@@ -349,15 +359,17 @@ namespace tshlib {
                 revertRotations = true;
                 // Swap pnode with qnode according to the direction found during the move configuration
                 // If the swap is performed correctly then the function returns true otherwise false
-                outcomeExecutionMove =  pnode->swapNode(qnode, MoveDirections::up, revertRotations);
+                outcomeExecutionMove = _utree__topology.getNode(pnode)->swapNode(_utree__topology.getNode(qnode),
+                                                                                 MoveDirections::up,
+                                                                                 revertRotations);
 
                 break;
 
             case MoveType::SPR:
                 // Swap pnode with qnode according to the direction found during the move configuration
                 // If the swap is performed correctly then the function returns true otherwise false
-                outcomeExecutionMove = _revertSPR(trMoveSet.at(moveID));
-                UTree_->printAllNodesNeighbors();
+                outcomeExecutionMove = _revertSPR(trMoveSet.at(moveID), _utree__topology);
+                _utree__topology.printAllNodesNeighbors();
                 break;
 
             case MoveType::TBR:
@@ -367,10 +379,10 @@ namespace tshlib {
                 break;
 
 
-
             case MoveType::undef:
                 outcomeExecutionMove = false;
-                LOG(FATAL) << "[tshlib::TreeRearrangment::applyMove] Something went wrong during the application of the move [" << moveID << "]. It looks like its type is undefined!";
+                LOG(FATAL) << "[tshlib::TreeRearrangment::applyMove] Something went wrong during the application of the move [" << moveID
+                           << "]. It looks like its type is undefined!";
 
                 break;
         }
@@ -399,15 +411,20 @@ namespace tshlib {
 
     }
 
-    void TreeRearrangment::commitMove(int moveID) {
+    void TreeRearrangment::commitMove(int moveID, Utree &_utree__topology) {
 
         // apply move
-        applyMove(moveID);
+        applyMove(moveID, _utree__topology);
 
         // reset node rotations
-        for (auto &node:UTree_->listVNodes) {
-            node->vnode_rotated = NodeRotation::undef;
+        for (auto &nodeID:_utree__topology.getNodeIdsMap()) {
+            _utree__topology.getNode(nodeID.first)->vnode_rotated = NodeRotation::undef;
         }
+
+        // reset node rotations
+        //for (auto &node:utree_->listVNodes) {
+        //    utree_->getNode(node)->vnode_rotated = NodeRotation::undef;
+        //}
 
     }
 
@@ -418,11 +435,11 @@ namespace tshlib {
 
     }
 
-    void TreeRearrangment::setTreeTopology(Utree *inTree) {
-        UTree_ = inTree;
+    void TreeRearrangment::setTree(Utree *inTree) {
+        utree_ = inTree;
     }
 
-    void TreeRearrangment::displayRearrangmentStatus(int idMove, bool printTree) {
+    void TreeRearrangment::displayRearrangmentStatus(int idMove, Utree & _utree__topology, bool printTree) {
 
         std::string start_col_line, end_col_line;
 
@@ -442,117 +459,111 @@ namespace tshlib {
         if (printTree) {
             VLOG(2) << "[test  move]\t" << getMove(idMove)->moveClassDescription_ << "." << std::setfill('0') << std::setw(3) << idMove
                     << " | " << start_col_line << getMove(idMove)->moveScore_ << end_col_line << "\t"
-                    << " | (" << getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
+                    << " | (" << _utree__topology.getNode(getMove(idMove)->getSourceNode())->vnode_name << "->"
+                    << _utree__topology.getNode(getMove(idMove)->getTargetNode())->vnode_name << ")"
                     << "\t[" << getMove(idMove)->moveRadius_ << "] | " << getTree()->printTreeNewick(true);
         } else {
             VLOG(2) << "[test  move]\t" << getMove(idMove)->moveClassDescription_ << "." << std::setfill('0') << std::setw(3) << idMove
                     << " | " << start_col_line << getMove(idMove)->moveScore_ << end_col_line << "\t"
-                    << " | (" << getMove(idMove)->getSourceNode()->vnode_name << "->" << getMove(idMove)->getTargetNode()->vnode_name << ")"
+                    << " | (" << _utree__topology.getNode(getMove(idMove)->getSourceNode())->vnode_name
+                    << "->" << _utree__topology.getNode(getMove(idMove)->getTargetNode())->vnode_name << ")"
                     << "\t[" << getMove(idMove)->moveRadius_ << "]";
         }
 
     }
 
-    const std::vector<VirtualNode *> TreeRearrangment::updatePathBetweenNodes(unsigned long moveID, std::vector<VirtualNode *> inPath) {
+    const std::vector<int> TreeRearrangment::updatePathBetweenNodes(unsigned long moveID, std::vector<int> inPath) {
 
         // Retrieve move object
         Move *move = getMove(moveID);
 
         // Declaring temporary objects
-        std::vector<VirtualNode *> tmpVector_B, tmpVector_C, updatedNodesInPath, outNodePath;
+        std::vector<int> tmpVector_B, tmpVector_C, updatedNodesInPath, outNodePath;
         std::ptrdiff_t pos;
 
         // According to the different kind of move, apply the specific method to compute the list of nodes
-        switch (move->getType()){
+        switch (move->getType()) {
             case MoveType::SPR:
 
-                    tmpVector_B = inPath;
+                tmpVector_B = inPath;
 
-                    if (move->moveDirection_ == MoveDirections::up_left || move->moveDirection_ == MoveDirections::up_right) {
-                        pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
-                    } else {
-                        pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
+                if (move->moveDirection_ == MoveDirections::up_left || move->moveDirection_ == MoveDirections::up_right) {
+                    pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
+                } else {
+                    pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
+                }
+
+                if (pos <= tmpVector_B.size()) {
+
+                    switch (move->getMoveDirection()) {
+
+                        case MoveDirections::down_right:
+                        case MoveDirections::down_left:
+
+                            // Copy all the VirtualNode-pointers from the point where Source is found to the end
+                            for (std::ptrdiff_t i = pos; i < tmpVector_B.size(); i++) {
+                                tmpVector_C.push_back(tmpVector_B.at(i));
+                            }
+
+                            // Revert the order of the elements in the vector
+                            std::reverse(std::begin(tmpVector_C), std::end(tmpVector_C));
+
+                            // Add
+                            tmpVector_C.push_back(tmpVector_B.at(pos - 1));
+
+                            // Add the beginning of the vector B to vector C
+                            for (std::ptrdiff_t i = 1; i < pos - 1; i++) {
+                                tmpVector_C.push_back(tmpVector_B.at(i));
+                            }
+
+                            break;
+
+                        case MoveDirections::up_right:
+                        case MoveDirections::up_left:
+
+                            // Add the path between steparent and insertion point
+                            for (std::ptrdiff_t i = 2; i < pos; i++) {
+                                tmpVector_C.push_back(tmpVector_B.at(i));
+                            }
+
+                            // Add target node
+                            tmpVector_C.push_back(tmpVector_B.at(pos));
+
+                            // Add source and sourceparent nodes
+                            tmpVector_C.push_back(tmpVector_B.at(0));
+                            tmpVector_C.push_back(tmpVector_B.at(1));
+
+                            // Add path from insertion point to root
+                            for (std::ptrdiff_t i = pos + 1; i < tmpVector_B.size(); i++) {
+                                tmpVector_C.push_back(tmpVector_B.at(i));
+                            }
+
+                            break;
+
+                        case MoveDirections::up:
+
+                            tmpVector_C.push_back(tmpVector_B.at(pos + 1));
+                            // Add the beginning of the vector B to vector C
+                            for (std::ptrdiff_t i = 1; i < pos; i++) {
+                                tmpVector_C.push_back(tmpVector_B.at(i));
+                            }
+
+                            // Add the beginning of the vector B to vector C
+                            for (std::ptrdiff_t i = pos + 2; i < tmpVector_B.size(); i++) {
+                                tmpVector_C.push_back(tmpVector_B.at(i));
+                            }
+
+                            break;
+
+                        case MoveDirections::undef:
+                            DLOG(WARNING) << "[tshlib::TreeRearrangment::updatePathBetweenNodes] The current type of move is not yet supported!";
+                            break;
                     }
-                    //pos = std::distance(tmpVector_B.begin(), std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
-
-                    if (pos <= tmpVector_B.size()) {
-
-                        switch(move->getMoveDirection()){
-
-                            case MoveDirections::down_right:
-                            case MoveDirections::down_left:
-
-                                // Copy all the VirtualNode-pointers from the point where Source is found to the end
-                                for (std::ptrdiff_t i = pos; i < tmpVector_B.size(); i++) {
-                                    tmpVector_C.push_back(tmpVector_B.at(i));
-                                }
-
-                                // Revert the order of the elements in the vector
-                                std::reverse(std::begin(tmpVector_C), std::end(tmpVector_C));
-
-                                // Add
-                                tmpVector_C.push_back(tmpVector_B.at(pos-1));
-
-                                // Add the beginning of the vector B to vector C
-                                for (std::ptrdiff_t i = 1; i < pos-1; i++) {
-                                    tmpVector_C.push_back(tmpVector_B.at(i));
-                                }
-
-                                break;
-
-                            case MoveDirections::up_right:
-                            case MoveDirections::up_left:
-
-                                // Add the path between steparent and insertion point
-                                for (std::ptrdiff_t i = 2; i < pos; i++) {
-                                    tmpVector_C.push_back(tmpVector_B.at(i));
-                                }
-
-                                // Add target node
-                                tmpVector_C.push_back(tmpVector_B.at(pos));
-
-                                // Add source and sourceparent nodes
-                                tmpVector_C.push_back(tmpVector_B.at(0));
-                                tmpVector_C.push_back(tmpVector_B.at(1));
-
-                                // Add path from insertion point to root
-                                for (std::ptrdiff_t i = pos+1; i < tmpVector_B.size(); i++) {
-                                    tmpVector_C.push_back(tmpVector_B.at(i));
-                                }
-
-                                // Copy the reference to the pointers of the node starting from the target node to the end of the vector (root)
-                                //for (std::ptrdiff_t i = pos; i < tmpVector_B.size(); i++) {
-                                //    tmpVector_C.push_back(tmpVector_B.at(i));
-                                //}
-
-                                // Add the beginning of the vector B to vector C
-                                //for (std::ptrdiff_t i = 1; i < pos; i++) {
-                                //    tmpVector_C.push_back(tmpVector_B.at(i));
-                                //}
-
-                                break;
-
-                            case MoveDirections::up:
-
-                                tmpVector_C.push_back(tmpVector_B.at(pos+1));
-                                // Add the beginning of the vector B to vector C
-                                for (std::ptrdiff_t i = 1; i < pos; i++) {
-                                    tmpVector_C.push_back(tmpVector_B.at(i));
-                                }
-
-                                // Add the beginning of the vector B to vector C
-                                for (std::ptrdiff_t i = pos+2; i < tmpVector_B.size(); i++) {
-                                    tmpVector_C.push_back(tmpVector_B.at(i));
-                                }
-
-                                break;
-
-                        }
 
 
-                        // Return the newly ordered vector
-                        updatedNodesInPath = tmpVector_C;
-                    }
+                    // Return the newly ordered vector
+                    updatedNodesInPath = tmpVector_C;
+                }
 
 
                 outNodePath = updatedNodesInPath;
@@ -604,6 +615,11 @@ namespace tshlib {
 
                 break;
 
+            case MoveType::TBR:
+            case MoveType::undef:
+                DLOG(WARNING) << "[tshlib::TreeRearrangment::updatePathBetweenNodes] The current type of move is not yet supported!";
+
+                break;
         }
 
         return outNodePath;
@@ -621,32 +637,33 @@ namespace tshlib {
 
             case tshlib::TreeRearrangmentOperations::classic_SPR:
                 trSearchRadius_min = 4;
-                trSearchRadius_max = UTree_->getMaxNodeDistance() / 2;
+                trSearchRadius_max = utree_->getMaxNodeDistance() / 2;
                 break;
 
             case tshlib::TreeRearrangmentOperations::classic_TBR:
                 trSearchRadius_min = 5;
-                trSearchRadius_max = UTree_->getMaxNodeDistance() / 2;
+                trSearchRadius_max = utree_->getMaxNodeDistance() / 2;
                 break;
 
             case tshlib::TreeRearrangmentOperations::classic_Mixed:
                 trSearchRadius_min = 3;  // Minimum radius for an NNI move is 3 nodes
-                trSearchRadius_max = UTree_->getMaxNodeDistance(); // Full tree traversing from any nodeInterface of the tree
+                trSearchRadius_max = utree_->getMaxNodeDistance(); // Full tree traversing from any nodeInterface of the tree
                 break;
 
         }
 
-        VLOG(1) << "[tsh] Defined coverage radius as ["<<trSearchRadius_min<<";"<<trSearchRadius_max<<"] on a max of ["<<UTree_->getMaxNodeDistance()<<"]";
+        VLOG(1) << "[tsh] Defined coverage radius as [" << trSearchRadius_min << ";" << trSearchRadius_max << "] on a max of ["
+                << utree_->getMaxNodeDistance() << "]";
 
-        trInitialized_=true;
+        trInitialized_ = true;
     }
 
-    bool TreeRearrangment::_applySPR(Move *move) {
+    bool TreeRearrangment::_applySPR(Move *move, Utree &_utree__topology) {
 
         bool execstatus = false;
 
-        VirtualNode *sourceNode = move->getSourceNode();
-        VirtualNode *targetNode = move->getTargetNode();
+        VirtualNode *sourceNode = _utree__topology.getNode(move->getSourceNode());
+        VirtualNode *targetNode = _utree__topology.getNode(move->getTargetNode());
 
 
         if (sourceNode == targetNode) {
@@ -686,17 +703,11 @@ namespace tshlib {
                     targetNode->disconnectNode();
 
                     // Connect step-child and step-parent
-                    //if(moveStepChild->isPseudoRootNode()){
-                    //    moveStepChild->_bidirectionalUpwardConnection(moveStepParent);
-                    //}else{
-
-                    if(!moveStepParent->getNodeUp()&&!moveStepParent->getNodeLeft()&&!moveStepParent->getNodeRight()){
+                    if (!moveStepParent->getNodeUp() && !moveStepParent->getNodeLeft() && !moveStepParent->getNodeRight()) {
                         moveStepChild->connectNode(moveStepParent);
-                    }else{
+                    } else {
                         moveStepParent->connectNode(moveStepChild);
                     }
-
-                    //}
 
                     break;
 
@@ -704,10 +715,10 @@ namespace tshlib {
                 case MoveDirections::down_right:
 
                     // Rotations //TODO: Check for rotation direction (it could be the way around)
-                    if(move->getMoveDirection() == MoveDirections::down_left){
+                    if (move->getMoveDirection() == MoveDirections::down_left) {
                         sourceNode->rotateCounterClockwise();
                         //sourceNode->rotateClockwise();
-                    }else{
+                    } else {
                         //sourceNode->rotateCounterClockwise();
                         sourceNode->rotateClockwise();
                     }
@@ -737,20 +748,19 @@ namespace tshlib {
             }
 
             // Re-Connections
-            //moveStepParent->connectNode(moveStepChild);
             parentTarget->connectNode(parentSource);
             parentSource->connectNode(targetNode);
 
 
-
-            VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] pS: " << parentSource->getNodeName() << "("<< parentS_RN << ")" <<
-                    " pT: " << parentTarget->getNodeName() << "("<< parentT_RN << ")";
-            VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] stepParent: " << moveStepParent->getNodeName() << " stepChild: " << moveStepChild->getNodeName();
+            VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] pS: " << parentSource->getNodeName() << "(" << parentS_RN << ")" <<
+                    " pT: " << parentTarget->getNodeName() << "(" << parentT_RN << ")";
+            VLOG(2) << "[tshlib::_applySPR] Debug: [MOVE#" << move->getUID() << "] stepParent: " << moveStepParent->getNodeName() << " stepChild: "
+                    << moveStepChild->getNodeName();
 
 
             // Set StepParent and StepChild in move description
-            move->setStepChildNode(moveStepChild);
-            move->setStepParentNode(moveStepParent);
+            move->setStepChildNode(moveStepChild->getVnode_id());
+            move->setStepParentNode(moveStepParent->getVnode_id());
 
             execstatus = true;
 
@@ -758,18 +768,18 @@ namespace tshlib {
         return execstatus;
     }
 
-    bool TreeRearrangment::_revertSPR(Move *move) {
+    bool TreeRearrangment::_revertSPR(Move *move, Utree &_utree__topology) {
 
         bool execstatus = false;
 
-        VirtualNode *sourceNode = move->getSourceNode();
-        VirtualNode *parentSourceNode = move->getSourceNode()->getNodeUp();
+        VirtualNode *sourceNode = _utree__topology.getNode(move->getSourceNode());
+        VirtualNode *parentSourceNode = _utree__topology.getNode(move->getSourceNode())->getNodeUp();
 
-        VirtualNode *targetNode =  move->getTargetNode();
-        VirtualNode *parentTargetNode =  move->getSourceNode()->getNodeUp()->getNodeUp();
+        VirtualNode *targetNode = _utree__topology.getNode(move->getTargetNode());
+        VirtualNode *parentTargetNode = _utree__topology.getNode(move->getSourceNode())->getNodeUp()->getNodeUp();
 
-        VirtualNode *moveStepParent = move->getStepParentNode();
-        VirtualNode *moveStepChild = move->getStepChildNode();
+        VirtualNode *moveStepParent = _utree__topology.getNode(move->getStepParentNode());
+        VirtualNode *moveStepChild = _utree__topology.getNode(move->getStepChildNode());
 
 
         if (sourceNode == targetNode) {
@@ -790,7 +800,7 @@ namespace tshlib {
 
             // 2. Revert rotations on the parentSourceNode (resolve)
             bool rotatedcase = false;
-            switch(sourceNode->getNodeRotation()){
+            switch (sourceNode->getNodeRotation()) {
                 case NodeRotation::counterclockwise:
                     sourceNode->rotateClockwise(true);
                     VirtualNodeUtils::rotateNodeCounterClockwise(parentSourceNode);
@@ -806,19 +816,15 @@ namespace tshlib {
             }
 
             // 4. Reconnections
-
-            if(rotatedcase){
+            if (rotatedcase) {
                 parentSourceNode->connectNode(moveStepParent);
-            }else{
-                if(!moveStepParent->getNodeLeft()&&!moveStepParent->getNodeRight()){
+            } else {
+                if (!moveStepParent->getNodeLeft() && !moveStepParent->getNodeRight()) {
                     moveStepParent->_setNodeUp(parentSourceNode);
                     parentSourceNode->_setNodeUp(moveStepParent);
-                    //parentSourceNode->connectNode(moveStepParent);
-                }else{
+                } else {
                     moveStepParent->connectNode(parentSourceNode);
                 }
-
-
             }
 
             parentSourceNode->connectNode(moveStepChild);
@@ -832,89 +838,5 @@ namespace tshlib {
 
 }
 
-
-
-//void ::treesearchheuristics::performTestTreeSearch(Utree *input_tree, TreeSearchHeuristics tsh_strategy) {
-//
-//    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-//    int min_radius = 3;  // Minimum radius for an NNI move is 3 nodes
-//    int max_radius = input_tree->getMaxNodeDistance(); // Hard coded max value for a small tree (this ensures the complete q-node search)
-//
-//    unsigned long total_exec_moves = 0;
-//
-//    // Print node description with neighbors
-//    for (auto &vnode:input_tree->listVNodes) {
-//        //    VirtualNode *vnode = input_tree->listVNodes.at(200);
-//
-//        VLOG(2) << "[utree neighbours] " << vnode->printNeighbours() << std::endl;
-//
-//        // Initialise a new rearrangement list
-//        auto rearrangmentList = new TreeRearrangment;
-//
-//        rearrangmentList->initTreeRearrangment(nullptr, min_radius, max_radius, true, vnode);
-//
-//        // Get all the target nodes with distance == radius from the source node
-//        // excluding the starting node.
-//        rearrangmentList->defineMoves(false, false);
-//
-//        // Print the list of moves for the current P node (source node)
-//        rearrangmentList->printMoves();
-//
-//        VLOG(1) << "[tsh] Strategy " << rearrangmentList->getStrategy() << std::endl;
-//        VLOG(1) << "[utree rearrangment] Found " << rearrangmentList->getNumberOfMoves() << " possible moves for node " << vnode->vnode_name << std::endl;
-//
-//        //
-//
-//        // For each potential move computed before, apply it to the tree topology, print the resulting newick tree, and revert it.
-//        for (unsigned long i = 0; i < rearrangmentList->getNumberOfMoves(); i++) {
-//            bool status;
-//
-//            // Apply the move
-//            status = rearrangmentList->applyMove(i);
-//
-//            //utree->saveTreeOnFile("../data/test.txt");
-//
-//            if (status) {
-//                VLOG(2) << "[apply  move]\t" << rearrangmentList->getMove(i)->moveClassDescription_ << "." << std::setfill('0') << std::setw(3) << i
-//                        << " | (" << rearrangmentList->getSourceNode()->vnode_name << "->" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << ")"
-//                        << "\t[" << rearrangmentList->getMove(i)->moveRadius_ << "] | "
-//                        << input_tree->printTreeNewick(true) << std::endl;
-//                //utree->_testReachingPseudoRoot();
-//            }
-//
-//            // Revert the move, and return to the original tree
-//            status = rearrangmentList->revertMove(i);
-//            //utree->saveTreeOnFile("../data/test.txt");
-//            if (status) {
-//                VLOG(2) << "[revert move]\t" << rearrangmentList->getMove(i)->moveClassDescription_ << "." << std::setfill('0') << std::setw(3) << i
-//                        << " | (" << rearrangmentList->getMove(i)->getTargetNode()->vnode_name << "->" << rearrangmentList->getSourceNode()->vnode_name << ")"
-//                        << "\t[" << rearrangmentList->getMove(i)->moveRadius_ << "] | "
-//                        << input_tree->printTreeNewick(true) << std::endl;
-//                //utree->_testReachingPseudoRoot();
-//            }
-//
-//        }
-//
-//        total_exec_moves += rearrangmentList->getNumberOfMoves() * 2;
-//        delete rearrangmentList;
-//    }
-//
-//    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-//    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-//
-//    VLOG(2) << "Moves applied and reverted: " << total_exec_moves << std::endl;
-//    VLOG(2) << "Elapsed time: " << duration << " microseconds" << std::endl;
-//    VLOG(2) << "*** " << (double) duration / total_exec_moves << " microseconds/move *** " << std::endl;
-//
-//
-//#ifdef TSHLIB_BENCHMARK
-//    std::ofstream myfile;
-//    myfile.open ("tshlib_statistics.csv", std::ios_base::app);
-//    myfile << input_tree->listVNodes.size()<< "," <<total_exec_moves << "," << duration << "," << (double) duration/total_exec_moves << std::endl;
-//    myfile.close();
-//#endif
-//
-//}
-//
 
 

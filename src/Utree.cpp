@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
+ * Licensed Materials - Property of Lorenzo Gatti
  *
  *
- * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti
  *******************************************************************************
  *
  * This file is part of tshlib
  *
- * tshlib is a free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshlib is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
@@ -24,13 +24,10 @@
 /**
  * @file Utree.cpp
  * @author Lorenzo Gatti
- * @author Massimo Maiolo
  * @date 26 10 2017
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
- * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
- * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -133,7 +130,6 @@ namespace tshlib {
     }
 
 
-
     VirtualNode *VirtualNode::getNodeUp() {
 
         return vnode_up ?: nullptr;
@@ -229,6 +225,9 @@ namespace tshlib {
             startVNodes.push_back(inVNode);
         }
 
+        // Add pointer reference to the utree map
+        utreeNodeIdsMap_[inVNode->getVnode_id()] = inVNode;
+
     }
 
 
@@ -238,12 +237,10 @@ namespace tshlib {
         // from the start node to the pseudoroot
         std::vector<VirtualNode *> path2root;
 
-        VirtualNode *CurrentNode;
+        VirtualNode *CurrentNode = inVNode;
 
         // Add the first element of the path to the root
         //path2root.push_back(inVNode);
-
-        CurrentNode = inVNode;
 
         // Add all the other nodes traversing the tree in post-order
         while (CurrentNode != nullptr) {
@@ -260,17 +257,7 @@ namespace tshlib {
             }
 
         }
-        /*
-        do {
-            if(CurrentNode->getNodeUp() != nullptr){
-                CurrentNode = CurrentNode->getNodeUp();
-                path2root.push_back(CurrentNode);
-            }else{
-                break;
-            }
 
-        } while (CurrentNode->getNodeUp() != nullptr && CurrentNode != CurrentNode->getNodeUp()->getNodeUp());
-        */
         if (fixPseudoRootOnNextSubtree) {
 
             if (CurrentNode->getNodeUp() != nullptr) {
@@ -302,7 +289,7 @@ namespace tshlib {
 
             }
             return s;
-        }catch (const std::exception& e) {
+        } catch (const std::exception &e) {
 
             LOG(FATAL) << "[Utree::printTreeNewick]" << e.what();
 
@@ -345,8 +332,8 @@ namespace tshlib {
             VirtualNode *vnode = *i;
             delete vnode;
         }
-
         delete rootnode;
+        std::vector<VirtualNode *>().swap(listVNodes);
 
     }
 
@@ -361,7 +348,6 @@ namespace tshlib {
 
         return t_length;
     }
-
 
 
     void Utree::_printUtree() {
@@ -393,8 +379,11 @@ namespace tshlib {
         // Added virtual root to utree
         auto root = new VirtualNode;
         root->vnode_name = "root";
+        root->vnode_id = -1;
         rootnode = root;
 
+        // Add pointer reference to the utree map
+        utreeNodeIdsMap_[rootnode->getVnode_id()] = rootnode;
     };
 
 
@@ -552,12 +541,6 @@ namespace tshlib {
             pnode_parent = getNodeUp();
             qnode_parent = targetNode->getNodeUp();
 
-/*
-        std::cout << pnode->printNeighbours() << std::endl;
-        std::cout << qnode->printNeighbours() << std::endl;
-        std::cout << pnode_parent->printNeighbours() << std::endl;
-        std::cout << qnode_parent->printNeighbours() << std::endl;
-*/
             bool invertQParents = false;
             bool invertPParents = false;
 
@@ -712,7 +695,7 @@ namespace tshlib {
 
     }
 
-    void VirtualNode::_bidirectionalUpwardConnection(VirtualNode *inNode){
+    void VirtualNode::_bidirectionalUpwardConnection(VirtualNode *inNode) {
 
         _setNodeUp(inNode);
         inNode->_setNodeUp(this);
@@ -740,7 +723,7 @@ namespace tshlib {
         std::string token = "";
         for (auto &node:listVNodes) {
 
-            if(node->isPseudoRootNode()) token = "***";
+            if (node->isPseudoRootNode()) token = "***";
             VLOG(3) << node->printNeighbours() << token;
             token = "";
         }
@@ -787,7 +770,7 @@ namespace tshlib {
         }
     }
 
-    std::vector<VirtualNode *> Utree::computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2) {
+    std::vector<int> Utree::computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2) {
 
         std::vector<VirtualNode *> list_vnode_to_root;
 
@@ -814,7 +797,8 @@ namespace tshlib {
             }
         }
 
-        auto newvector = std::vector<VirtualNode *>(tmpMap.size());
+        //auto newvector = std::vector<VirtualNode *>(tmpMap.size());
+        auto newvector = std::vector<int>(tmpMap.size());
         // Create a map iterator and point to beginning of map
         //std::map<VirtualNode *,int>::iterator it = tmpMap.begin();
 
@@ -827,24 +811,13 @@ namespace tshlib {
             // Accessing VALUE from element.
             int order = element.second;
 
-            newvector[order] = node;
+            newvector[order] = node->getVnode_id();
 
         }
 
         std::reverse(newvector.begin(), newvector.end());
 
 
-        //path2root_1.insert( path2root_1.end(), path2root_2.begin(), path2root_2.end() );
-        //auto last = std::unique(path2root_1.begin(), path2root_1.end());
-        // v now holds {1 2 3 4 5 6 7 x x x x x x}, where 'x' is indeterminate
-        //path2root_1.erase(last, path2root_1.end());
-        //list_vnode_to_root = path2root_1;
-
-        //list_vnode_to_root = _unique(path2root_1, path2root_2);
-
-
-        //delete(path2root_1);
-        //delete(path2root_2);
         return newvector;
     }
 
@@ -955,6 +928,10 @@ namespace tshlib {
 
         vnode->setNodeLevel(level);
 
+    }
+
+    const std::map<int, VirtualNode *> &Utree::getNodeIdsMap() const {
+        return utreeNodeIdsMap_;
     }
 
 
@@ -1194,149 +1171,23 @@ namespace tshlib {
         return vnode_id;
     }
 
-    void VirtualNode::setVnode_id(int vnode_id) {
-        VirtualNode::vnode_id = vnode_id;
+    void VirtualNode::setVnode_id(int in_vnode_id) {
+        VirtualNode::vnode_id = in_vnode_id;
     }
 
     VirtualNode *VirtualNode::getSiblingNode() {
         VirtualNode *siblingNode = nullptr;
         if (indexOf() == NodePosition::left) {
             siblingNode = getNodeUp()->getNodeRight();
-        } else if(indexOf() == NodePosition::right) {
+        } else if (indexOf() == NodePosition::right) {
             siblingNode = getNodeUp()->getNodeLeft();
         } else {
-            if(isTerminalNode()){
+            if (isTerminalNode()) {
                 LOG(WARNING) << "[tshlib::VirtualNode::getSiblingNode] Node " << getNodeName() << " has no siblings since it is a leaf.";
             }
         }
         return siblingNode;
     }
-
-
-
-//    bool VirtualNode::sprNode_apply(VirtualNode *targetNode, Move *rearrangmentMove) {
-//        bool execstatus = false;
-//
-//
-//
-//        if (this == targetNode) {
-//
-//            LOG(FATAL) << "[tshlib::sprNode_apply] The source and the target nodes must be different!";
-//
-//        } else if (targetNode == nullptr) {
-//
-//            LOG(FATAL) << "[tshlib::sprNode_apply] The target node is empty";
-//
-//
-//        } else {
-//
-//            // References
-//            VirtualNode *moveStepChild = nullptr;
-//            VirtualNode *moveStepParent = nullptr;
-//            VirtualNode *parentTarget = targetNode->getNodeUp();
-//            VirtualNode *parentSource = getNodeUp();
-//
-//            // Assing a node to be the step-child
-//            if (indexOf() == NodePosition::left) {
-//                moveStepChild = parentSource->getNodeRight();
-//            } else {
-//                moveStepChild = parentSource->getNodeLeft();
-//            }
-//
-//            // Assing a node to be the step-parent
-//            moveStepParent = parentSource->getNodeUp();
-//
-//            // Disconnections (at the root the behaviour changes)
-//            if(getNodeUp()->getNodeUp()==this || targetNode->getNodeUp()->getNodeUp()== targetNode){
-//                VLOG(1) << "[tshlib::sprNode_apply] Over the root movement: " << this->getNodeName() << " ^ " << getNodeUp()->getNodeName();
-//
-//                // Assing a node to be the step-parent
-//                moveStepParent = parentSource->getNodeLeft();
-//                moveStepChild = parentSource->getNodeRight();
-//
-//                // Disconnect grandchildren = disconnect parentSource
-//                moveStepParent->disconnectNode();
-//                moveStepChild->disconnectNode();
-//
-//                // Connect grandchildren together
-//                //moveStepParent->connectNode(moveStepChild);
-//                moveStepChild->connectNode(moveStepParent);
-//                // Rotate node triangular pointers (resolves pseudoroot)
-//                rotateNodeCounterClockwise(parentSource);
-//
-//
-//            }else {
-//                VLOG(1) << "[tshlib::sprNode_apply] Below the root movement: " << this->getNodeName() << " ^ " << getNodeUp()->getNodeName();
-//
-//                // Disconnections
-//                parentSource->disconnectNode();
-//                moveStepChild->disconnectNode();
-//
-//            }
-//
-//            // Disconnect target node from its parentnode
-//            targetNode->disconnectNode();
-//
-//            // Re-connections
-//            moveStepChild->connectNode(moveStepParent);
-//            parentSource->connectNode(targetNode);
-//            parentTarget->connectNode(parentSource);
-//
-//            // Set StepParent and StepChild in move description
-//            rearrangmentMove->setStepChildNode(moveStepChild);
-//            rearrangmentMove->setStepParentNode(moveStepParent);
-//
-//            // Update branches
-//
-//
-//
-//            execstatus = true;
-//
-//        }
-//        return execstatus;
-//    }
-//
-//    bool VirtualNode::sprNode_revert(VirtualNode *targetNode, VirtualNode *moveStepParent, VirtualNode *moveStepChild) {
-//        bool execstatus = false;
-//
-//        if (this == targetNode) {
-//
-//            LOG(FATAL) << "[tshlib::sprNode_revert] The source and the target nodes must be different!";
-//
-//        } else if (targetNode == nullptr) {
-//
-//            LOG(FATAL) << "[tshlib::sprNode_revert] The target node is empty";
-//
-//
-//        } else {
-//
-//            // References
-//            VirtualNode *stepChild = nullptr;
-//            VirtualNode *parentSource = getNodeUp();
-//            VirtualNode *granParentSource = parentSource->getNodeUp();
-//
-//            parentSource->disconnectNode();
-//            targetNode->disconnectNode();
-//            stepChild = moveStepChild;
-//
-//            // If the parentSource node is rotated, then the topology has been rerooted
-//            if (parentSource->vnode_rotated != NodeRotation::undef){
-//                rotateNodeClockwise(parentSource);
-//                stepChild = moveStepParent->getNodeUp();
-//            }
-//
-//            stepChild->disconnectNode();
-//            granParentSource->connectNode(targetNode);
-//            stepChild->connectNode(parentSource);
-//            moveStepParent->connectNode(parentSource);
-//
-//
-//
-//            execstatus = true;
-//
-//        }
-//        return execstatus;
-//    }
 
     VirtualNode::~VirtualNode() = default;
 

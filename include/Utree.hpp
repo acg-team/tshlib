@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Licensed Materials - Property of Lorenzo Gatti & Massimo Maiolo
+ * Licensed Materials - Property of Lorenzo Gatti
  *
  *
- * Copyright (C) 2015-2018 by Lorenzo Gatti & Massimo Maiolo
+ * Copyright (C) 2015-2018 by Lorenzo Gatti
  *******************************************************************************
  *
  * This file is part of tshlib
  *
- * tshlib is a free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshlib is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
@@ -24,13 +24,10 @@
 /**
  * @file Utree.hpp
  * @author Lorenzo Gatti
- * @author Massimo Maiolo
  * @date 26 10 2017
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
- * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me
- * @email massimo.maiolo@zhaw.ch
  * @status Development
  *
  * @brief
@@ -46,7 +43,7 @@
 
 #include <string>
 #include <vector>
-
+#include <map>
 
 #include "Utilities.hpp"
 
@@ -72,38 +69,86 @@ namespace tshlib {
  */
 
     class VirtualNode {
-    private:
+
+    protected:
+        VirtualNode *vnode_up;                          // NodeUp - This is the pointer to the VirtualNode above
+        VirtualNode *vnode_left;                        // NodeLeft  -  This is the pointer to the VirtualNode on the leftside
+        VirtualNode *vnode_right;                       // NodeRight - This is the pointer to the VirtualNode on the rightside
 
     public:
 
-        int vnode_id;                                   /* Node ID - Useful in case of parallel independent executions */
-        std::string vnode_name;                         /* Node Name - Useful in case of parallel independent executions */
-        double vnode_branchlength;                      /* Branch length connecting the node the parent node */
-        int vnode_depth;                                /* Depth level of the node in the tree */
-        bool vnode_leaf;                                /* Flag: terminal node in the tree listVNodes */
-        int vnode_move_direction;                       /* Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node. */
+        int vnode_id;                                   // Node ID - Useful in case of parallel independent executions
+        std::string vnode_name;                         // Node Name - Useful in case of parallel independent executions
+        double vnode_branchlength;                      // Branch length connecting the node the parent node
+        int vnode_depth;                                // Depth level of the node in the tree
+        bool vnode_leaf;                                // Flag: terminal node in the tree listVNodes
+        int vnode_move_direction;                       // Int: This attribute is used to perform the correct rotation of the p-node w.r.t q-node.
         NodeRotation vnode_rotated;
 
-        NodeRotation getVnode_rotated() const;
 
-        /* Flag: if node was rotaded during a tree rearrangement move */
-        int vnode_seqid;                                /* Needed to associate the seqID to the nodeID
+        // Flag: if node was rotaded during a tree rearrangement move
+        int vnode_seqid;                                // Needed to associate the seqID to the nodeID
 
         /*!
          *  Standard constructor
          */
         VirtualNode();
 
-        int getVnode_id() const;
+        VirtualNode(const VirtualNode &inNode){
 
-        void setVnode_id(int vnode_id);
+            vnode_id = inNode.vnode_id;
+            vnode_seqid = inNode.vnode_seqid;
+            vnode_name = inNode.vnode_name;
+            vnode_depth = inNode.vnode_depth;
+            vnode_leaf = inNode.vnode_leaf;
+            vnode_move_direction = inNode.vnode_move_direction;
+            vnode_branchlength = inNode.vnode_branchlength;
+            vnode_leaf = inNode.vnode_leaf;
+            vnode_rotated = inNode.vnode_rotated;
 
-        VirtualNode(const VirtualNode &inNode);
+            vnode_right = inNode.vnode_right;
+            vnode_left = inNode.vnode_left;
+            vnode_up = inNode.vnode_up;
+
+        };
+
+        VirtualNode &operator=(const VirtualNode &inNode) {
+
+
+            vnode_id = inNode.vnode_id;
+            vnode_seqid = inNode.vnode_seqid;
+            vnode_name = inNode.vnode_name;
+            vnode_depth = inNode.vnode_depth;
+            vnode_leaf = inNode.vnode_leaf;
+            vnode_move_direction = inNode.vnode_move_direction;
+            vnode_branchlength = inNode.vnode_branchlength;
+            vnode_leaf = inNode.vnode_leaf;
+            vnode_rotated = inNode.vnode_rotated;
+
+            vnode_right = inNode.vnode_right;
+            vnode_left = inNode.vnode_left;
+            vnode_up = inNode.vnode_up;
+
+//            vnode_id = inNode.vnode_id;
+//            vnode_seqid = inNode.vnode_seqid;
+//            vnode_name = inNode.vnode_name;
+//            vnode_depth = inNode.vnode_depth;
+//            vnode_leaf = inNode.vnode_leaf;
+//            vnode_move_direction = inNode.vnode_move_direction;
+//            vnode_branchlength = inNode.vnode_branchlength;
+//            vnode_leaf = inNode.vnode_leaf;
+//            vnode_rotated = inNode.vnode_rotated;
+//
+//            vnode_right = inNode.vnode_right;
+//            vnode_left = inNode.vnode_left;
+//            vnode_up = inNode.vnode_up;
+
+        };
 
         /*!
          * Virtual deconstructor
          */
-         ~VirtualNode();
+        ~VirtualNode();
 
         /*!
          * @brief This function connects the current node to another one. It automatically performs a bidirectional connection
@@ -169,6 +214,12 @@ namespace tshlib {
 
         void clearChildren();
 
+        int getVnode_id() const;
+
+        void setVnode_id(int vnode_id);
+
+        NodeRotation getVnode_rotated() const;
+
         /*!
          * @brief This function returns true if the node is terminal
          * @return boolean value (true or false)
@@ -216,16 +267,9 @@ namespace tshlib {
 
         void _bidirectionalUpwardConnection(VirtualNode *inNode);
 
-        NodeRotation getNodeRotation() const {
-            return vnode_rotated;
-        }
+        NodeRotation getNodeRotation() const { return vnode_rotated; }
 
     protected:
-
-        VirtualNode *vnode_up;                          /* NodeUp - This is the pointer to the VirtualNode above */
-        VirtualNode *vnode_left;                        /* NodeLeft  -  This is the pointer to the VirtualNode on the leftside */
-        VirtualNode *vnode_right;                       /* NodeRight - This is the pointer to the VirtualNode on the rightside */
-
 
         void _oneway_connectNode(VirtualNode *inVNode);
 
@@ -245,13 +289,58 @@ namespace tshlib {
 
         std::vector<VirtualNode *> listVNodes;
         std::vector<VirtualNode *> startVNodes;
+        std::map<int, VirtualNode *> utreeNodeIdsMap_;
+
         VirtualNode *rootnode;
 
         Utree();
 
-        Utree(const Utree &rhs) { /* copy construction from rhs*/ }
+        Utree(const Utree &inTree) {
 
-        Utree &operator=(const Utree &rhs) {};
+            initialized_treeDepth = false;
+            // copy nodes of the tree
+            for(auto &_node__intree:inTree.listVNodes){
+
+                // Deep copy node attributes
+                auto _node__utree = new VirtualNode(*_node__intree);
+                _node__utree->_setNodeLeft(nullptr);
+                _node__utree->_setNodeRight(nullptr);
+                _node__utree->_setNodeUp(nullptr);
+
+                // add copied node to the tree
+                addMember(_node__utree, false);
+
+            }
+
+            // update nodes connections with new pointers
+            for(auto &_node__utree:listVNodes){
+
+                VirtualNode &_node__intree = inTree.getNode(_node__utree->getVnode_id());
+
+                if(_node__intree.getNodeLeft())
+                    _node__utree->_setNodeLeft(getNode(_node__intree.getNodeLeft()->getVnode_id()));
+
+                if(_node__intree.getNodeRight())
+                    _node__utree->_setNodeRight(getNode(_node__intree.getNodeRight()->getVnode_id()));
+
+                if(_node__intree.getNodeUp())
+                    _node__utree->_setNodeUp(getNode(_node__intree.getNodeUp()->getVnode_id()));
+
+            }
+
+            for(auto &_startnode__intree:inTree.startVNodes){
+                startVNodes.push_back(getNode(_startnode__intree->getVnode_id()));
+            }
+
+            // Add rootnode
+            rootnode = new VirtualNode(*inTree.rootnode);
+
+            // Add pointer reference to the utree map
+            utreeNodeIdsMap_[rootnode->getVnode_id()] = rootnode;
+
+        }
+
+        Utree &operator=(const Utree &inTree) {};
 
         ~Utree();
 
@@ -309,7 +398,8 @@ namespace tshlib {
 
         void _printUtree();
 
-        std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
+        //std::vector<VirtualNode *> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
+        std::vector<int> computePathBetweenNodes(VirtualNode *vnode_1, VirtualNode *vnode_2);
 
         std::vector<VirtualNode *> _unique(std::vector<VirtualNode *> &list_nodes_n1, std::vector<VirtualNode *> &list_nodes_n2);
 
@@ -325,6 +415,12 @@ namespace tshlib {
 
         void computeNodeDepth(VirtualNode *vnode);
 
+        const std::map<int, VirtualNode *> &getNodeIdsMap() const;
+
+        VirtualNode *getNode(int nodeID) { return utreeNodeIdsMap_[nodeID]; }
+
+        VirtualNode & getNode(int nodeID) const { return (*utreeNodeIdsMap_.at(nodeID)); }
+
     protected:
         std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);
 
@@ -336,8 +432,7 @@ namespace tshlib {
     };
 
 
-
-    namespace VirtualNodeUtils{
+    namespace VirtualNodeUtils {
 
         void rotateNodeClockwise(VirtualNode *vnode);
 
@@ -362,11 +457,11 @@ namespace tshlib {
 
         //std::vector<VirtualNode *> fill_with_nodes(VirtualNode *n);
 
-    /*!
-         * @brief This function has been ported in Utree::computePathBetweenNodes
-         * @param n
-         * @return
-         */
+        /*!
+             * @brief This function has been ported in Utree::computePathBetweenNodes
+             * @param n
+             * @return
+             */
         //std::vector<VirtualNode *> get_path_from_nodes(VirtualNode *vn1, VirtualNode *vn2);
 
         //void associateNode2Alignment(Alignment *inMSA, Utree *inTree);

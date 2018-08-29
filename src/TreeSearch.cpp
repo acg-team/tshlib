@@ -5,15 +5,15 @@
  * Copyright (C) 2015-2018 by Lorenzo Gatti
  *******************************************************************************
  *
- * This file is part of Tree Search Heuristic Library (TshLib)
+ * This file is part of tshlib
  *
- * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
@@ -25,7 +25,7 @@
  * @file TreeSearchEngine.cpp
  * @author Lorenzo Gatti
  * @date 11 10 2017
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
  * @email lg@lorenzogatti.me
  * @status Development
