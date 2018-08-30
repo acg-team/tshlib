@@ -223,7 +223,7 @@ namespace tshlib {
             moveInstance->setDirection(moveDirection);
             moveInstance->setRadius(radius);
             moveInstance->setTargetNode(targetNode->getVnode_id());
-            moveInstance->setClass(ts_strategy);
+            moveInstance->setClass(ts_strategy, (utree_->getNode(trSourceNode_)->isPseudoRootNode() || targetNode->isPseudoRootNode()));
 
 
             bool storeMove = true;
@@ -542,16 +542,31 @@ namespace tshlib {
 
                         case MoveDirections::up:
 
-                            tmpVector_C.push_back(tmpVector_B.at(pos + 1));
-                            // Add the beginning of the vector B to vector C
-                            for (std::ptrdiff_t i = 1; i < pos; i++) {
-                                tmpVector_C.push_back(tmpVector_B.at(i));
-                            }
+//                            if(pos+1 == tmpVector_B.size()){
+//
+//                                // Add
+//                                tmpVector_C.push_back(tmpVector_B.at(pos - 1));
+//
+//                                // Add the beginning of the vector B to vector C
+//                                for (std::ptrdiff_t i = 1; i < pos - 1; i++) {
+//                                    tmpVector_C.push_back(tmpVector_B.at(i));
+//                                }
+//
+//                            }else {
 
-                            // Add the beginning of the vector B to vector C
-                            for (std::ptrdiff_t i = pos + 2; i < tmpVector_B.size(); i++) {
-                                tmpVector_C.push_back(tmpVector_B.at(i));
-                            }
+                                //tmpVector_C.push_back(tmpVector_B.at(pos + 1));
+                                tmpVector_C.push_back(tmpVector_B.at(pos + 1));
+
+                                // Add the beginning of the vector B to vector C
+                                for (std::ptrdiff_t i = 1; i < pos; i++) {
+                                    tmpVector_C.push_back(tmpVector_B.at(i));
+                                }
+
+                                // Add the beginning of the vector B to vector C
+                                for (std::ptrdiff_t i = pos + 2; i < tmpVector_B.size(); i++) {
+                                    tmpVector_C.push_back(tmpVector_B.at(i));
+                                }
+//                            }
 
                             break;
 
@@ -610,7 +625,13 @@ namespace tshlib {
                     outNodePath = updatedNodesInPath;
 
                 } else {
-                    outNodePath = inPath;
+
+                    tmpVector_B = inPath;
+
+                    tmpVector_B.erase(std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getTargetNode()));
+                    tmpVector_B.erase(std::find(tmpVector_B.begin(), tmpVector_B.end(), move->getSourceNode()));
+
+                    outNodePath = tmpVector_B;
                 }
 
                 break;

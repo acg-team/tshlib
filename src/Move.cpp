@@ -77,7 +77,7 @@ namespace tshlib {
     }
 
 
-    void Move::setClass(TreeSearchHeuristics tsStrategy) {
+    void Move::setClass(TreeSearchHeuristics tsStrategy, bool _location__overpseudoroot) {
 
         // Set tree search strategy associated to this move
         moveStrategy_ = tsStrategy;
@@ -134,7 +134,8 @@ namespace tshlib {
         // If either the source or the target node define are on the pseudoroot, and the tree-search strategy is [PhyML], then the
         // movetype is handled as TBR
         //if ((moveTargetNode_->isPseudoRootNode() || moveSourceNode_->isPseudoRootNode()) && tsStrategy == TreeSearchHeuristics::phyml)
-        //    moveType_ = MoveType::TBR;
+        if (_location__overpseudoroot && tsStrategy == TreeSearchHeuristics::phyml)
+            moveType_ = MoveType::TBR;
 
 
         moveClassDescription_ = getClass();

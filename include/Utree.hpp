@@ -129,20 +129,6 @@ namespace tshlib {
             vnode_left = inNode.vnode_left;
             vnode_up = inNode.vnode_up;
 
-//            vnode_id = inNode.vnode_id;
-//            vnode_seqid = inNode.vnode_seqid;
-//            vnode_name = inNode.vnode_name;
-//            vnode_depth = inNode.vnode_depth;
-//            vnode_leaf = inNode.vnode_leaf;
-//            vnode_move_direction = inNode.vnode_move_direction;
-//            vnode_branchlength = inNode.vnode_branchlength;
-//            vnode_leaf = inNode.vnode_leaf;
-//            vnode_rotated = inNode.vnode_rotated;
-//
-//            vnode_right = inNode.vnode_right;
-//            vnode_left = inNode.vnode_left;
-//            vnode_up = inNode.vnode_up;
-
         };
 
         /*!

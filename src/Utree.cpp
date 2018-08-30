@@ -1181,10 +1181,10 @@ namespace tshlib {
             siblingNode = getNodeUp()->getNodeRight();
         } else if (indexOf() == NodePosition::right) {
             siblingNode = getNodeUp()->getNodeLeft();
+        } else if (isTerminalNode()) {
+            LOG(WARNING) << "[tshlib::VirtualNode::getSiblingNode] Node " << getNodeName() << " has no siblings since it is a leaf.";
         } else {
-            if (isTerminalNode()) {
-                LOG(WARNING) << "[tshlib::VirtualNode::getSiblingNode] Node " << getNodeName() << " has no siblings since it is a leaf.";
-            }
+            //siblingNode = getNodeUp();
         }
         return siblingNode;
     }

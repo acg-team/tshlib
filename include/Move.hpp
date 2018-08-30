@@ -147,7 +147,7 @@ namespace tshlib {
         }
 
 
-        void setClass(TreeSearchHeuristics tsStrategy);
+        void setClass(TreeSearchHeuristics tsStrategy, bool _location__overpseudoroot);
 
 
         std::string getClass() const {
