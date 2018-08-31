@@ -270,16 +270,16 @@ namespace tshlib {
     }
 
 
-    std::string Utree::printTreeNewick(bool showInternalNodeNames) {
+    std::string Utree::printTreeNewick(bool showInternalNodeNames, bool updateStartNodes) {
 
         try {
             std::string s, terminator;
 
-            _updateStartNodes();
+            if(updateStartNodes) _updateStartNodes();
 
             s += "(";
-            for (unsigned long i = 0; i < startVNodes.size(); i++) {
-                if (i == startVNodes.size() - 1) {
+            for (unsigned long i = 0; i < 2; i++) {
+                if (i == 2 - 1) {
                     terminator = ");";
                 } else {
                     terminator = ",";
@@ -301,28 +301,35 @@ namespace tshlib {
 
     std::string Utree::_recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames) {
 
-        std::stringstream newick;
+        try {
+            std::stringstream newick;
 
-        if (vnode->isTerminalNode()) {
+            if (vnode->isTerminalNode()) {
 
-            newick << vnode->vnode_name << ":" << vnode->vnode_branchlength;
+                newick << vnode->vnode_name << ":" << vnode->vnode_branchlength;
 
-        } else {
+            } else {
 
-            newick << "(";
-            newick << _recursiveFormatNewick(vnode->getNodeLeft(), showInternalNodeNames);
-            newick << ",";
-            newick << _recursiveFormatNewick(vnode->getNodeRight(), showInternalNodeNames);
-            newick << ")";
+                newick << "(";
+                newick << _recursiveFormatNewick(vnode->getNodeLeft(), showInternalNodeNames);
+                newick << ",";
+                newick << _recursiveFormatNewick(vnode->getNodeRight(), showInternalNodeNames);
+                newick << ")";
 
-            if (showInternalNodeNames) {
-                newick << vnode->vnode_name;
+                if (showInternalNodeNames) {
+                    newick << vnode->vnode_name;
+                }
+
+                newick << ":" << vnode->vnode_branchlength;
             }
 
-            newick << ":" << vnode->vnode_branchlength;
+            return newick.str();
+        } catch (const std::exception &e) {
+
+            LOG(FATAL) << "[Utree::printTreeNewick]" << e.what();
+
         }
 
-        return newick.str();
     }
 
 
@@ -388,23 +395,29 @@ namespace tshlib {
 
 
     void Utree::_updateStartNodes() {
+        try {
+            // Find the pseudoroot node on the first side of the tree
+            bool fixPseudoRootOnNextSubtree = true;
+            std::vector<VirtualNode *> sideA = findPseudoRoot(listVNodes.at(0), fixPseudoRootOnNextSubtree);
+            VirtualNode *sideA_node = sideA.back();
 
-        // Find the pseudoroot node on the first side of the tree
-        bool fixPseudoRootOnNextSubtree = true;
-        std::vector<VirtualNode *> sideA = findPseudoRoot(listVNodes.at(0), fixPseudoRootOnNextSubtree);
-        VirtualNode *sideA_node = sideA.back();
+            // Find the pseudoroot node on the opposite side of the tree
+            fixPseudoRootOnNextSubtree = false;
+            std::vector<VirtualNode *> sideB = findPseudoRoot(listVNodes.at(0), fixPseudoRootOnNextSubtree);
+            VirtualNode *sideB_node = sideB.back();
 
-        // Find the pseudoroot node on the opposite side of the tree
-        fixPseudoRootOnNextSubtree = false;
-        std::vector<VirtualNode *> sideB = findPseudoRoot(listVNodes.at(0), fixPseudoRootOnNextSubtree);
-        VirtualNode *sideB_node = sideB.back();
+            // Reset the original utree attribute
+            startVNodes.clear();
 
-        // Reset the original utree attribute
-        startVNodes.clear();
+            // Update the utree attribute
+            startVNodes.push_back(sideA_node);
+            startVNodes.push_back(sideB_node);
 
-        // Update the utree attribute
-        startVNodes.push_back(sideA_node);
-        startVNodes.push_back(sideB_node);
+        } catch (const std::exception &e) {
+
+            LOG(FATAL) << "[Utree::_updateStartNodes]" << e.what();
+
+        }
 
     }
 

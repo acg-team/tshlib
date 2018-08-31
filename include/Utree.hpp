@@ -349,7 +349,7 @@ namespace tshlib {
          * @param showInternalNodeNames
          * @return
          */
-        std::string printTreeNewick(bool showInternalNodeNames);
+        std::string printTreeNewick(bool showInternalNodeNames, bool updateStartNodes = true);
 
         /*!
          * @brief
