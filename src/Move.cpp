@@ -7,25 +7,25 @@
  *
  * This file is part of tshlib
  *
- * tshlib is a free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
+ * Tree Search Heuristic Library (TshLib) is a free software: you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * tshlib is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * Tree Search Heuristic Library (TshLib) is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with tshlib. If not, see <http://www.gnu.org/licenses/>.
+ * License along with TshLib. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
 /**
  * @file Move.cpp
  * @author Lorenzo Gatti
  * @date 11 06 2018
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
  * @email lg@lorenzogatti.me
  * @status Development
@@ -70,15 +70,14 @@ namespace tshlib {
     }
 
 
-
     void Move::deleteTargetNode() {
 
-        moveTargetNode_ = nullptr;
+        moveTargetNode_ = 0;
 
     }
 
 
-    void Move::setClass(TreeSearchHeuristics tsStrategy) {
+    void Move::setClass(TreeSearchHeuristics tsStrategy, bool _location__overpseudoroot) {
 
         // Set tree search strategy associated to this move
         moveStrategy_ = tsStrategy;
@@ -97,7 +96,7 @@ namespace tshlib {
                     moveType_ = MoveType::undef;
                     break;
             }
-        }else if (radius == 4){
+        } else if (radius == 4) {
             switch (tsStrategy) {
                 case TreeSearchHeuristics::swap:
                     moveType_ = MoveType::FNNI;
@@ -112,7 +111,7 @@ namespace tshlib {
                     moveType_ = MoveType::undef;
                     break;
             }
-        }else if(radius > 4){
+        } else if (radius > 4) {
             switch (tsStrategy) {
                 case TreeSearchHeuristics::swap:
                     moveType_ = MoveType::VFNNI;
@@ -127,16 +126,17 @@ namespace tshlib {
                     moveType_ = MoveType::undef;
                     break;
             }
-        }else{
+        } else {
 
             moveType_ = MoveType::undef;
         }
 
         // If either the source or the target node define are on the pseudoroot, and the tree-search strategy is [PhyML], then the
         // movetype is handled as TBR
-        if((moveTargetNode_->isPseudoRootNode() || moveSourceNode_->isPseudoRootNode()) && tsStrategy == TreeSearchHeuristics::phyml){
+        //if ((moveTargetNode_->isPseudoRootNode() || moveSourceNode_->isPseudoRootNode()) && tsStrategy == TreeSearchHeuristics::phyml)
+        if (_location__overpseudoroot && tsStrategy == TreeSearchHeuristics::phyml)
             moveType_ = MoveType::TBR;
-        }
+
 
         moveClassDescription_ = getClass();
     }

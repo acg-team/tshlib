@@ -25,7 +25,7 @@
  * @file newick.cpp
  * @author Lorenzo Gatti & Massimo Maiolo
  * @date 11 10 2017
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
  * @maintainer Massimo Maiolo
  * @email lg@lorenzogatti.me

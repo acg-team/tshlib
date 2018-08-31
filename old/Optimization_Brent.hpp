@@ -25,7 +25,7 @@
  * @file Optimization_Brent.hpp
  * @author Lorenzo Gatti
  * @date 06 12 2017
- * @version 2.0.2
+ * @version 3.0.1
  * @maintainer Lorenzo Gatti
  * @email lg@lorenzogatti.me
  * @status Development
