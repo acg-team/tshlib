@@ -393,7 +393,11 @@ namespace tshlib {
 
         std::vector<VirtualNode *> getPostOrderNodeList(VirtualNode *startNode);
 
+        std::vector<int> getPostOrderNodeList(int NodeID);
+
         void _getPostOrderNodeList(std::vector<VirtualNode *> &rlist, VirtualNode *node);
+
+        void _getPostOrderNodeList(std::vector<int> &rlist, int nodeID) ;
 
         void computeTreeDepth();
 
@@ -403,9 +407,22 @@ namespace tshlib {
 
         const std::map<int, VirtualNode *> &getNodeIdsMap() const;
 
-        VirtualNode *getNode(int nodeID) { return utreeNodeIdsMap_[nodeID]; }
+        VirtualNode *getNode(int nodeID) {
+            if(nodeID == -1)
+                return rootnode;
 
-        VirtualNode & getNode(int nodeID) const { return (*utreeNodeIdsMap_.at(nodeID)); }
+            return utreeNodeIdsMap_[nodeID];
+        }
+
+        VirtualNode & getNode(int nodeID) const {
+            if(nodeID == -1)
+                return (*rootnode);
+
+            return (*utreeNodeIdsMap_.at(nodeID));
+        }
+
+        std::vector<int> getChildrenId(int nodeID) const;
+
 
     protected:
         std::string _recursiveFormatNewick(VirtualNode *vnode, bool showInternalNodeNames);

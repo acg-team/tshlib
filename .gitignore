@@ -3,3 +3,10 @@ data/*
 output/*
 cmake-build-*/*
 tests/lib/*
+*.out
+*.a
+*.cmake
+*.cbp
+Makefile
+CMakeCache.txt
+Unit_Tests_run

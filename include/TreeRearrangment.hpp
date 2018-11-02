@@ -80,7 +80,7 @@ namespace tshlib {
         ~TreeRearrangment();
 
         //VirtualNode *getSourceNode() const { return trSourceNode_ ?: nullptr; }
-        int getSourceNode() const { return trSourceNode_ ?: NULL; }
+        int getSourceNode() const { return trSourceNode_ ?: -2; }
 
         //void setSourceNode(VirtualNode *mset_sourcenode) { TreeRearrangment::trSourceNode_ = mset_sourcenode; }
         void setSourceNode(int mset_sourcenode) { TreeRearrangment::trSourceNode_ = mset_sourcenode; }

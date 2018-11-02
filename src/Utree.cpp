@@ -46,6 +46,8 @@
 #include <iostream>
 #include <glog/logging.h>
 #include <map>
+#include <include/Utree.hpp>
+
 
 #include "Utree.hpp"
 
@@ -218,6 +220,7 @@ namespace tshlib {
     }
 
 
+
     void Utree::addMember(VirtualNode *inVNode, bool isStartNode) {
 
         listVNodes.push_back(inVNode);
@@ -230,6 +233,16 @@ namespace tshlib {
 
     }
 
+    std::vector<int> Utree::getChildrenId(int nodeID) const {
+        std::vector<int> sonsId(2,-2);
+
+        VirtualNode *node = &getNode(nodeID);
+
+        sonsId[0] = node->getNodeLeft()->getVnode_id();
+        sonsId[1] = node->getNodeRight()->getVnode_id();
+
+        return sonsId;
+    }
 
     std::vector<VirtualNode *> Utree::findPseudoRoot(VirtualNode *inVNode, bool fixPseudoRootOnNextSubtree) {
 
@@ -900,6 +913,36 @@ namespace tshlib {
             removeVirtualRootNode();
         }
         return rlist;
+    }
+
+    std::vector<int> Utree::getPostOrderNodeList(int NodeID){
+        bool removeRoot = false;
+        std::vector<int> rlist;
+        if (rootnode->getNodeRight() == nullptr && rootnode->getNodeLeft() == nullptr) {
+            addVirtualRootNode();
+            removeRoot = true;
+        }
+
+        _getPostOrderNodeList(rlist, NodeID);
+
+        if (removeRoot) {
+            removeVirtualRootNode();
+        }
+        return rlist;
+
+    }
+
+    void Utree::_getPostOrderNodeList(std::vector<int> &rlist, int nodeID){
+
+        if (!getNode(nodeID)->isTerminalNode()) {
+
+            _getPostOrderNodeList(rlist, getNode(nodeID)->getNodeLeft()->getVnode_id());
+            _getPostOrderNodeList(rlist, getNode(nodeID)->getNodeRight()->getVnode_id());
+
+        }
+
+        rlist.push_back(nodeID);
+
     }
 
 
